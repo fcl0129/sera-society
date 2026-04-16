@@ -167,6 +167,7 @@ export default function Login() {
                 </Button>
               </form>
               <p className="mt-8 text-center text-xs text-sera-sand/90">
+              <p className="mt-8 text-center text-xs text-sera-sand/80">
                 Need invite-only access?{" "}
                 <Link
                   to="/request-access"
@@ -176,6 +177,7 @@ export default function Login() {
                 </Link>
               </p>
               <p className="mt-2 text-center text-xs text-sera-sand/90">
+              <p className="mt-2 text-center text-xs text-sera-sand/80">
                 Are you the owner? <span className="text-sera-sand">Use your master account to sign in.</span>
               </p>
             </>
