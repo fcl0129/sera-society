@@ -16,14 +16,12 @@ export default function Index() {
       <Navbar />
 
       <HeroSection />
-      <ExperienceSection />
 
-      {/* tiers nära toppen så det känns som en del av “storyn” */}
+      {/* Tiers nära toppen */}
       <TierSection />
 
       <FeaturesSection />
 
-      {/* InvitationShowcase verkar vara “paper”-känsla → mjuk övergång ner i night */}
       <InvitationShowcase />
       <SectionFade />
 
@@ -35,4 +33,3 @@ export default function Index() {
     </div>
   );
 }
-``
