@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 export default function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Base: dark-to-beige cinematic gradient (smooth, no harsh band) */}
+      {/* Base: dark-to-beige cinematic gradient (smooth, avoids harsh banding) */}
       <div
         aria-hidden="true"
         className="absolute inset-0"
@@ -23,7 +23,7 @@ export default function HeroSection() {
         }}
       />
 
-      {/* Subtle dotted texture (very light) */}
+      {/* Subtle dotted texture */}
       <div
         aria-hidden="true"
         className="absolute inset-0 opacity-[0.035]"
@@ -34,7 +34,7 @@ export default function HeroSection() {
         }}
       />
 
-      {/* Bottom vignette to avoid “gray band” feeling */}
+      {/* Bottom vignette (keeps the fade cinematic) */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 bottom-0 h-72"
@@ -44,6 +44,7 @@ export default function HeroSection() {
         }}
       />
 
+      {/* Content */}
       <div className="relative z-10 max-w-5xl mx-auto px-6 text-center py-32">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -95,3 +96,14 @@ export default function HeroSection() {
 
           <Button variant="sera-outline" size="xl" asChild>
             <Link
+              to="/platform"
+              className="border-sera-sand text-sera-sand hover:bg-sera-ivory hover:text-sera-navy"
+            >
+              View Platform
+            </Link>
+          </Button>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
