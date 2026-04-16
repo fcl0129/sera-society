@@ -16,6 +16,8 @@ import Contact from "./pages/Contact";
 import Faq from "./pages/Faq";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminAccessRequests from "./pages/AdminAccessRequests";
+import MasterRoute from "./components/MasterRoute";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +43,14 @@ const App = () => (
             )}
           />
           <Route path="/request-access" element={<RequestAccess />} />
+          <Route
+            path="/master/access-requests"
+            element={(
+              <MasterRoute>
+                <AdminAccessRequests />
+              </MasterRoute>
+            )}
+          />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/faq" element={<Faq />} />
