@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 export default function BackgroundShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-[#050814] text-sera-ivory">
-      {/* Subtle cinematic overlays (optional, but helps unify sections) */}
+      {/* Cinematic overlays (subtle) */}
       <div aria-hidden="true" className="pointer-events-none fixed inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_50%_0%,rgba(120,140,255,0.10),transparent_60%)] opacity-60" />
         <div className="absolute inset-0 bg-[radial-gradient(800px_520px_at_0%_40%,rgba(255,255,255,0.06),transparent_55%)] opacity-45" />
