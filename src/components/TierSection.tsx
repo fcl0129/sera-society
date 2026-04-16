@@ -68,13 +68,10 @@ function TierCard({ tier }: { tier: Tier }) {
         "transition duration-300 ease-out",
         "hover:-translate-y-0.5 hover:scale-[1.01] hover:shadow-[0_22px_80px_rgba(0,0,0,0.55)]",
         isDim && "opacity-70 hover:opacity-85",
-        isHighlight && [
-          "border-white/25",
-          "shadow-[0_18px_60px_rgba(0,0,0,0.35),0_0_0_1px_rgba(255,255,255,0.10),0_0_60px_rgba(120,140,255,0.10)]",
-        ].join(" ")
+        isHighlight &&
+          "border-white/25 shadow-[0_18px_60px_rgba(0,0,0,0.35),0_0_0_1px_rgba(255,255,255,0.10),0_0_60px_rgba(120,140,255,0.10)]"
       )}
     >
-      {/* subtle highlight glow */}
       {isHighlight && (
         <div
           aria-hidden="true"
@@ -89,12 +86,12 @@ function TierCard({ tier }: { tier: Tier }) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="sera-label text-sera-stone mb-2">{tier.label}</p>
-          <h3 className={cx("sera-subheading text-sera-ivory text-2xl md:text-[28px] leading-tight", "tracking-wide")}>
+          <h3 className="sera-subheading text-sera-ivory text-2xl md:text-[28px] leading-tight tracking-wide">
             {tier.title}
           </h3>
         </div>
 
-        {tier.badge && (
+        {tier.badge ? (
           <div className="shrink-0">
             <span
               className={cx(
@@ -107,7 +104,7 @@ function TierCard({ tier }: { tier: Tier }) {
               {tier.badge}
             </span>
           </div>
-        )}
+        ) : null}
       </div>
 
       <div className="mt-6 md:mt-7 space-y-2">
@@ -142,7 +139,6 @@ function TierCard({ tier }: { tier: Tier }) {
 export default function TierSection() {
   return (
     <section className="relative py-20 md:py-28">
-      {/* cinematic background */}
       <div aria-hidden="true" className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-black via-[#050814] to-black" />
         <div className="absolute inset-0 opacity-35 bg-[radial-gradient(900px_500px_at_50%_10%,rgba(120,140,255,0.10),transparent_60%)]" />
@@ -151,3 +147,21 @@ export default function TierSection() {
 
       <div className="relative mx-auto w-full max-w-6xl px-6">
         <div className="max-w-2xl">
+          <p className="sera-label text-sera-stone mb-3">Tiers</p>
+          <h2 className="sera-subheading text-sera-ivory text-3xl md:text-4xl leading-tight">
+            A premium set of tiers — designed for the night.
+          </h2>
+          <p className="sera-body text-sera-sand mt-4 text-sm md:text-base leading-relaxed">
+            Minimal, editorial, and cinematic — built around how events actually run.
+          </p>
+        </div>
+
+        <div className="mt-10 md:mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+          {TIERS.map((tier) => (
+            <TierCard key={tier.title} tier={tier} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
