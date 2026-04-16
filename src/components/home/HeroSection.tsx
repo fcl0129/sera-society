@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 export default function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-center justify-center sera-hero-gradient overflow-hidden">
-      {/* Subtle dotted texture */}
       <div
         className="absolute inset-0 opacity-[0.035]"
         style={{
@@ -15,7 +14,6 @@ export default function HeroSection() {
         }}
       />
 
-      {/* Content */}
       <div className="relative z-10 max-w-5xl mx-auto px-6 text-center py-32">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -75,16 +73,6 @@ export default function HeroSection() {
           </Button>
         </motion.div>
       </div>
-
-      {/* ✅ Smooth fade from hero into the light beige page background */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 left-0 right-0 h-44 md:h-56"
-        style={{
-          background:
-            "linear-gradient(to bottom, rgba(0,0,0,0) 0%, hsl(var(--background)) 100%)",
-        }}
-      />
     </section>
   );
 }
