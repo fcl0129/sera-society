@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
 
 type View = "login" | "forgot" | "signup";
 
@@ -35,6 +35,10 @@ export default function Login() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isSupabaseConfigured) {
+      setLoginMessage("Supabase är inte konfigurerat ännu. Lägg till miljövariabler i Lovable.");
+      return;
+    }
     setIsLoggingIn(true);
     setLoginMessage(null);
 
@@ -51,13 +55,16 @@ export default function Login() {
     }
 
     setIsLoggingIn(false);
-    const role = data.user?.app_metadata?.role;
+    const role = data?.user?.app_metadata?.role;
     navigate(role === "master" ? "/master/access-requests" : redirectPath, { replace: true });
-    navigate(redirectPath, { replace: true });
   };
 
   const handleForgot = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isSupabaseConfigured) {
+      setForgotMessage("Supabase är inte konfigurerat ännu. Lägg till miljövariabler i Lovable.");
+      return;
+    }
     setIsSendingReset(true);
     setForgotMessage(null);
 
@@ -77,6 +84,10 @@ export default function Login() {
 
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isSupabaseConfigured) {
+      setSignupMessage("Supabase är inte konfigurerat ännu. Lägg till miljövariabler i Lovable.");
+      return;
+    }
     setIsCreatingAccount(true);
     setSignupMessage(null);
 
@@ -197,80 +208,6 @@ export default function Login() {
                 Are you the owner?{" "}
                 <span className="text-sera-sand">Use your master account to sign in.</span>
               </p>
-            </>
-          )}
-
-          {view === "signup" && (
-            <>
-              <button
-                onClick={() => {
-                  setView("login");
-                  setSignupMessage(null);
-                }}
-                className="flex items-center gap-2 text-sera-stone hover:text-sera-sand transition-colors text-xs mb-8"
-              >
-                <ArrowLeft size={14} />
-                <span className="font-sans">Back to login</span>
-              </button>
-              <div className="mb-8">
-                <p className="sera-label text-sera-stone mb-2">Organizer Access</p>
-                <h2 className="sera-subheading text-sera-ivory text-2xl">Create account</h2>
-                <p className="sera-body text-sera-stone text-sm mt-3">
-                  Skapa ett konto för att komma igång.
-                </p>
-              </div>
-              <form onSubmit={handleCreateAccount} className="space-y-5">
-                <div className="space-y-2">
-                  <Label className="sera-label text-sera-sand text-[10px]">Email</Label>
-                  <Input
-                    type="email"
-                    value={signupEmail}
-                    onChange={(e) => setSignupEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    className="bg-sera-navy/50 border-sera-ink/60 text-sera-ivory placeholder:text-sera-stone/60 rounded-none h-11 font-sans text-sm focus:border-sera-sand"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="sera-label text-sera-sand text-[10px]">Password</Label>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      value={signupPassword}
-                      onChange={(e) => setSignupPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="bg-sera-navy/50 border-sera-ink/60 text-sera-ivory placeholder:text-sera-stone/60 rounded-none h-11 font-sans text-sm pr-10 focus:border-sera-sand"
-                      minLength={8}
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-sera-stone hover:text-sera-sand transition-colors"
-                    >
-                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label className="sera-label text-sera-sand text-[10px]">Confirm password</Label>
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="bg-sera-navy/50 border-sera-ink/60 text-sera-ivory placeholder:text-sera-stone/60 rounded-none h-11 font-sans text-sm focus:border-sera-sand"
-                    minLength={8}
-                    required
-                  />
-                </div>
-                {signupMessage && (
-                  <p className="text-xs text-sera-sand">{signupMessage}</p>
-                )}
-                <Button variant="sera-ivory" size="lg" className="w-full" type="submit" disabled={isCreatingAccount}>
-                  {isCreatingAccount ? "Creating..." : "Create account"}
-                </Button>
-              </form>
             </>
           )}
 
