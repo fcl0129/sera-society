@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_requests: {
+        Row: {
+          created_at: string
+          decision_note: string | null
+          email: string
+          events_details: string | null
+          id: string
+          name: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          decision_note?: string | null
+          email: string
+          events_details?: string | null
+          id?: string
+          name: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          decision_note?: string | null
+          email?: string
+          events_details?: string | null
+          id?: string
+          name?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      app_settings: {
+        Row: {
+          id: number
+          owner_notification_email: string
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          owner_notification_email?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          owner_notification_email?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
