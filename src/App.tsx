@@ -4,8 +4,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-import BackgroundShell from "@/components/BackgroundShell";
-
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Platform from "./pages/Platform";
@@ -34,66 +32,63 @@ const App = () => (
       <Toaster />
       <Sonner />
 
-      {/* ✅ One background for the entire app (no more “hopping”) */}
-      <BackgroundShell>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/login" element={<Login />} />
 
-            <Route path="/platform" element={<Platform />} />
-            <Route path="/invitations" element={<Invitations />} />
-            <Route path="/event-pages" element={<EventPages />} />
+          <Route path="/platform" element={<Platform />} />
+          <Route path="/invitations" element={<Invitations />} />
+          <Route path="/event-pages" element={<EventPages />} />
 
-            {/* Public RSVP route */}
-            <Route path="/rsvp/:token" element={<RsvpPage />} />
+          {/* Public RSVP route */}
+          <Route path="/rsvp/:token" element={<RsvpPage />} />
 
-            <Route
-              path="/check-in"
-              element={
-                <ProtectedRoute>
-                  <CheckIn />
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/check-in"
+            element={
+              <ProtectedRoute>
+                <CheckIn />
+              </ProtectedRoute>
+            }
+          />
 
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
 
-            <Route
-              path="/dashboard/events"
-              element={
-                <ProtectedRoute>
-                  <ManageEvents />
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/dashboard/events"
+            element={
+              <ProtectedRoute>
+                <ManageEvents />
+              </ProtectedRoute>
+            }
+          />
 
-            <Route path="/request-access" element={<RequestAccess />} />
+          <Route path="/request-access" element={<RequestAccess />} />
 
-            <Route
-              path="/master/access-requests"
-              element={
-                <MasterRoute>
-                  <AdminAccessRequests />
-                </MasterRoute>
-              }
-            />
+          <Route
+            path="/master/access-requests"
+            element={
+              <MasterRoute>
+                <AdminAccessRequests />
+              </MasterRoute>
+            }
+          />
 
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/faq" element={<Faq />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/faq" element={<Faq />} />
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </BackgroundShell>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
