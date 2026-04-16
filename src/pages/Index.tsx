@@ -12,7 +12,7 @@ import CtaSection from "@/components/home/CtaSection";
 
 export default function Index() {
   return (
-    <div className="min-h-screen sera-gradient-navy">
+   <div className="min-h-screen bg-background text-foreground">
       <Navbar />
 
       <HeroSection />
