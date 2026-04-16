@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Platform from "./pages/Platform";
@@ -16,6 +17,10 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Faq from "./pages/Faq";
 import NotFound from "./pages/NotFound";
+
+// ✅ NEW: RSVP page (make sure this file exists: src/pages/Rsvp.tsx)
+import RsvpPage from "./pages/Rsvp";
+
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminAccessRequests from "./pages/AdminAccessRequests";
 import MasterRoute from "./components/MasterRoute";
@@ -31,42 +36,52 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
+
           <Route path="/platform" element={<Platform />} />
           <Route path="/invitations" element={<Invitations />} />
           <Route path="/event-pages" element={<EventPages />} />
+
+          {/* ✅ NEW: Public RSVP route (guests should not need to log in) */}
+          <Route path="/rsvp/:token" element={<RsvpPage />} />
+
           <Route
             path="/check-in"
-            element={(
+            element={
               <ProtectedRoute>
                 <CheckIn />
               </ProtectedRoute>
-            )}
+            }
           />
+
           <Route
             path="/dashboard"
-            element={(
+            element={
               <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
-            )}
+            }
           />
+
           <Route
             path="/dashboard/events"
-            element={(
+            element={
               <ProtectedRoute>
                 <ManageEvents />
               </ProtectedRoute>
-            )}
+            }
           />
+
           <Route path="/request-access" element={<RequestAccess />} />
+
           <Route
             path="/master/access-requests"
-            element={(
+            element={
               <MasterRoute>
                 <AdminAccessRequests />
               </MasterRoute>
-            )}
+            }
           />
+
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/faq" element={<Faq />} />
