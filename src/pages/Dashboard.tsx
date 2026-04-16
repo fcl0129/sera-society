@@ -3,6 +3,8 @@ import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { LayoutDashboard, CalendarPlus, Users, Palette, ScanLine, Ticket, Globe, Settings } from "lucide-react";
 
 const dashboardItems = [
@@ -17,6 +19,111 @@ const dashboardItems = [
 ];
 
 export default function Dashboard() {
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [stats, setStats] = useState({
+    activeEvents: 0,
+    totalGuests: 0,
+    pendingRsvps: 0,
+    checkedIn: 0,
+  });
+  const [upcomingEvents, setUpcomingEvents] = useState<
+    { id: string; title: string; starts_at: string; venue: string | null; status: string }[]
+  >([]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadDashboard = async () => {
+      setLoading(true);
+      setErrorMessage(null);
+
+      const [{ data: userData, error: userError }] = await Promise.all([supabase.auth.getUser()]);
+      if (userError || !userData.user) {
+        if (!mounted) return;
+        setErrorMessage("Kunde inte läsa användarsession. Logga in igen.");
+        setLoading(false);
+        return;
+      }
+
+      const organizerId = userData.user.id;
+      const nowIso = new Date().toISOString();
+
+      const [{ count: activeEventsCount, error: eventsCountError }, { data: eventsData, error: eventsError }] =
+        await Promise.all([
+          supabase
+            .from("events")
+            .select("id", { count: "exact", head: true })
+            .eq("organizer_id", organizerId)
+            .gte("starts_at", nowIso)
+            .in("status", ["draft", "published"]),
+          supabase
+            .from("events")
+            .select("id,title,starts_at,venue,status")
+            .eq("organizer_id", organizerId)
+            .gte("starts_at", nowIso)
+            .order("starts_at", { ascending: true })
+            .limit(5),
+        ]);
+
+      if (eventsCountError || eventsError) {
+        if (!mounted) return;
+        setErrorMessage("Kunde inte läsa eventdata just nu.");
+        setLoading(false);
+        return;
+      }
+
+      const eventIds = (eventsData ?? []).map((event) => event.id);
+
+      let guestCount = 0;
+      let pendingCount = 0;
+      let checkedInCount = 0;
+
+      if (eventIds.length > 0) {
+        const [{ count: totalGuestsCount }, { count: pendingGuestsCount }, { count: checkinsCount }] = await Promise.all([
+          supabase.from("guests").select("id", { count: "exact", head: true }).in("event_id", eventIds),
+          supabase
+            .from("guests")
+            .select("id", { count: "exact", head: true })
+            .in("event_id", eventIds)
+            .eq("rsvp_status", "pending"),
+          supabase.from("checkins").select("id", { count: "exact", head: true }).in("event_id", eventIds),
+        ]);
+
+        guestCount = totalGuestsCount ?? 0;
+        pendingCount = pendingGuestsCount ?? 0;
+        checkedInCount = checkinsCount ?? 0;
+      }
+
+      if (!mounted) return;
+
+      setUpcomingEvents(eventsData ?? []);
+      setStats({
+        activeEvents: activeEventsCount ?? 0,
+        totalGuests: guestCount,
+        pendingRsvps: pendingCount,
+        checkedIn: checkedInCount,
+      });
+      setLoading(false);
+    };
+
+    void loadDashboard();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const statCards = useMemo(
+    () => [
+      { label: "Active Events", value: String(stats.activeEvents) },
+      { label: "Total Guests", value: String(stats.totalGuests) },
+      { label: "Pending RSVPs", value: String(stats.pendingRsvps) },
+      { label: "Checked In", value: String(stats.checkedIn) },
+    ],
+    [stats],
+  );
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -49,24 +156,56 @@ export default function Dashboard() {
                 <h3 className="font-serif text-sera-ivory text-lg font-light">Welcome back</h3>
               </div>
               <div className="flex gap-3">
-                <div className="px-4 py-2 border border-sera-ink text-sera-sand text-[10px] tracking-widest uppercase">
+                <Link
+                  to="/event-pages"
+                  className="px-4 py-2 border border-sera-ink text-sera-sand text-[10px] tracking-widest uppercase"
+                >
                   + New Event
-                </div>
+                </Link>
               </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { label: "Active Events", value: "3" },
-                { label: "Total Guests", value: "284" },
-                { label: "Pending RSVPs", value: "47" },
-                { label: "Tickets Issued", value: "156" },
-              ].map((stat) => (
+              {statCards.map((stat) => (
                 <div key={stat.label} className="p-4 border border-sera-ink/50">
                   <p className="text-sera-stone text-[9px] uppercase tracking-wider mb-1">{stat.label}</p>
-                  <p className="font-serif text-sera-ivory text-2xl font-light">{stat.value}</p>
+                  <p className="font-serif text-sera-ivory text-2xl font-light">
+                    {loading ? "…" : stat.value}
+                  </p>
                 </div>
               ))}
             </div>
+            {errorMessage && <p className="text-xs text-sera-sand mt-4">{errorMessage}</p>}
+          </motion.div>
+
+          <motion.div
+            className="bg-sera-ivory/40 border border-sera-sand/60 p-6 md:p-8 mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-serif text-sera-navy text-xl font-light">Upcoming events</h3>
+              <Link to="/event-pages" className="text-xs text-sera-oxblood underline underline-offset-4">
+                Manage event pages
+              </Link>
+            </div>
+            {!loading && upcomingEvents.length === 0 ? (
+              <p className="sera-body text-sera-warm-grey text-sm">
+                Inga kommande events ännu. Skapa ditt första event för att komma igång.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {upcomingEvents.map((event) => (
+                  <div key={event.id} className="p-4 border border-sera-sand/50 bg-sera-ivory">
+                    <p className="font-sans text-sm font-medium text-sera-navy">{event.title}</p>
+                    <p className="text-xs text-sera-warm-grey mt-1">
+                      {new Date(event.starts_at).toLocaleString()} {event.venue ? `• ${event.venue}` : ""}
+                    </p>
+                    <p className="text-[10px] uppercase tracking-wider text-sera-stone mt-2">{event.status}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -90,7 +229,7 @@ export default function Dashboard() {
 
           <div className="text-center mt-12">
             <Button variant="sera" size="lg" asChild>
-              <Link to="/login">Sign In to Dashboard</Link>
+              <Link to="/request-access">Request organizer access</Link>
             </Button>
           </div>
         </div>

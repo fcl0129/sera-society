@@ -7,13 +7,39 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
 
 export default function RequestAccess() {
   const [submitted, setSubmitted] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [eventsDetails, setEventsDetails] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isSupabaseConfigured) {
+      setErrorMessage("Supabase är inte konfigurerat ännu. Lägg till miljövariabler i Lovable.");
+      return;
+    }
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    const { error } = await supabase.from("access_requests").insert({
+      name,
+      email,
+      events_details: eventsDetails || null,
+    });
+
+    if (error) {
+      setErrorMessage("Kunde inte skicka ansökan just nu. Försök igen.");
+      setIsSubmitting(false);
+      return;
+    }
+
     setSubmitted(true);
+    setIsSubmitting(false);
   };
 
   return (
@@ -46,18 +72,34 @@ export default function RequestAccess() {
             >
               <div className="space-y-2">
                 <Label className="sera-label text-sera-navy text-[10px]">Name</Label>
-                <Input className="border-sera-sand bg-sera-ivory/50 rounded-none h-11 font-sans text-sm focus:border-sera-navy" required />
+                <Input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="border-sera-sand bg-sera-ivory/50 rounded-none h-11 font-sans text-sm focus:border-sera-navy"
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <Label className="sera-label text-sera-navy text-[10px]">Email</Label>
-                <Input type="email" className="border-sera-sand bg-sera-ivory/50 rounded-none h-11 font-sans text-sm focus:border-sera-navy" required />
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="border-sera-sand bg-sera-ivory/50 rounded-none h-11 font-sans text-sm focus:border-sera-navy"
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <Label className="sera-label text-sera-navy text-[10px]">Tell us about your events</Label>
-                <Textarea className="border-sera-sand bg-sera-ivory/50 rounded-none font-sans text-sm focus:border-sera-navy min-h-[120px]" />
+                <Textarea
+                  value={eventsDetails}
+                  onChange={(e) => setEventsDetails(e.target.value)}
+                  className="border-sera-sand bg-sera-ivory/50 rounded-none font-sans text-sm focus:border-sera-navy min-h-[120px]"
+                />
               </div>
-              <Button variant="sera" size="lg" className="w-full" type="submit">
-                Submit Request
+              {errorMessage && <p className="text-xs text-red-700">{errorMessage}</p>}
+              <Button variant="sera" size="lg" className="w-full" type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Submitting..." : "Submit Request"}
               </Button>
             </motion.form>
           ) : (
