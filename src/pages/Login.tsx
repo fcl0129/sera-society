@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
 
-type View = "login" | "forgot" | "signup";
+type View = "login" | "forgot";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -17,17 +17,12 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [signupEmail, setSignupEmail] = useState("");
-  const [signupPassword, setSignupPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [forgotEmail, setForgotEmail] = useState("");
 
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
   const [isSendingReset, setIsSendingReset] = useState(false);
 
   const [loginMessage, setLoginMessage] = useState<string | null>(null);
-  const [signupMessage, setSignupMessage] = useState<string | null>(null);
   const [forgotMessage, setForgotMessage] = useState<string | null>(null);
   const [forgotSent, setForgotSent] = useState(false);
 
@@ -81,47 +76,6 @@ export default function Login() {
     setIsSendingReset(false);
   };
 
-  const handleCreateAccount = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isSupabaseConfigured) {
-      setSignupMessage("Supabase är inte konfigurerat ännu. Lägg till miljövariabler i Lovable.");
-      return;
-    }
-    setIsCreatingAccount(true);
-    setSignupMessage(null);
-
-    if (signupPassword.length < 8) {
-      setSignupMessage("Lösenordet måste vara minst 8 tecken.");
-      setIsCreatingAccount(false);
-      return;
-    }
-
-    if (signupPassword !== confirmPassword) {
-      setSignupMessage("Lösenorden matchar inte.");
-      setIsCreatingAccount(false);
-      return;
-    }
-
-    const { error } = await supabase.auth.signUp({
-      email: signupEmail,
-      password: signupPassword,
-      options: {
-        emailRedirectTo: `${window.location.origin}/login`,
-      },
-    });
-
-    if (error) {
-      setSignupMessage(error.message);
-      setIsCreatingAccount(false);
-      return;
-    }
-
-    setSignupMessage("Konto skapat! Bekräfta din e-post för att aktivera kontot.");
-    setConfirmPassword("");
-    setSignupPassword("");
-    setIsCreatingAccount(false);
-  };
-
   return (
     <div className="min-h-screen flex sera-gradient-navy relative overflow-hidden">
       <div
@@ -146,12 +100,12 @@ export default function Login() {
             Access your organizer dashboard, manage events, and power your next evening.
           </p>
         </div>
-        <p className="text-sera-stone text-xs italic font-serif">Better late than ordinary.</p>
+        <p className="text-sera-sand/70 text-xs italic font-serif">Better late than ordinary.</p>
       </div>
 
       <div className="flex-1 flex items-center justify-center p-6 relative z-10">
         <motion.div
-          className="w-full max-w-md bg-sera-ivory/5 backdrop-blur-sm border border-sera-ink/40 p-8 md:p-10"
+          className="w-full max-w-md bg-sera-navy/45 backdrop-blur-md border border-sera-sand/20 shadow-[0_24px_80px_rgba(0,0,0,0.45)] p-8 md:p-10"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -163,7 +117,7 @@ export default function Login() {
           {view === "login" && (
             <>
               <div className="mb-8">
-                <p className="sera-label text-sera-stone mb-2">Organizer Access</p>
+                <p className="sera-label text-sera-sand/70 mb-2">Organizer Access</p>
                 <h2 className="sera-subheading text-sera-ivory text-2xl">Sign in to Sera</h2>
               </div>
               <form onSubmit={handleLogin} className="space-y-5">
@@ -192,7 +146,7 @@ export default function Login() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-sera-stone hover:text-sera-sand transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-sera-sand/70 hover:text-sera-ivory transition-colors"
                     >
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -203,7 +157,7 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={() => setView("forgot")}
-                    className="text-xs text-sera-stone hover:text-sera-sand transition-colors font-sans"
+                    className="text-xs text-sera-sand/70 hover:text-sera-ivory transition-colors font-sans"
                   >
                     Forgot password?
                   </button>
@@ -212,17 +166,7 @@ export default function Login() {
                   {isLoggingIn ? "Signing in..." : "Continue"}
                 </Button>
               </form>
-              <p className="mt-8 text-center text-xs text-sera-stone">
-                Don't have access?{" "}
-                <button
-                  type="button"
-                  onClick={() => setView("signup")}
-                  className="text-sera-sand hover:text-sera-ivory transition-colors underline underline-offset-4"
-                >
-                  Create account
-                </button>
-              </p>
-              <p className="mt-2 text-center text-xs text-sera-stone">
+              <p className="mt-8 text-center text-xs text-sera-sand/90">
                 Need invite-only access?{" "}
                 <Link
                   to="/request-access"
@@ -231,79 +175,9 @@ export default function Login() {
                   Request an invitation
                 </Link>
               </p>
-              <p className="mt-2 text-center text-xs text-sera-stone">
+              <p className="mt-2 text-center text-xs text-sera-sand/90">
                 Are you the owner? <span className="text-sera-sand">Use your master account to sign in.</span>
               </p>
-            </>
-          )}
-
-          {view === "signup" && (
-            <>
-              <button
-                onClick={() => {
-                  setView("login");
-                  setSignupMessage(null);
-                }}
-                className="flex items-center gap-2 text-sera-stone hover:text-sera-sand transition-colors text-xs mb-8"
-              >
-                <ArrowLeft size={14} />
-                <span className="font-sans">Back to login</span>
-              </button>
-              <div className="mb-8">
-                <p className="sera-label text-sera-stone mb-2">Organizer Access</p>
-                <h2 className="sera-subheading text-sera-ivory text-2xl">Create account</h2>
-                <p className="sera-body text-sera-stone text-sm mt-3">Skapa ett konto för att komma igång.</p>
-              </div>
-              <form onSubmit={handleCreateAccount} className="space-y-5">
-                <div className="space-y-2">
-                  <Label className="sera-label text-sera-sand text-[10px]">Email</Label>
-                  <Input
-                    type="email"
-                    value={signupEmail}
-                    onChange={(e) => setSignupEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    className="bg-sera-navy/50 border-sera-ink/60 text-sera-ivory placeholder:text-sera-stone/60 rounded-none h-11 font-sans text-sm focus:border-sera-sand"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="sera-label text-sera-sand text-[10px]">Password</Label>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      value={signupPassword}
-                      onChange={(e) => setSignupPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="bg-sera-navy/50 border-sera-ink/60 text-sera-ivory placeholder:text-sera-stone/60 rounded-none h-11 font-sans text-sm pr-10 focus:border-sera-sand"
-                      minLength={8}
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-sera-stone hover:text-sera-sand transition-colors"
-                    >
-                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label className="sera-label text-sera-sand text-[10px]">Confirm password</Label>
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="bg-sera-navy/50 border-sera-ink/60 text-sera-ivory placeholder:text-sera-stone/60 rounded-none h-11 font-sans text-sm focus:border-sera-sand"
-                    minLength={8}
-                    required
-                  />
-                </div>
-                {signupMessage && <p className="text-xs text-sera-sand">{signupMessage}</p>}
-                <Button variant="sera-ivory" size="lg" className="w-full" type="submit" disabled={isCreatingAccount}>
-                  {isCreatingAccount ? "Creating..." : "Create account"}
-                </Button>
-              </form>
             </>
           )}
 
@@ -311,15 +185,15 @@ export default function Login() {
             <>
               <button
                 onClick={() => setView("login")}
-                className="flex items-center gap-2 text-sera-stone hover:text-sera-sand transition-colors text-xs mb-8"
+                className="flex items-center gap-2 text-sera-sand/70 hover:text-sera-ivory transition-colors text-xs mb-8"
               >
                 <ArrowLeft size={14} />
                 <span className="font-sans">Back to login</span>
               </button>
               <div className="mb-8">
-                <p className="sera-label text-sera-stone mb-2">Password Reset</p>
+                <p className="sera-label text-sera-sand/70 mb-2">Password Reset</p>
                 <h2 className="sera-subheading text-sera-ivory text-2xl">Reset your password</h2>
-                <p className="sera-body text-sera-stone text-sm mt-3">
+                <p className="sera-body text-sera-sand/80 text-sm mt-3">
                   Enter your email address and we'll send you a link to reset your password.
                 </p>
               </div>
@@ -350,7 +224,7 @@ export default function Login() {
                   setView("login");
                   setForgotSent(false);
                 }}
-                className="flex items-center gap-2 text-sera-stone hover:text-sera-sand transition-colors text-xs mb-8"
+                className="flex items-center gap-2 text-sera-sand/70 hover:text-sera-ivory transition-colors text-xs mb-8"
               >
                 <ArrowLeft size={14} />
                 <span className="font-sans">Back to login</span>
@@ -360,7 +234,7 @@ export default function Login() {
                   <span className="text-sera-ivory text-lg">✓</span>
                 </div>
                 <h2 className="sera-subheading text-sera-ivory text-xl mb-3">Check your email</h2>
-                <p className="sera-body text-sera-stone text-sm">
+                <p className="sera-body text-sera-sand/80 text-sm">
                   If an account exists for {forgotEmail}, we've sent a password reset link.
                 </p>
               </div>
