@@ -23,7 +23,6 @@ export default function Index() {
       <FeaturesSection />
 
       <InvitationShowcase />
-      <SectionFade />
 
       <OperationsShowcase />
       <MobileSection />
