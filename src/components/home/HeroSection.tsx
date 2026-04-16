@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 export default function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Base: dark-to-beige cinematic gradient (smooth, avoids harsh banding) */}
+      {/* Base: dark-to-beige cinematic gradient */}
       <div
         aria-hidden="true"
         className="absolute inset-0"
@@ -34,7 +34,7 @@ export default function HeroSection() {
         }}
       />
 
-      {/* Bottom vignette (keeps the fade cinematic) */}
+      {/* Bottom vignette */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 bottom-0 h-72"
@@ -44,7 +44,7 @@ export default function HeroSection() {
         }}
       />
 
-      {/* Content — force white text for cinematic contrast */}
+      {/* Content — force white text */}
       <div className="relative z-10 max-w-5xl mx-auto px-6 text-center py-32 text-white">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
