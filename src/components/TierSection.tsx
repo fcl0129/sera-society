@@ -77,7 +77,6 @@ const TIERS: Tier[] = [
   },
 ];
 
-
 function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
@@ -85,19 +84,22 @@ function cx(...classes: Array<string | false | null | undefined>) {
 function TierCard({ tier }: { tier: Tier }) {
   const isHighlight = tier.tone === "highlight";
   const isDim = tier.tone === "dim";
+  const isEssential = tier.title === "SERA ESSENTIAL";
 
   return (
     <div
       className={cx(
         "group relative rounded-2xl border p-7 md:p-8",
-        "bg-white/[0.035] border-white/10",
-        "shadow-[0_18px_60px_rgba(0,0,0,0.28)]",
+        // More “Sera” glass, less “white card”
+        "bg-black/20 border-white/10 backdrop-blur-md",
+        "shadow-[0_14px_50px_rgba(0,0,0,0.35)]",
         "transition duration-300 ease-out",
-        "hover:-translate-y-0.5 hover:scale-[1.01] hover:shadow-[0_22px_80px_rgba(0,0,0,0.45)]",
+        "hover:-translate-y-0.5 hover:scale-[1.01] hover:shadow-[0_18px_70px_rgba(0,0,0,0.55)]",
         isDim && "opacity-70 hover:opacity-85",
         isHighlight && "border-white/25"
       )}
     >
+      {/* subtle ring/glow for SOCIAL only */}
       {isHighlight && (
         <div
           aria-hidden="true"
@@ -113,7 +115,14 @@ function TierCard({ tier }: { tier: Tier }) {
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="sera-label text-sera-stone mb-2">{tier.label}</p>
-            <h3 className="sera-subheading text-sera-ivory text-2xl md:text-[28px] leading-tight tracking-wide">
+
+            <h3
+              className={cx(
+                "sera-subheading text-2xl md:text-[28px] leading-tight tracking-wide",
+                // keep Essential slightly calmer
+                isEssential ? "text-sera-ivory/90" : "text-sera-ivory"
+              )}
+            >
               {tier.title}
             </h3>
           </div>
@@ -143,7 +152,8 @@ function TierCard({ tier }: { tier: Tier }) {
           </p>
         </div>
 
-        <div className="mt-8 md:mt-9 flex items-start justify-between gap-4">
+        {/* CTA first (single primary action) */}
+        <div className="mt-8 md:mt-9">
           <Link
             to={tier.href}
             className={cx(
@@ -159,17 +169,20 @@ function TierCard({ tier }: { tier: Tier }) {
             {tier.cta}
           </Link>
 
-          <details className="group/details">
+          {/* subtle editorial divider */}
+          <div className="mt-6 h-px w-12 bg-white/10" />
+
+          {/* Read more as editorial inline expansion (no heavy box) */}
+          <details className="group/details mt-4">
             <summary
               className={cx(
                 "cursor-pointer list-none select-none",
                 "sera-body text-sera-sand text-sm",
                 "inline-flex items-center gap-2",
-                "rounded-full px-3 py-2",
-                "border border-transparent hover:border-white/10 hover:bg-white/5 transition"
+                "opacity-70 hover:opacity-100 transition"
               )}
             >
-              <span className="underline underline-offset-4 decoration-white/20 group-hover/details:decoration-white/30">
+              <span className="underline underline-offset-4 decoration-white/20 group-hover/details:decoration-white/40">
                 Read more
               </span>
               <span
@@ -180,11 +193,11 @@ function TierCard({ tier }: { tier: Tier }) {
               </span>
             </summary>
 
-            <div className="mt-4 rounded-xl border border-white/10 bg-black/10 p-4 md:p-5">
+            <div className="mt-4 max-w-prose">
               <p className="sera-body text-sera-ivory text-sm leading-relaxed">
                 {tier.includes.lead}
               </p>
-              <p className="sera-body text-sera-sand text-sm leading-relaxed mt-2">
+              <p className="sera-body text-sera-sand text-sm leading-relaxed mt-3">
                 {tier.includes.detail}
               </p>
             </div>
@@ -207,7 +220,8 @@ export default function TierSection() {
             Premium tiers — built for the night.
           </h2>
           <p className="sera-body text-sera-sand mt-4 text-sm md:text-base leading-relaxed">
-           All tiers include: Event (name, date, location), guest list, RSVP (yes/no/maybe), and a shareable event page.
+            All tiers include: Event (name, date, location), guest list, RSVP (yes/no/maybe),
+            and a shareable event page.
           </p>
         </div>
 
