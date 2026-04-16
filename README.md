@@ -57,3 +57,60 @@ Also ensure required secrets are set in Supabase Edge Functions:
 3. Log in as master and open `/master/access-requests`
 4. Approve/reject a request
 5. Verify email was queued/sent in `public.email_send_log`
+
+## GitHub Actions automation
+
+This repo now includes two workflows:
+- `.github/workflows/ci.yml` — builds frontend on PRs and pushes to `main`
+- `.github/workflows/deploy-supabase.yml` — pushes Supabase migrations + deploys edge functions on `main` changes under `supabase/**`
+
+Set these GitHub Actions secrets:
+- `SUPABASE_ACCESS_TOKEN`
+- `SUPABASE_PROJECT_REF`
+
+### Avoid conflicts + failed deployments
+
+Use this merge flow every time:
+1. `git fetch origin`
+2. `git checkout <your-branch>`
+3. `git merge origin/main`
+4. Resolve conflicts locally and remove all markers (`<<<<<<<`, `=======`, `>>>>>>>`)
+5. Run CI locally if possible (`npm run build`)
+6. Push branch and open/update PR
+7. Merge only when CI + Vercel preview are green
+
+The CI workflow now includes an explicit conflict-marker check so broken merges fail fast before deployment.
+
+## Vercel setup (recommended hosting)
+
+For this React + Vite app, Vercel is the recommended host for the website frontend.
+
+### Required Vercel env vars
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+
+Add them for both:
+- **Production**
+- **Preview**
+
+### SPA routing on Vercel
+
+This repo includes `vercel.json` with a rewrite to `index.html` so routes like
+`/login`, `/dashboard`, and `/master/access-requests` work on page refresh.
+It also pins Vercel build commands so dev dependencies (like `vite`) are
+installed during deploy builds, and avoids strict lockfile resolution in CI/CD.
+
+## Domain setup
+
+### Where to host the domain?
+- **Website hosting**: Vercel
+- **Domain registration**: any registrar (Namecheap, GoDaddy, Porkbun, etc.)
+- **DNS management**: either at your registrar or Cloudflare (both are fine)
+
+### Suggested setup
+1. Add domain in Vercel Project → Domains.
+2. Set apex domain (`serasociety.com`) to Vercel.
+3. Set `www.serasociety.com` and redirect it to apex (or the reverse).
+4. In Supabase Auth settings, add your final production URL(s) to:
+   - Site URL
+   - Redirect URLs

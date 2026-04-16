@@ -7,7 +7,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
+import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
 
 export default function RequestAccess() {
   const [submitted, setSubmitted] = useState(false);
@@ -19,6 +19,10 @@ export default function RequestAccess() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isSupabaseConfigured) {
+      setErrorMessage("Supabase är inte konfigurerat ännu. Lägg till miljövariabler i Lovable.");
+      return;
+    }
     setIsSubmitting(true);
     setErrorMessage(null);
 
