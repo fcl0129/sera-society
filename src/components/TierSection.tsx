@@ -27,9 +27,9 @@ const TIERS: Tier[] = [
     href: "/request-access",
     tone: "default",
     includes: {
-      lead: "Core hosting, beautifully simplified.",
+      lead: "For dinners, birthdays, and small nights — clean, calm, and frictionless.",
       detail:
-        "Event setup, guest list, RSVP (yes/no/maybe), and a shareable event page — clean, calm, and frictionless.",
+        "Event setup with a refined basic event page (title, date, location, message) and a cover image. Invitations via a shareable link, plus a simple auto‑generated invite email. RSVP (yes / no / maybe) with guest name, plus‑one support, and optional dietary notes. A host view that keeps the guest list readable with RSVP status at a glance. Light automation: one reminder before the RSVP deadline, a countdown timer, and Add to Calendar (Apple + Google). Not included in Essential: NFC, check‑in, chat, and advanced branding — intentionally kept clean.",
     },
   },
   {
@@ -42,9 +42,9 @@ const TIERS: Tier[] = [
     href: "/request-access",
     tone: "highlight",
     includes: {
-      lead: "Everything in Essential — plus the night’s operational layer.",
+      lead: "Everything in Essential — plus the operational layer for the night itself.",
       detail:
-        "Designed for flow: arrival, access, and redemption — built mobile‑first for the room, not the desk.",
+        "Tickets & check‑in with QR scanning (camera) and NFC tap, including live status (checked‑in / not). Digital drink tickets with configurable drinks per guest and simple redemption: one tap = one drink, with a live remaining count per guest. Live guest management: a real‑time list showing who has arrived and who still has drinks left. Guest communication: a “Message host” action (MVP opens SMS/email), with an optional lightweight in‑app chat later. Light notifications: a reminder before the event and an “event starts soon” nudge. Not included in Social: white‑label, staff tooling, multi‑admin, and seating.",
     },
   },
   {
@@ -56,9 +56,9 @@ const TIERS: Tier[] = [
     href: "/request-access",
     tone: "dim",
     includes: {
-      lead: "Team execution and tighter control.",
+      lead: "For companies and organized productions — run it like a system, not a spreadsheet.",
       detail:
-        "A more structured operational setup for multiple people running one night — with higher precision and oversight.",
+        "Everything in Social, plus branding and staff execution. Branding: remove Sera branding, upload a logo, and set custom colors (custom domain can follow later). Staff tools: a dedicated staff view (separate login or secure link) and a check‑in dashboard showing arrivals live, drink usage, and support for multiple check‑in devices. Test mode: simulate the flow with fake check‑ins and fake ticket redemptions before the night. Staff prep system: an auto‑generated email with event info, check‑in instructions, and a test link to validate the flow. Advanced RSVP automation: reminders X days before deadline and an RSVP cutoff that disables responses and shows “contact host”. Export/control: guest list export (CSV), attendance export, and ticket usage export. Not included in Host: seating, timeline planning, and post‑event analytics.",
     },
   },
   {
@@ -70,12 +70,13 @@ const TIERS: Tier[] = [
     href: "/request-access",
     tone: "dim",
     includes: {
-      lead: "Orchestrated, bespoke experiences.",
+      lead: "For weddings, conferences, and once‑in‑a‑lifetime nights — orchestrated end‑to‑end.",
       detail:
-        "Designed around singular moments — elevated presentation, collaboration, and post‑event wrap‑up for the full story.",
+        "Everything in Host, plus seating, collaboration, planning, and the story after. Seating system: table setup, guest assignments, and a visual table overview. Multi‑host collaboration: multiple admins with roles (Host / Staff / Viewer). Planning tools that stay light: a timeline for send invites, finalize guest list, and event day, plus a focused checklist. Post‑event “Evening Wrapped”: total guests, attendance rate, drinks consumed, and peak arrival time — with shareable visuals. Post‑event communication: a thank‑you message and an optional photo/recap share.",
     },
   },
 ];
+
 
 function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -206,8 +207,7 @@ export default function TierSection() {
             Premium tiers — built for the night.
           </h2>
           <p className="sera-body text-sera-sand mt-4 text-sm md:text-base leading-relaxed">
-            All tiers include: Event setup, guest list, RSVP (yes/no/maybe), and a
-            shareable event page.
+           All tiers include: Event (name, date, location), guest list, RSVP (yes/no/maybe), and a shareable event page.
           </p>
         </div>
 
