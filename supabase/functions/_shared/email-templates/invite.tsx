@@ -30,6 +30,7 @@ export const InviteEmail = ({
     <Preview>You've been invited to join {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
+        <Text style={brand}>SERA SOCIETY</Text>
         <Heading style={h1}>You've been invited</Heading>
         <Text style={text}>
           You've been invited to join{' '}
@@ -53,27 +54,37 @@ export const InviteEmail = ({
 
 export default InviteEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
+const main = { backgroundColor: '#ffffff', fontFamily: "'Inter', Arial, sans-serif" }
+const container = { padding: '40px 32px', maxWidth: '480px' }
+const brand = {
+  fontSize: '11px',
+  fontWeight: '600' as const,
+  letterSpacing: '0.18em',
+  color: '#132a45',
+  margin: '0 0 32px',
+}
 const h1 = {
-  fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
+  fontFamily: "'Cormorant Garamond', Georgia, serif",
+  fontSize: '28px',
+  fontWeight: '500' as const,
+  color: '#132a45',
   margin: '0 0 20px',
 }
 const text = {
   fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
+  color: '#7a7568',
+  lineHeight: '1.6',
+  margin: '0 0 24px',
 }
-const link = { color: 'inherit', textDecoration: 'underline' }
+const link = { color: '#132a45', textDecoration: 'underline' }
 const button = {
-  backgroundColor: '#000000',
-  color: '#ffffff',
-  fontSize: '14px',
-  borderRadius: '8px',
-  padding: '12px 20px',
+  backgroundColor: '#132a45',
+  color: '#f7f4ef',
+  fontSize: '13px',
+  fontWeight: '500' as const,
+  letterSpacing: '0.08em',
+  borderRadius: '6px',
+  padding: '14px 28px',
   textDecoration: 'none',
 }
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+const footer = { fontSize: '12px', color: '#a09a90', margin: '32px 0 0' }
