@@ -68,6 +68,45 @@ export type Database = {
         }
         Relationships: []
       }
+      checkins: {
+        Row: {
+          checked_in_at: string
+          checked_in_by: string | null
+          event_id: string
+          guest_id: string
+          id: string
+        }
+        Insert: {
+          checked_in_at?: string
+          checked_in_by?: string | null
+          event_id: string
+          guest_id: string
+          id?: string
+        }
+        Update: {
+          checked_in_at?: string
+          checked_in_by?: string | null
+          event_id?: string
+          guest_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkins_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkins_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -154,6 +193,86 @@ export type Database = {
           used_at?: string | null
         }
         Relationships: []
+      }
+      events: {
+        Row: {
+          capacity: number | null
+          created_at: string
+          ends_at: string | null
+          id: string
+          organizer_id: string
+          starts_at: string
+          status: string
+          title: string
+          updated_at: string
+          venue: string | null
+        }
+        Insert: {
+          capacity?: number | null
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          organizer_id: string
+          starts_at: string
+          status?: string
+          title: string
+          updated_at?: string
+          venue?: string | null
+        }
+        Update: {
+          capacity?: number | null
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          organizer_id?: string
+          starts_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          venue?: string | null
+        }
+        Relationships: []
+      }
+      guests: {
+        Row: {
+          created_at: string
+          email: string | null
+          event_id: string
+          full_name: string
+          id: string
+          notes: string | null
+          plus_ones: number
+          rsvp_status: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          event_id: string
+          full_name: string
+          id?: string
+          notes?: string | null
+          plus_ones?: number
+          rsvp_status?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          event_id?: string
+          full_name?: string
+          id?: string
+          notes?: string | null
+          plus_ones?: number
+          rsvp_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guests_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       suppressed_emails: {
         Row: {
