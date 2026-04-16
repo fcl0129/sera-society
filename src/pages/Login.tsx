@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
 import { supabase } from "@/integrations/supabase/client";
 
 type View = "login" | "forgot" | "signup";
@@ -35,6 +36,10 @@ export default function Login() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isSupabaseConfigured) {
+      setLoginMessage("Supabase är inte konfigurerat ännu. Lägg till miljövariabler i Lovable.");
+      return;
+    }
     setIsLoggingIn(true);
     setLoginMessage(null);
 
@@ -58,6 +63,10 @@ export default function Login() {
 
   const handleForgot = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isSupabaseConfigured) {
+      setForgotMessage("Supabase är inte konfigurerat ännu. Lägg till miljövariabler i Lovable.");
+      return;
+    }
     setIsSendingReset(true);
     setForgotMessage(null);
 
@@ -77,6 +86,10 @@ export default function Login() {
 
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isSupabaseConfigured) {
+      setSignupMessage("Supabase är inte konfigurerat ännu. Lägg till miljövariabler i Lovable.");
+      return;
+    }
     setIsCreatingAccount(true);
     setSignupMessage(null);
 
