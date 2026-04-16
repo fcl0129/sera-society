@@ -129,5 +129,93 @@
   .sera-panel {
     background-color: hsl(var(--card));
     border: 1px solid hsl(var(--border));
+
+    @layer components {
+  /* Navbar base */
+  .sera-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    transition: background-color 300ms ease, border-color 300ms ease, backdrop-filter 300ms ease;
+  }
+
+  /* State: on hero (dark) */
+  .sera-nav--hero {
+    background: rgba(0, 0, 0, 0);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+  }
+
+  /* State: after scroll (light/paper) */
+  .sera-nav--scrolled {
+    background: rgba(245, 242, 236, 0.82); /* beige-ish glass */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(12px);
+  }
+
+  /* Link colors */
+  .sera-navlink {
+    transition: color 200ms ease, opacity 200ms ease;
+    text-decoration: none;
+  }
+  .sera-navlink--hero {
+    color: rgba(255, 255, 255, 0.78);
+  }
+  .sera-navlink--hero:hover {
+    color: rgba(255, 255, 255, 0.95);
+  }
+
+  .sera-navlink--scrolled {
+    color: rgba(0, 0, 0, 0.68);
+  }
+  .sera-navlink--scrolled:hover {
+    color: rgba(0, 0, 0, 0.90);
+  }
+
+  /* Brand title */
+  .sera-brand--hero {
+    color: rgba(255, 255, 255, 0.92);
+  }
+  .sera-brand--scrolled {
+    color: rgba(0, 0, 0, 0.90);
+  }
+
+  /* CTA buttons */
+  .sera-navbtn--hero {
+    border: 1px solid rgba(255, 255, 255, 0.38);
+    color: rgba(255, 255, 255, 0.92);
+    background: transparent;
+  }
+  .sera-navbtn--hero:hover {
+    background: rgba(255, 255, 255, 0.10);
+  }
+
+  .sera-navbtn--scrolled {
+    border: 1px solid rgba(0, 0, 0, 0.18);
+    color: rgba(0, 0, 0, 0.90);
+    background: transparent;
+  }
+  .sera-navbtn--scrolled:hover {
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  .sera-navprimary--hero {
+    background: rgba(255, 255, 255, 0.92);
+    color: rgba(0, 0, 0, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  .sera-navprimary--hero:hover {
+    background: rgba(255, 255, 255, 0.85);
+  }
+
+  .sera-navprimary--scrolled {
+    background: rgba(0, 0, 0, 0.92);
+    color: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+  }
+  .sera-navprimary--scrolled:hover {
+    background: rgba(0, 0, 0, 0.82);
+  }
+}
   }
 }
