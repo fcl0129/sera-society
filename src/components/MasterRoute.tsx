@@ -60,4 +60,8 @@ export default function MasterRoute({ children }: MasterRouteProps) {
   }
 
   return <>{children}</>;
+
+  import RsvpPage from "@/pages/Rsvp";
+  <Route path="/rsvp/:token" element={<RsvpPage />} />
+``
 }
