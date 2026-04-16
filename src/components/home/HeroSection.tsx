@@ -55,3 +55,55 @@ export default function HeroSection() {
         </motion.div>
 
         <motion.h1
+          className="sera-heading text-white text-5xl md:text-7xl lg:text-8xl mb-6"
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.15, ease: "easeOut" }}
+        >
+          Events designed
+          <br />
+          <span className="italic font-light">to be remembered</span>
+        </motion.h1>
+
+        <motion.p
+          className="sera-body text-white/80 text-lg md:text-xl max-w-2xl mx-auto mb-4"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+        >
+          A premium platform for creating, hosting, and managing modern events — from invitation
+          design to night-of operations.
+        </motion.p>
+
+        <motion.p
+          className="text-white/60 text-xs italic font-serif mb-12"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.45 }}
+        >
+          Sera — pronounced "seh-rah"
+        </motion.p>
+
+        <motion.div
+          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+        >
+          <Button variant="sera-ivory" size="xl" asChild>
+            <Link to="/request-access">Request Access</Link>
+          </Button>
+
+          <Button variant="sera-outline" size="xl" asChild>
+            <Link
+              to="/platform"
+              className="border-white/60 text-white hover:bg-white hover:text-black"
+            >
+              View Platform
+            </Link>
+          </Button>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
