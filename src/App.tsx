@@ -10,6 +10,7 @@ import Invitations from "./pages/Invitations";
 import EventPages from "./pages/EventPages";
 import CheckIn from "./pages/CheckIn";
 import Dashboard from "./pages/Dashboard";
+import ManageEvents from "./pages/ManageEvents";
 import RequestAccess from "./pages/RequestAccess";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -33,12 +34,27 @@ const App = () => (
           <Route path="/platform" element={<Platform />} />
           <Route path="/invitations" element={<Invitations />} />
           <Route path="/event-pages" element={<EventPages />} />
-          <Route path="/check-in" element={<CheckIn />} />
+          <Route
+            path="/check-in"
+            element={(
+              <ProtectedRoute>
+                <CheckIn />
+              </ProtectedRoute>
+            )}
+          />
           <Route
             path="/dashboard"
             element={(
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            )}
+          />
+          <Route
+            path="/dashboard/events"
+            element={(
+              <ProtectedRoute>
+                <ManageEvents />
               </ProtectedRoute>
             )}
           />

@@ -107,6 +107,57 @@ export type Database = {
           },
         ]
       }
+      drink_tickets: {
+        Row: {
+          created_at: string
+          event_id: string
+          guest_id: string | null
+          id: string
+          nfc_tag: string | null
+          redeemed_at: string | null
+          redeemed_by: string | null
+          status: string
+          ticket_code: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          guest_id?: string | null
+          id?: string
+          nfc_tag?: string | null
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          status?: string
+          ticket_code: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          guest_id?: string | null
+          id?: string
+          nfc_tag?: string | null
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          status?: string
+          ticket_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drink_tickets_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drink_tickets_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -198,6 +249,8 @@ export type Database = {
         Row: {
           capacity: number | null
           created_at: string
+          enable_nfc: boolean
+          enable_qr: boolean
           ends_at: string | null
           id: string
           organizer_id: string
@@ -210,6 +263,8 @@ export type Database = {
         Insert: {
           capacity?: number | null
           created_at?: string
+          enable_nfc?: boolean
+          enable_qr?: boolean
           ends_at?: string | null
           id?: string
           organizer_id: string
@@ -222,6 +277,8 @@ export type Database = {
         Update: {
           capacity?: number | null
           created_at?: string
+          enable_nfc?: boolean
+          enable_qr?: boolean
           ends_at?: string | null
           id?: string
           organizer_id?: string

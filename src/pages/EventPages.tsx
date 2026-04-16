@@ -55,7 +55,7 @@ export default function EventPages() {
 
           <div className="text-center">
             <Button variant="sera" size="lg" asChild>
-              <Link to="/login">Create Event Page</Link>
+              <Link to="/dashboard/events">Create Event</Link>
             </Button>
           </div>
         </div>

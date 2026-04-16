@@ -157,7 +157,7 @@ export default function Dashboard() {
               </div>
               <div className="flex gap-3">
                 <Link
-                  to="/event-pages"
+                  to="/dashboard/events"
                   className="px-4 py-2 border border-sera-ink text-sera-sand text-[10px] tracking-widest uppercase"
                 >
                   + New Event
@@ -185,8 +185,8 @@ export default function Dashboard() {
           >
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-serif text-sera-navy text-xl font-light">Upcoming events</h3>
-              <Link to="/event-pages" className="text-xs text-sera-oxblood underline underline-offset-4">
-                Manage event pages
+              <Link to="/dashboard/events" className="text-xs text-sera-oxblood underline underline-offset-4">
+                Manage events
               </Link>
             </div>
             {!loading && upcomingEvents.length === 0 ? (
@@ -229,7 +229,7 @@ export default function Dashboard() {
 
           <div className="text-center mt-12">
             <Button variant="sera" size="lg" asChild>
-              <Link to="/request-access">Request organizer access</Link>
+              <Link to="/check-in">Open check-in console</Link>
             </Button>
           </div>
         </div>
