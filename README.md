@@ -57,3 +57,13 @@ Also ensure required secrets are set in Supabase Edge Functions:
 3. Log in as master and open `/master/access-requests`
 4. Approve/reject a request
 5. Verify email was queued/sent in `public.email_send_log`
+
+## GitHub Actions automation
+
+This repo now includes two workflows:
+- `.github/workflows/ci.yml` — builds frontend on PRs and pushes to `main`
+- `.github/workflows/deploy-supabase.yml` — pushes Supabase migrations + deploys edge functions on `main` changes under `supabase/**`
+
+Set these GitHub Actions secrets:
+- `SUPABASE_ACCESS_TOKEN`
+- `SUPABASE_PROJECT_REF`
