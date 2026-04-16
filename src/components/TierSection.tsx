@@ -49,7 +49,7 @@ const TIERS: Tier[] = [
     bullets: [
       "Everything in Essential",
       "QR check-in (camera scan)",
-      "NFC check-in (tap)",
+      "Nfc check-in (tap)",
       "Check-in status: checked-in / not",
       "Drink tickets: X drinks per guest (configurable)",
       "Redemption: 1 tap = 1 drink + live remaining count",
@@ -156,16 +156,14 @@ function TierCard({ tier }: { tier: Tier }) {
           </p>
         </div>
 
-        {/* CTA (match Log in style via Button component) */}
         <div className="mt-8 md:mt-9">
+          {/* Button should match "Log in" if that uses shadcn Button */}
           <Button asChild className="rounded-full">
             <Link to={tier.href}>{tier.cta}</Link>
           </Button>
 
-          {/* subtle editorial divider */}
           <div className="mt-6 h-px w-12 bg-white/10" />
 
-          {/* Read more: bullet form */}
           <details className="group/details mt-4">
             <summary className="cursor-pointer list-none select-none inline-flex items-center gap-2 opacity-70 hover:opacity-100 transition sera-body text-sera-sand text-sm">
               <span className="underline underline-offset-4 decoration-white/20 group-hover/details:decoration-white/40">
@@ -221,3 +219,22 @@ export default function TierSection() {
     <section className="py-20 md:py-28">
       <div className="mx-auto w-full max-w-6xl px-6">
         <div className="max-w-2xl">
+          <p className="sera-label text-sera-stone mb-3">Choose your level of hosting</p>
+          <h2 className="sera-subheading text-sera-ivory text-3xl md:text-4xl leading-tight">
+            Premium tiers — built for the night.
+          </h2>
+          <p className="sera-body text-sera-sand mt-4 text-sm md:text-base leading-relaxed">
+            All tiers include: Event (name, date, location), guest list, RSVP (yes/no/maybe),
+            and a shareable event page.
+          </p>
+        </div>
+
+        <div className="mt-10 md:mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+          {TIERS.map((tier) => (
+            <TierCard key={tier.title} tier={tier} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
