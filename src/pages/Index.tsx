@@ -10,14 +10,14 @@ import CtaSection from "@/components/home/CtaSection";
 
 export default function Index() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen sera-gradient-navy">
       <Navbar />
       <HeroSection />
-      <TierSection />
       <FeaturesSection />
       <InvitationShowcase />
       <OperationsShowcase />
       <MobileSection />
+      <TierSection />
       <CtaSection />
       <Footer />
     </div>
