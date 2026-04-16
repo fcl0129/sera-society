@@ -220,13 +220,6 @@ export default function TierSection() {
       <div className="mx-auto w-full max-w-6xl px-6">
         <div className="max-w-2xl">
           <p className="sera-label text-sera-stone mb-3">Choose your level of hosting</p>
-          <h2 className="sera-subheading text-sera-ivory text-3xl md:text-4xl leading-tight">
-            Premium tiers — built for the night.
-          </h2>
-          <p className="sera-body text-sera-sand mt-4 text-sm md:text-base leading-relaxed">
-            All tiers include: Event (name, date, location), guest list, RSVP (yes/no/maybe),
-            and a shareable event page.
-          </p>
         </div>
 
         <div className="mt-10 md:mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
