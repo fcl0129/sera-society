@@ -4,13 +4,43 @@ import { Link } from "react-router-dom";
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center sera-hero-gradient overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Base: dark-to-beige cinematic gradient (smooth, no harsh band) */}
       <div
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{
+          background: `
+            radial-gradient(900px 520px at 50% 0%, rgba(120,140,255,0.10), transparent 60%),
+            radial-gradient(800px 520px at 0% 40%, rgba(255,255,255,0.06), transparent 55%),
+            linear-gradient(
+              180deg,
+              hsl(var(--sera-navy)) 0%,
+              hsl(var(--sera-deep-navy)) 68%,
+              hsl(var(--sera-beige)) 100%
+            )
+          `,
+        }}
+      />
+
+      {/* Subtle dotted texture (very light) */}
+      <div
+        aria-hidden="true"
         className="absolute inset-0 opacity-[0.035]"
         style={{
           backgroundImage:
             "radial-gradient(circle at 1px 1px, hsl(var(--sera-ivory)) 1px, transparent 0)",
           backgroundSize: "40px 40px",
+        }}
+      />
+
+      {/* Bottom vignette to avoid “gray band” feeling */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-72"
+        style={{
+          background:
+            "radial-gradient(1200px 220px at 50% 100%, rgba(0,0,0,0.18), transparent 70%)",
         }}
       />
 
@@ -65,14 +95,3 @@ export default function HeroSection() {
 
           <Button variant="sera-outline" size="xl" asChild>
             <Link
-              to="/platform"
-              className="border-sera-sand text-sera-sand hover:bg-sera-ivory hover:text-sera-navy"
-            >
-              View Platform
-            </Link>
-          </Button>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
