@@ -100,12 +100,12 @@ export default function Login() {
             Access your organizer dashboard, manage events, and power your next evening.
           </p>
         </div>
-        <p className="text-sera-stone text-xs italic font-serif">Better late than ordinary.</p>
+        <p className="text-sera-sand/70 text-xs italic font-serif">Better late than ordinary.</p>
       </div>
 
       <div className="flex-1 flex items-center justify-center p-6 relative z-10">
         <motion.div
-          className="w-full max-w-md bg-sera-ivory/5 backdrop-blur-sm border border-sera-ink/40 p-8 md:p-10"
+          className="w-full max-w-md bg-sera-navy/45 backdrop-blur-md border border-sera-sand/20 shadow-[0_24px_80px_rgba(0,0,0,0.45)] p-8 md:p-10"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -117,7 +117,7 @@ export default function Login() {
           {view === "login" && (
             <>
               <div className="mb-8">
-                <p className="sera-label text-sera-stone mb-2">Organizer Access</p>
+                <p className="sera-label text-sera-sand/70 mb-2">Organizer Access</p>
                 <h2 className="sera-subheading text-sera-ivory text-2xl">Sign in to Sera</h2>
               </div>
               <form onSubmit={handleLogin} className="space-y-5">
@@ -146,7 +146,7 @@ export default function Login() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-sera-stone hover:text-sera-sand transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-sera-sand/70 hover:text-sera-ivory transition-colors"
                     >
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -157,7 +157,7 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={() => setView("forgot")}
-                    className="text-xs text-sera-stone hover:text-sera-sand transition-colors font-sans"
+                    className="text-xs text-sera-sand/70 hover:text-sera-ivory transition-colors font-sans"
                   >
                     Forgot password?
                   </button>
@@ -166,6 +166,7 @@ export default function Login() {
                   {isLoggingIn ? "Signing in..." : "Continue"}
                 </Button>
               </form>
+              <p className="mt-8 text-center text-xs text-sera-sand/90">
               <p className="mt-8 text-center text-xs text-sera-sand/80">
                 Need invite-only access?{" "}
                 <Link
@@ -175,6 +176,7 @@ export default function Login() {
                   Request an invitation
                 </Link>
               </p>
+              <p className="mt-2 text-center text-xs text-sera-sand/90">
               <p className="mt-2 text-center text-xs text-sera-sand/80">
                 Are you the owner? <span className="text-sera-sand">Use your master account to sign in.</span>
               </p>
@@ -185,15 +187,15 @@ export default function Login() {
             <>
               <button
                 onClick={() => setView("login")}
-                className="flex items-center gap-2 text-sera-stone hover:text-sera-sand transition-colors text-xs mb-8"
+                className="flex items-center gap-2 text-sera-sand/70 hover:text-sera-ivory transition-colors text-xs mb-8"
               >
                 <ArrowLeft size={14} />
                 <span className="font-sans">Back to login</span>
               </button>
               <div className="mb-8">
-                <p className="sera-label text-sera-stone mb-2">Password Reset</p>
+                <p className="sera-label text-sera-sand/70 mb-2">Password Reset</p>
                 <h2 className="sera-subheading text-sera-ivory text-2xl">Reset your password</h2>
-                <p className="sera-body text-sera-stone text-sm mt-3">
+                <p className="sera-body text-sera-sand/80 text-sm mt-3">
                   Enter your email address and we'll send you a link to reset your password.
                 </p>
               </div>
@@ -224,7 +226,7 @@ export default function Login() {
                   setView("login");
                   setForgotSent(false);
                 }}
-                className="flex items-center gap-2 text-sera-stone hover:text-sera-sand transition-colors text-xs mb-8"
+                className="flex items-center gap-2 text-sera-sand/70 hover:text-sera-ivory transition-colors text-xs mb-8"
               >
                 <ArrowLeft size={14} />
                 <span className="font-sans">Back to login</span>
@@ -234,7 +236,7 @@ export default function Login() {
                   <span className="text-sera-ivory text-lg">✓</span>
                 </div>
                 <h2 className="sera-subheading text-sera-ivory text-xl mb-3">Check your email</h2>
-                <p className="sera-body text-sera-stone text-sm">
+                <p className="sera-body text-sera-sand/80 text-sm">
                   If an account exists for {forgotEmail}, we've sent a password reset link.
                 </p>
               </div>
