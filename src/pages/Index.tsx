@@ -1,7 +1,10 @@
 import TierSection from "@/components/TierSection";
+import SectionFade from "@/components/SectionFade";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+
 import HeroSection from "@/components/home/HeroSection";
+import ExperienceSection from "@/components/home/ExperienceSection";
 import FeaturesSection from "@/components/home/FeaturesSection";
 import InvitationShowcase from "@/components/home/InvitationShowcase";
 import OperationsShowcase from "@/components/home/OperationsShowcase";
@@ -12,14 +15,25 @@ export default function Index() {
   return (
     <div className="min-h-screen sera-gradient-navy">
       <Navbar />
+
       <HeroSection />
+      <ExperienceSection />
+
+      {/* tiers nära toppen så det känns som en del av “storyn” */}
+      <TierSection />
+
       <FeaturesSection />
+
+      {/* InvitationShowcase verkar vara “paper”-känsla → mjuk övergång ner i night */}
       <InvitationShowcase />
+      <SectionFade />
+
       <OperationsShowcase />
       <MobileSection />
-      <TierSection />
       <CtaSection />
+
       <Footer />
     </div>
   );
 }
+``
