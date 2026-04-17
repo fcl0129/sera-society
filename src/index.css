@@ -66,10 +66,11 @@
     --sera-moss: 110 18% 28%;
     --sera-moss-muted: 110 14% 52%;
 
-    /* Surface variants */
-    --sera-surface-light: 36 25% 95%;
-    --sera-surface-warm: 32 22% 90%;
-    --sera-surface-cool: 210 14% 92%;
+    /* Surface variants — kept ALL identical to body bg for a seamless canvas.
+       Sections rely on spacing + accents (not bg color shifts) for rhythm. */
+    --sera-surface-light: 36 22% 93%;
+    --sera-surface-warm: 36 22% 93%;
+    --sera-surface-cool: 36 22% 93%;
 
     /* Sidebar (shadcn) */
     --sidebar-background: 36 25% 96%;
