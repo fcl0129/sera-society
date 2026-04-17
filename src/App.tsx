@@ -17,6 +17,9 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Faq from "./pages/Faq";
 import NfcPass from "./pages/NfcPass";
+import DrinkRedeem from "./pages/DrinkRedeem";
+import RedeemStation from "./pages/RedeemStation";
+import BarMode from "./pages/BarMode";
 import NotFound from "./pages/NotFound";
 
 import RsvpPage from "./pages/Rsvp";
@@ -87,6 +90,9 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/faq" element={<Faq />} />
           <Route path="/nfc-pass/:tag" element={<NfcPass />} />
+          <Route path="/events/:eventId/drinks" element={<DrinkRedeem />} />
+          <Route path="/redeem" element={<RedeemStation />} />
+          <Route path="/bar-mode" element={<BarMode />} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>
