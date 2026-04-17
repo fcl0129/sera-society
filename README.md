@@ -57,6 +57,7 @@ You must ensure the email queue worker/function is deployed and running:
 Also ensure required secrets are set in Supabase Edge Functions:
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
+- `LOVABLE_API_KEY` (required by `auth-email-hook`)
 - `SMTP_HOST`
 - `SMTP_PORT`
 - `SMTP_USER`
@@ -77,6 +78,45 @@ If you trigger `process-email-queue` from `pg_cron` + `net.http_post`, include:
 - `x-cron-secret: <CRON_SECRET>`
 
 This avoids JWT-format issues when using non-JWT API keys for scheduled calls.
+
+### 6) Make sure auth emails are actually routed to the hook
+
+In Supabase Dashboard:
+1. **Authentication → Hooks**
+2. Set the email hook endpoint to your deployed function:
+   - `https://<PROJECT_REF>.functions.supabase.co/auth-email-hook`
+3. Set webhook secret to the same value as `LOVABLE_API_KEY`.
+
+If this hook is not configured, signup/recovery/magic-link emails will not enter the queue.
+
+### 7) Optional but recommended: schedule queue processing with pg_cron
+
+If you don't schedule processing, queued emails stay pending until manually invoked.
+
+Example SQL (run in SQL Editor, replace placeholders):
+
+```sql
+select cron.unschedule('process-email-queue')
+where exists (select 1 from cron.job where jobname = 'process-email-queue');
+
+select cron.schedule(
+  'process-email-queue',
+  '*/1 * * * *',
+  $$
+  select net.http_post(
+    url := 'https://<PROJECT_REF>.functions.supabase.co/process-email-queue',
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'x-cron-secret', '<CRON_SECRET>'
+    ),
+    body := '{}'::jsonb
+  );
+  $$
+);
+```
+
+You can still run manual smoke tests with:
+- `supabase functions invoke process-email-queue --no-verify-jwt --header "x-cron-secret: <CRON_SECRET>"`
 
 ## GitHub Actions automation
 

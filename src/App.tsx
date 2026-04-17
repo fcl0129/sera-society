@@ -16,6 +16,7 @@ import RequestAccess from "./pages/RequestAccess";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Faq from "./pages/Faq";
+import NfcPass from "./pages/NfcPass";
 import NotFound from "./pages/NotFound";
 
 import RsvpPage from "./pages/Rsvp";
@@ -85,6 +86,7 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/faq" element={<Faq />} />
+          <Route path="/nfc-pass/:tag" element={<NfcPass />} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>
