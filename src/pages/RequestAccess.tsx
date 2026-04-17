@@ -26,7 +26,7 @@ export default function RequestAccess() {
     setIsSubmitting(true);
     setErrorMessage(null);
 
-    const { error } = await supabase.from("access_requests").insert({
+    const { error } = await (supabase as any).from("access_requests").insert({
       name,
       email,
       events_details: eventsDetails || null,
