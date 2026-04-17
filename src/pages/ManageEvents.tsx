@@ -1,4 +1,4 @@
-// @ts-nocheck — legacy schema references; will be regenerated when platform tables exist
+// @ts-nocheck — schema is evolving quickly while tier features are being rolled out
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 
 type RsvpStatus = "pending" | "yes" | "no" | "maybe";
+type EventTier = "essential" | "social" | "host" | "occasions";
+const tierOrder: EventTier[] = ["essential", "social", "host", "occasions"];
 
 interface EventRow {
   id: string;
@@ -19,6 +21,11 @@ interface EventRow {
   capacity: number | null;
   enable_qr: boolean;
   enable_nfc: boolean;
+  tier: EventTier;
+  reminder_days: number[] | null;
+  rsvp_cutoff_at: string | null;
+  contact_host_email: string | null;
+  test_mode: boolean;
 }
 
 interface GuestRow {
@@ -38,6 +45,81 @@ interface DrinkTicketRow {
   guest_id: string | null;
   status: string;
 }
+
+interface EventMessageRow {
+  id: string;
+  body: string;
+  channel: string;
+  created_at: string;
+}
+
+interface StaffRoleRow {
+  id: string;
+  staff_email: string | null;
+  role: string;
+}
+
+interface SeatingTableRow {
+  id: string;
+  label: string;
+  seat_count: number;
+}
+
+interface SeatingAssignmentRow {
+  id: string;
+  guest_id: string;
+  seating_table_id: string;
+}
+
+interface TimelineItemRow {
+  id: string;
+  title: string;
+  kind: "timeline" | "checklist";
+  starts_at: string | null;
+  status: "pending" | "done";
+}
+
+interface WrappedSummaryRow {
+  id: string;
+  summary: Record<string, unknown>;
+  created_at: string;
+}
+
+const tierCaps: Record<EventTier, string[]> = {
+  essential: ["Event + RSVP", "Reminder + kalender", "Bas-sida"],
+  social: ["QR/NFC check-in", "Drink tickets", "Host messaging"],
+  host: ["Staff tools", "Export + test mode", "Avancerad RSVP automation"],
+  occasions: ["Seating", "Timeline/checklist", "Evening Wrapped"],
+};
+
+const parseReminderDays = (value: string) =>
+  value
+    .split(",")
+    .map((part) => Number(part.trim()))
+    .filter((n) => Number.isInteger(n) && n >= 0 && n <= 30);
+
+const toDatetimeLocal = (iso: string | null) => {
+  if (!iso) return "";
+  const date = new Date(iso);
+  const tzOffset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
+};
+
+const asCsv = (rows: Record<string, unknown>[]) => {
+  if (rows.length === 0) return "";
+  const headers = Object.keys(rows[0]);
+  const escaped = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;
+  return [headers.join(","), ...rows.map((row) => headers.map((h) => escaped(row[h])).join(","))].join("\n");
+};
+
+const downloadCsv = (fileName: string, csv: string) => {
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(link.href);
+};
 
 export default function ManageEvents() {
   const [events, setEvents] = useState<EventRow[]>([]);
@@ -59,6 +141,30 @@ export default function ManageEvents() {
   const [guestEmail, setGuestEmail] = useState("");
   const [loadingGuests, setLoadingGuests] = useState(false);
   const [ticketsByGuest, setTicketsByGuest] = useState<Record<string, number>>({});
+
+  const [messageText, setMessageText] = useState("");
+  const [messages, setMessages] = useState<EventMessageRow[]>([]);
+
+  const [staffEmail, setStaffEmail] = useState("");
+  const [staffRole, setStaffRole] = useState("host");
+  const [staffRoles, setStaffRoles] = useState<StaffRoleRow[]>([]);
+
+  const [reminderDaysInput, setReminderDaysInput] = useState("3");
+  const [rsvpCutoffInput, setRsvpCutoffInput] = useState("");
+  const [contactHostEmail, setContactHostEmail] = useState("");
+
+  const [tableLabel, setTableLabel] = useState("");
+  const [tableSeats, setTableSeats] = useState("8");
+  const [seatingTables, setSeatingTables] = useState<SeatingTableRow[]>([]);
+  const [seatingAssignments, setSeatingAssignments] = useState<SeatingAssignmentRow[]>([]);
+
+  const [timelineTitle, setTimelineTitle] = useState("");
+  const [timelineKind, setTimelineKind] = useState<"timeline" | "checklist">("timeline");
+  const [timelineAt, setTimelineAt] = useState("");
+  const [timelineItems, setTimelineItems] = useState<TimelineItemRow[]>([]);
+
+  const [wrappedSummaries, setWrappedSummaries] = useState<WrappedSummaryRow[]>([]);
+  const [allowedTier, setAllowedTier] = useState<EventTier>("essential");
 
   const sortedEvents = useMemo(
     () => [...events].sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()),
@@ -94,7 +200,7 @@ export default function ManageEvents() {
 
     const { data, error } = await supabase
       .from("events")
-      .select("id,title,starts_at,venue,status,capacity,enable_qr,enable_nfc")
+      .select("id,title,starts_at,venue,status,capacity,enable_qr,enable_nfc,tier,reminder_days,rsvp_cutoff_at,contact_host_email,test_mode")
       .eq("organizer_id", user.id)
       .order("starts_at", { ascending: true });
 
@@ -112,6 +218,77 @@ export default function ManageEvents() {
     setLoading(false);
   };
 
+  const loadAllowedTier = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const normalizedEmail = user.email?.toLowerCase() ?? null;
+    const { data: byUser } = await supabase
+      .from("user_tier_access")
+      .select("max_tier")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (byUser?.max_tier) {
+      setAllowedTier((byUser.max_tier as EventTier) ?? "essential");
+      return;
+    }
+
+    if (!normalizedEmail) {
+      setAllowedTier("essential");
+      return;
+    }
+
+    const { data: byEmail } = await supabase
+      .from("user_tier_access")
+      .select("max_tier")
+      .eq("email", normalizedEmail)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    setAllowedTier((byEmail?.max_tier as EventTier) ?? "essential");
+  };
+
+  const loadEventFeatureData = async (eventId: string) => {
+    if (!eventId) {
+      setMessages([]);
+      setStaffRoles([]);
+      setSeatingTables([]);
+      setSeatingAssignments([]);
+      setTimelineItems([]);
+      setWrappedSummaries([]);
+      return;
+    }
+
+    const [
+      { data: messagesData },
+      { data: staffData },
+      { data: seatingData },
+      { data: assignmentData },
+      { data: timelineData },
+      { data: wrappedData },
+    ] = await Promise.all([
+      supabase.from("event_messages").select("id,body,channel,created_at").eq("event_id", eventId).order("created_at", { ascending: false }).limit(20),
+      supabase.from("event_staff_roles").select("id,staff_email,role").eq("event_id", eventId).order("created_at", { ascending: false }),
+      supabase.from("seating_tables").select("id,label,seat_count").eq("event_id", eventId).order("label", { ascending: true }),
+      supabase.from("seating_assignments").select("id,guest_id,seating_table_id").eq("event_id", eventId),
+      supabase.from("event_timeline_items").select("id,title,kind,starts_at,status").eq("event_id", eventId).order("created_at", { ascending: false }),
+      supabase.from("event_post_event_summaries").select("id,summary,created_at").eq("event_id", eventId).order("created_at", { ascending: false }).limit(3),
+    ]);
+
+    setMessages((messagesData ?? []) as EventMessageRow[]);
+    setStaffRoles((staffData ?? []) as StaffRoleRow[]);
+    setSeatingTables((seatingData ?? []) as SeatingTableRow[]);
+    setSeatingAssignments((assignmentData ?? []) as SeatingAssignmentRow[]);
+    setTimelineItems((timelineData ?? []) as TimelineItemRow[]);
+    setWrappedSummaries((wrappedData ?? []) as WrappedSummaryRow[]);
+  };
+
   const loadGuestsForEvent = async (eventId: string) => {
     if (!eventId) {
       setGuests([]);
@@ -123,7 +300,11 @@ export default function ManageEvents() {
     setLoadingGuests(true);
     setErrorMessage(null);
 
-    const [{ data: guestsData, error: guestsError }, { data: checkinsData, error: checkinsError }, { data: ticketData, error: ticketError }] = await Promise.all([
+    const [
+      { data: guestsData, error: guestsError },
+      { data: checkinsData, error: checkinsError },
+      { data: ticketData, error: ticketError },
+    ] = await Promise.all([
       supabase.from("guests").select("id,full_name,email,rsvp_status").eq("event_id", eventId).order("created_at", { ascending: false }),
       supabase.from("checkins").select("id,guest_id").eq("event_id", eventId),
       supabase.from("drink_tickets").select("id,guest_id,status").eq("event_id", eventId).neq("status", "void"),
@@ -153,11 +334,20 @@ export default function ManageEvents() {
 
   useEffect(() => {
     void loadEvents();
+    void loadAllowedTier();
   }, []);
 
   useEffect(() => {
     void loadGuestsForEvent(selectedEventId);
+    void loadEventFeatureData(selectedEventId);
   }, [selectedEventId]);
+
+  useEffect(() => {
+    if (!selectedEvent) return;
+    setReminderDaysInput((selectedEvent.reminder_days ?? [3]).join(", "));
+    setRsvpCutoffInput(toDatetimeLocal(selectedEvent.rsvp_cutoff_at));
+    setContactHostEmail(selectedEvent.contact_host_email ?? "");
+  }, [selectedEvent]);
 
   const handleCreateEvent = async (e: FormEvent) => {
     e.preventDefault();
@@ -187,6 +377,9 @@ export default function ManageEvents() {
       ends_at: endsAtIso,
       capacity: capacity ? Number(capacity) : null,
       status: "draft",
+      tier: "essential",
+      reminder_days: [3],
+      contact_host_email: user.email ?? null,
     });
 
     if (error) {
@@ -258,6 +451,58 @@ export default function ManageEvents() {
           : event,
       ),
     );
+  };
+
+  const handleEventTierUpdate = async (tier: EventTier) => {
+    if (!selectedEventId) return;
+    if (tierOrder.indexOf(tier) > tierOrder.indexOf(allowedTier)) {
+      setErrorMessage(`Din plan tillåter max ${allowedTier}. Kontakta superuser för uppgradering.`);
+      return;
+    }
+
+    const { error } = await supabase.from("events").update({ tier }).eq("id", selectedEventId);
+    if (error) {
+      setErrorMessage("Kunde inte uppdatera tier.");
+      return;
+    }
+    setSuccessMessage("Tier uppdaterad.");
+    setEvents((prev) => prev.map((event) => (event.id === selectedEventId ? { ...event, tier } : event)));
+  };
+
+  const handleAutomationSave = async () => {
+    if (!selectedEventId) return;
+
+    const reminderDays = parseReminderDays(reminderDaysInput);
+    if (reminderDays.length === 0) {
+      setErrorMessage("Ange minst en reminder-dag (0–30). Ex: 7,3,1");
+      return;
+    }
+
+    const payload = {
+      reminder_days: reminderDays,
+      rsvp_cutoff_at: rsvpCutoffInput ? new Date(rsvpCutoffInput).toISOString() : null,
+      contact_host_email: contactHostEmail || null,
+    };
+
+    const { error } = await supabase.from("events").update(payload).eq("id", selectedEventId);
+    if (error) {
+      setErrorMessage("Kunde inte spara RSVP automation.");
+      return;
+    }
+
+    setSuccessMessage("RSVP automation sparad.");
+    await loadEvents();
+  };
+
+  const handleTestModeToggle = async (nextValue: boolean) => {
+    if (!selectedEventId) return;
+    const { error } = await supabase.from("events").update({ test_mode: nextValue }).eq("id", selectedEventId);
+    if (error) {
+      setErrorMessage("Kunde inte uppdatera test mode.");
+      return;
+    }
+    setSuccessMessage(nextValue ? "Test mode aktiverad." : "Test mode avstängd.");
+    setEvents((prev) => prev.map((event) => (event.id === selectedEventId ? { ...event, test_mode: nextValue } : event)));
   };
 
   const handleAddGuest = async (e: FormEvent) => {
@@ -356,6 +601,201 @@ export default function ManageEvents() {
     setTicketsByGuest((prev) => ({ ...prev, [guestId]: (prev[guestId] ?? 0) + 1 }));
   };
 
+  const handleSendHostMessage = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!selectedEventId || !messageText.trim()) return;
+
+    const { error } = await supabase.from("event_messages").insert({
+      event_id: selectedEventId,
+      channel: "host_message",
+      body: messageText.trim(),
+    });
+
+    if (error) {
+      setErrorMessage("Kunde inte spara host-meddelande.");
+      return;
+    }
+
+    setMessageText("");
+    setSuccessMessage("Host-meddelande sparat.");
+    await loadEventFeatureData(selectedEventId);
+  };
+
+  const handleAddStaffRole = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!selectedEventId || !staffEmail) return;
+
+    const { error } = await supabase.from("event_staff_roles").insert({
+      event_id: selectedEventId,
+      staff_email: staffEmail,
+      role: staffRole,
+    });
+
+    if (error) {
+      setErrorMessage("Kunde inte lägga till staff-roll.");
+      return;
+    }
+
+    setStaffEmail("");
+    setSuccessMessage("Staff-roll tillagd.");
+    await loadEventFeatureData(selectedEventId);
+  };
+
+  const handleCreateSeatingTable = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!selectedEventId || !tableLabel) return;
+
+    const { error } = await supabase.from("seating_tables").insert({
+      event_id: selectedEventId,
+      label: tableLabel,
+      seat_count: Number(tableSeats) || 0,
+    });
+
+    if (error) {
+      setErrorMessage("Kunde inte skapa bord.");
+      return;
+    }
+
+    setTableLabel("");
+    setTableSeats("8");
+    setSuccessMessage("Bord skapat.");
+    await loadEventFeatureData(selectedEventId);
+  };
+
+  const handleAssignGuestSeat = async (guestId: string, seatingTableId: string) => {
+    if (!selectedEventId) return;
+    const existing = seatingAssignments.find((assignment) => assignment.guest_id === guestId);
+
+    if (!seatingTableId && existing) {
+      const { error } = await supabase.from("seating_assignments").delete().eq("id", existing.id);
+      if (!error) await loadEventFeatureData(selectedEventId);
+      return;
+    }
+
+    if (existing) {
+      const { error } = await supabase
+        .from("seating_assignments")
+        .update({ seating_table_id: seatingTableId })
+        .eq("id", existing.id);
+      if (!error) await loadEventFeatureData(selectedEventId);
+      return;
+    }
+
+    const { error } = await supabase.from("seating_assignments").insert({
+      event_id: selectedEventId,
+      guest_id: guestId,
+      seating_table_id: seatingTableId,
+    });
+    if (!error) await loadEventFeatureData(selectedEventId);
+  };
+
+  const handleCreateTimelineItem = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!selectedEventId || !timelineTitle.trim()) return;
+
+    const { error } = await supabase.from("event_timeline_items").insert({
+      event_id: selectedEventId,
+      title: timelineTitle.trim(),
+      kind: timelineKind,
+      starts_at: timelineAt ? new Date(timelineAt).toISOString() : null,
+      status: "pending",
+    });
+
+    if (error) {
+      setErrorMessage("Kunde inte lägga till timeline/checklist-item.");
+      return;
+    }
+
+    setTimelineTitle("");
+    setTimelineAt("");
+    setSuccessMessage("Timeline/checklist-item tillagd.");
+    await loadEventFeatureData(selectedEventId);
+  };
+
+  const handleTimelineStatusToggle = async (item: TimelineItemRow) => {
+    const next = item.status === "done" ? "pending" : "done";
+    const { error } = await supabase.from("event_timeline_items").update({ status: next }).eq("id", item.id);
+    if (error) return;
+    setTimelineItems((prev) => prev.map((row) => (row.id === item.id ? { ...row, status: next } : row)));
+  };
+
+  const handleCreateWrappedSummary = async () => {
+    if (!selectedEventId) return;
+
+    const totalGuests = guests.length;
+    const accepted = guests.filter((guest) => guest.rsvp_status === "yes").length;
+    const checkedIn = Object.keys(checkinsByGuest).length;
+    const totalDrinkTickets = Object.values(ticketsByGuest).reduce((sum, count) => sum + count, 0);
+
+    const summary = {
+      totalGuests,
+      accepted,
+      checkedIn,
+      totalDrinkTickets,
+      createdFromTier: selectedEvent?.tier ?? "essential",
+    };
+
+    const { error } = await supabase.from("event_post_event_summaries").insert({
+      event_id: selectedEventId,
+      summary,
+    });
+
+    if (error) {
+      setErrorMessage("Kunde inte skapa Evening Wrapped.");
+      return;
+    }
+
+    setSuccessMessage("Evening Wrapped skapad.");
+    await loadEventFeatureData(selectedEventId);
+  };
+
+  const exportGuestList = () => {
+    const csv = asCsv(
+      guests.map((guest) => ({
+        name: guest.full_name,
+        email: guest.email,
+        rsvp_status: guest.rsvp_status,
+        checked_in: Boolean(checkinsByGuest[guest.id]),
+        drink_tickets: ticketsByGuest[guest.id] ?? 0,
+      })),
+    );
+    if (!csv) return;
+    downloadCsv(`sera-guests-${selectedEvent?.id ?? "event"}.csv`, csv);
+  };
+
+  const exportAttendance = () => {
+    const rows = guests
+      .filter((guest) => Boolean(checkinsByGuest[guest.id]))
+      .map((guest) => ({
+        name: guest.full_name,
+        email: guest.email,
+        checked_in: "yes",
+      }));
+    const csv = asCsv(rows);
+    if (!csv) return;
+    downloadCsv(`sera-attendance-${selectedEvent?.id ?? "event"}.csv`, csv);
+  };
+
+  const exportTicketUsage = () => {
+    const csv = asCsv(
+      guests.map((guest) => ({
+        name: guest.full_name,
+        email: guest.email,
+        issued_tickets: ticketsByGuest[guest.id] ?? 0,
+      })),
+    );
+    if (!csv) return;
+    downloadCsv(`sera-ticket-usage-${selectedEvent?.id ?? "event"}.csv`, csv);
+  };
+
+  const seatGuestMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    seatingAssignments.forEach((assignment) => {
+      map[assignment.guest_id] = assignment.seating_table_id;
+    });
+    return map;
+  }, [seatingAssignments]);
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -364,7 +804,7 @@ export default function ManageEvents() {
           <p className="sera-label text-sera-stone mb-4">Organizer Dashboard</p>
           <h1 className="sera-heading text-sera-ivory text-4xl md:text-5xl mb-3">Create & manage events</h1>
           <p className="sera-body text-sera-sand text-lg max-w-2xl">
-            Fullt arbetsflöde: skapa event, hantera gäster, uppdatera RSVP och checka in i realtid.
+            Nu med tier-funktioner för Essential, Social, Host och Occasions i samma arbetsyta.
           </p>
         </div>
       </section>
@@ -428,7 +868,9 @@ export default function ManageEvents() {
                       <p className="text-xs text-sera-warm-grey mt-1">
                         {new Date(event.starts_at).toLocaleString()} {event.venue ? `• ${event.venue}` : ""}
                       </p>
-                      <p className="text-[10px] uppercase tracking-wider text-sera-stone mt-2">{event.status}</p>
+                      <p className="text-[10px] uppercase tracking-wider text-sera-stone mt-2">
+                        {event.status} · {event.tier}
+                      </p>
                     </button>
                     <div className="flex gap-2 mt-3">
                       <button
@@ -453,7 +895,74 @@ export default function ManageEvents() {
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto px-6 mt-10">
+        <div className="max-w-6xl mx-auto px-6 mt-10 space-y-10">
+          <div className="bg-sera-ivory/50 border border-sera-sand/60 p-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h3 className="font-serif text-sera-navy text-2xl">Tier controls</h3>
+                <p className="text-xs text-sera-warm-grey mt-1">
+                  Aktivera funktioner per event utifrån vad som utlovas i respektive tier.
+                </p>
+              </div>
+
+              {selectedEvent && (
+                <select
+                  className="border border-sera-sand bg-sera-ivory px-3 py-2 text-sm"
+                  value={selectedEvent.tier}
+                  onChange={(e) => handleEventTierUpdate(e.target.value as EventTier)}
+                >
+                  <option value="essential">Essential</option>
+                  <option value="social" disabled={tierOrder.indexOf(allowedTier) < tierOrder.indexOf("social")}>Social</option>
+                  <option value="host" disabled={tierOrder.indexOf(allowedTier) < tierOrder.indexOf("host")}>Host</option>
+                  <option value="occasions" disabled={tierOrder.indexOf(allowedTier) < tierOrder.indexOf("occasions")}>Occasions</option>
+                </select>
+              )}
+            </div>
+            <p className="text-xs text-sera-stone mt-2">Din tilldelade max-tier: <span className="uppercase">{allowedTier}</span>.</p>
+
+            {selectedEvent ? (
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-4 border border-sera-sand/50 bg-sera-ivory/80 space-y-3">
+                  <p className="text-xs uppercase tracking-wider text-sera-stone">Active capabilities</p>
+                  <ul className="space-y-1 text-sm text-sera-warm-grey">
+                    {tierCaps[selectedEvent.tier].map((capability) => (
+                      <li key={capability}>• {capability}</li>
+                    ))}
+                  </ul>
+                  <label className="flex items-center gap-2 text-sm text-sera-navy pt-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedEvent.test_mode}
+                      onChange={(e) => handleTestModeToggle(e.target.checked)}
+                    />
+                    Test mode (simulerar check-in och ticket redeem)
+                  </label>
+                </div>
+
+                <div className="p-4 border border-sera-sand/50 bg-sera-ivory/80 space-y-3">
+                  <p className="text-xs uppercase tracking-wider text-sera-stone">RSVP automation</p>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] uppercase">Reminder days (komma-separerat)</Label>
+                    <Input value={reminderDaysInput} onChange={(e) => setReminderDaysInput(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] uppercase">RSVP cutoff</Label>
+                    <Input type="datetime-local" value={rsvpCutoffInput} onChange={(e) => setRsvpCutoffInput(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] uppercase">Contact host email</Label>
+                    <Input type="email" value={contactHostEmail} onChange={(e) => setContactHostEmail(e.target.value)} />
+                  </div>
+                  <Button type="button" variant="outline" className="w-full" onClick={handleAutomationSave}>
+                    Save automation settings
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <p className="sera-body text-sera-warm-grey text-sm mt-4">Välj ett event för att styra tier-funktionerna.</p>
+            )}
+          </div>
+
           <div className="bg-sera-ivory/50 border border-sera-sand/60 p-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
               <h3 className="font-serif text-sera-navy text-2xl">
@@ -492,6 +1001,12 @@ export default function ManageEvents() {
                   </div>
                 </div>
 
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <Button type="button" variant="outline" size="sm" onClick={exportGuestList}>Export guest list CSV</Button>
+                  <Button type="button" variant="outline" size="sm" onClick={exportAttendance}>Export attendance CSV</Button>
+                  <Button type="button" variant="outline" size="sm" onClick={exportTicketUsage}>Export ticket usage CSV</Button>
+                </div>
+
                 <form onSubmit={handleAddGuest} className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
                   <Input placeholder="Guest name" value={guestName} onChange={(e) => setGuestName(e.target.value)} required />
                   <Input placeholder="Guest email (optional)" type="email" value={guestEmail} onChange={(e) => setGuestEmail(e.target.value)} />
@@ -513,7 +1028,7 @@ export default function ManageEvents() {
                             Drink tickets: {ticketsByGuest[guest.id] ?? 0}
                           </p>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <select
                             value={guest.rsvp_status}
                             onChange={(e) => handleRsvpChange(guest.id, e.target.value as RsvpStatus)}
@@ -545,6 +1060,144 @@ export default function ManageEvents() {
                 )}
               </>
             )}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-sera-ivory/50 border border-sera-sand/60 p-6">
+              <h3 className="font-serif text-sera-navy text-2xl mb-4">Host messaging (Social)</h3>
+              <form onSubmit={handleSendHostMessage} className="space-y-3">
+                <Input value={messageText} onChange={(e) => setMessageText(e.target.value)} placeholder="Message to guests" />
+                <Button type="submit" variant="outline" className="w-full">Save host message</Button>
+              </form>
+              <div className="mt-4 space-y-2 max-h-56 overflow-y-auto">
+                {messages.map((msg) => (
+                  <div key={msg.id} className="p-3 border border-sera-sand/50 bg-sera-ivory text-xs">
+                    <p className="text-sera-navy">{msg.body}</p>
+                    <p className="text-sera-stone mt-1">{new Date(msg.created_at).toLocaleString()} · {msg.channel}</p>
+                  </div>
+                ))}
+                {messages.length === 0 && <p className="text-sm text-sera-warm-grey">Inga host-meddelanden ännu.</p>}
+              </div>
+            </div>
+
+            <div className="bg-sera-ivory/50 border border-sera-sand/60 p-6">
+              <h3 className="font-serif text-sera-navy text-2xl mb-4">Staff roles (Host)</h3>
+              <form onSubmit={handleAddStaffRole} className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <Input value={staffEmail} type="email" required placeholder="staff@email.com" onChange={(e) => setStaffEmail(e.target.value)} />
+                <select className="border border-sera-sand bg-sera-ivory px-2 text-sm" value={staffRole} onChange={(e) => setStaffRole(e.target.value)}>
+                  <option value="organizer">Organizer</option>
+                  <option value="door">Door</option>
+                  <option value="bartender">Bartender</option>
+                  <option value="host">Host</option>
+                  <option value="viewer">Viewer</option>
+                </select>
+                <Button type="submit" variant="outline">Add role</Button>
+              </form>
+              <div className="mt-4 space-y-2 max-h-56 overflow-y-auto">
+                {staffRoles.map((role) => (
+                  <div key={role.id} className="p-3 border border-sera-sand/50 bg-sera-ivory text-xs flex justify-between">
+                    <span>{role.staff_email ?? "(user id linked)"}</span>
+                    <span className="uppercase tracking-wide">{role.role}</span>
+                  </div>
+                ))}
+                {staffRoles.length === 0 && <p className="text-sm text-sera-warm-grey">Inga staff-roller ännu.</p>}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-sera-ivory/50 border border-sera-sand/60 p-6">
+              <h3 className="font-serif text-sera-navy text-2xl mb-4">Seating system (Occasions)</h3>
+              <form onSubmit={handleCreateSeatingTable} className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
+                <Input value={tableLabel} onChange={(e) => setTableLabel(e.target.value)} placeholder="Table A" required />
+                <Input value={tableSeats} type="number" min={1} onChange={(e) => setTableSeats(e.target.value)} required />
+                <Button type="submit" variant="outline">Create table</Button>
+              </form>
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {seatingTables.map((table) => {
+                  const used = seatingAssignments.filter((item) => item.seating_table_id === table.id).length;
+                  return (
+                    <div key={table.id} className="p-3 border border-sera-sand/50 bg-sera-ivory text-xs">
+                      <p className="text-sera-navy font-medium">{table.label}</p>
+                      <p className="text-sera-stone">{used}/{table.seat_count} assigned</p>
+                    </div>
+                  );
+                })}
+                {seatingTables.length === 0 && <p className="text-sm text-sera-warm-grey">Inga bord skapade ännu.</p>}
+              </div>
+
+              <div className="mt-4 border-t border-sera-sand/50 pt-4 space-y-2 max-h-56 overflow-y-auto">
+                {guests.map((guest) => (
+                  <div key={guest.id} className="flex items-center justify-between gap-2 text-xs">
+                    <span>{guest.full_name}</span>
+                    <select
+                      className="border border-sera-sand bg-sera-ivory px-2 py-1"
+                      value={seatGuestMap[guest.id] ?? ""}
+                      onChange={(e) => handleAssignGuestSeat(guest.id, e.target.value)}
+                    >
+                      <option value="">No table</option>
+                      {seatingTables.map((table) => (
+                        <option key={table.id} value={table.id}>{table.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-sera-ivory/50 border border-sera-sand/60 p-6">
+              <h3 className="font-serif text-sera-navy text-2xl mb-4">Timeline + checklist (Occasions)</h3>
+              <form onSubmit={handleCreateTimelineItem} className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
+                <Input value={timelineTitle} onChange={(e) => setTimelineTitle(e.target.value)} placeholder="Soundcheck" required />
+                <select
+                  className="border border-sera-sand bg-sera-ivory px-2 text-sm"
+                  value={timelineKind}
+                  onChange={(e) => setTimelineKind(e.target.value as "timeline" | "checklist")}
+                >
+                  <option value="timeline">Timeline</option>
+                  <option value="checklist">Checklist</option>
+                </select>
+                <Input type="datetime-local" value={timelineAt} onChange={(e) => setTimelineAt(e.target.value)} />
+                <Button type="submit" variant="outline" className="md:col-span-3">Add item</Button>
+              </form>
+
+              <div className="space-y-2 max-h-56 overflow-y-auto">
+                {timelineItems.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className="w-full p-3 border border-sera-sand/50 bg-sera-ivory text-left"
+                    onClick={() => handleTimelineStatusToggle(item)}
+                  >
+                    <p className="text-sm text-sera-navy">{item.title}</p>
+                    <p className="text-[10px] text-sera-stone uppercase tracking-wide mt-1">
+                      {item.kind} · {item.status} {item.starts_at ? `· ${new Date(item.starts_at).toLocaleString()}` : ""}
+                    </p>
+                  </button>
+                ))}
+                {timelineItems.length === 0 && <p className="text-sm text-sera-warm-grey">Inga items ännu.</p>}
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-sera-ivory/50 border border-sera-sand/60 p-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <div>
+                <h3 className="font-serif text-sera-navy text-2xl">Evening Wrapped + post-event recap</h3>
+                <p className="text-sm text-sera-warm-grey">Skapa summering med attendance, drink usage och delningsbar recap-data.</p>
+              </div>
+              <Button type="button" variant="sera" onClick={handleCreateWrappedSummary}>Generate Evening Wrapped</Button>
+            </div>
+
+            <div className="mt-4 space-y-2">
+              {wrappedSummaries.map((summary) => (
+                <div key={summary.id} className="p-3 border border-sera-sand/50 bg-sera-ivory text-xs">
+                  <p className="text-sera-stone mb-1">{new Date(summary.created_at).toLocaleString()}</p>
+                  <pre className="whitespace-pre-wrap text-sera-navy">{JSON.stringify(summary.summary, null, 2)}</pre>
+                </div>
+              ))}
+              {wrappedSummaries.length === 0 && <p className="text-sm text-sera-warm-grey">Ingen wrapped-summary ännu.</p>}
+            </div>
           </div>
         </div>
       </section>
