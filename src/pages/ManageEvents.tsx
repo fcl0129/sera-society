@@ -85,12 +85,56 @@ interface WrappedSummaryRow {
   created_at: string;
 }
 
+interface EventTemplate {
+  id: string;
+  name: string;
+  vibe: string;
+  titlePrefix: string;
+  reminderDays: number[];
+  defaultCapacity: number;
+  enableQr: boolean;
+  enableNfc: boolean;
+}
+
 const tierCaps: Record<EventTier, string[]> = {
   essential: ["Event + RSVP", "Reminder + kalender", "Bas-sida"],
   social: ["QR/NFC check-in", "Drink tickets", "Host messaging"],
   host: ["Staff tools", "Export + test mode", "Avancerad RSVP automation"],
   occasions: ["Seating", "Timeline/checklist", "Evening Wrapped"],
 };
+
+const eventTemplates: EventTemplate[] = [
+  {
+    id: "dinner",
+    name: "Private Dinner",
+    vibe: "Intimate, elegant, invite-only",
+    titlePrefix: "Private Dinner",
+    reminderDays: [7, 2],
+    defaultCapacity: 40,
+    enableQr: true,
+    enableNfc: false,
+  },
+  {
+    id: "night",
+    name: "Night Event",
+    vibe: "Fast door flow and high volume",
+    titlePrefix: "Night Event",
+    reminderDays: [3, 1],
+    defaultCapacity: 300,
+    enableQr: true,
+    enableNfc: true,
+  },
+  {
+    id: "release",
+    name: "Brand Launch",
+    vibe: "Premium guest journey",
+    titlePrefix: "Launch Event",
+    reminderDays: [7, 3, 1],
+    defaultCapacity: 120,
+    enableQr: true,
+    enableNfc: true,
+  },
+];
 
 const parseReminderDays = (value: string) =>
   value
@@ -133,6 +177,10 @@ export default function ManageEvents() {
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
   const [capacity, setCapacity] = useState("");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("night");
+  const [quickEnableQr, setQuickEnableQr] = useState(true);
+  const [quickEnableNfc, setQuickEnableNfc] = useState(true);
+  const [quickPublishAfterCreate, setQuickPublishAfterCreate] = useState(false);
 
   const [selectedEventId, setSelectedEventId] = useState<string>("");
   const [guests, setGuests] = useState<GuestRow[]>([]);
@@ -339,6 +387,12 @@ export default function ManageEvents() {
   }, []);
 
   useEffect(() => {
+    if (title || startsAt || capacity) return;
+    applyTemplate(selectedTemplateId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     void loadGuestsForEvent(selectedEventId);
     void loadEventFeatureData(selectedEventId);
   }, [selectedEventId]);
@@ -349,6 +403,27 @@ export default function ManageEvents() {
     setRsvpCutoffInput(toDatetimeLocal(selectedEvent.rsvp_cutoff_at));
     setContactHostEmail(selectedEvent.contact_host_email ?? "");
   }, [selectedEvent]);
+
+  const applyTemplate = (templateId: string) => {
+    const template = eventTemplates.find((item) => item.id === templateId);
+    if (!template) return;
+
+    const now = new Date();
+    const eventStart = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    eventStart.setMinutes(0, 0, 0);
+    eventStart.setHours(19);
+    const eventEnd = new Date(eventStart.getTime() + 4 * 60 * 60 * 1000);
+
+    setSelectedTemplateId(template.id);
+    setTitle(`${template.titlePrefix} ${eventStart.toLocaleDateString("sv-SE")}`);
+    setVenue((prev) => prev || "Stockholm");
+    setStartsAt(toDatetimeLocal(eventStart.toISOString()));
+    setEndsAt(toDatetimeLocal(eventEnd.toISOString()));
+    setCapacity(String(template.defaultCapacity));
+    setReminderDaysInput(template.reminderDays.join(", "));
+    setQuickEnableQr(template.enableQr);
+    setQuickEnableNfc(template.enableNfc);
+  };
 
   const handleCreateEvent = async (e: FormEvent) => {
     e.preventDefault();
@@ -369,27 +444,40 @@ export default function ManageEvents() {
 
     const startsAtIso = new Date(startsAt).toISOString();
     const endsAtIso = endsAt ? new Date(endsAt).toISOString() : null;
+    const reminderDays = parseReminderDays(reminderDaysInput);
+    const status = quickPublishAfterCreate ? "published" : "draft";
 
-    const { error } = await supabase.from("events").insert({
-      organizer_id: user.id,
-      title,
-      venue: venue || null,
-      starts_at: startsAtIso,
-      ends_at: endsAtIso,
-      capacity: capacity ? Number(capacity) : null,
-      status: "draft",
-      tier: "essential",
-      reminder_days: [3],
-      contact_host_email: user.email ?? null,
-    });
+    const { data, error } = await supabase
+      .from("events")
+      .insert({
+        organizer_id: user.id,
+        title,
+        venue: venue || null,
+        starts_at: startsAtIso,
+        ends_at: endsAtIso,
+        capacity: capacity ? Number(capacity) : null,
+        status,
+        tier: "essential",
+        reminder_days: reminderDays.length > 0 ? reminderDays : [3],
+        contact_host_email: user.email ?? null,
+        enable_qr: quickEnableQr,
+        enable_nfc: quickEnableNfc,
+      })
+      .select("id")
+      .single();
 
-    if (error) {
+    if (error || !data) {
       setErrorMessage(error.message || "Kunde inte skapa event just nu.");
       setIsSaving(false);
       return;
     }
 
-    setSuccessMessage("Event skapat!");
+    setSuccessMessage(
+      quickPublishAfterCreate
+        ? "Event skapat och publicerat. Nästa steg: lägg till gäster och börja skicka tickets."
+        : "Event skapat! Nästa steg: slå på ticket-läge och lägg till gäster."
+    );
+    setSelectedEventId(data.id);
     setTitle("");
     setVenue("");
     setStartsAt("");
@@ -828,6 +916,36 @@ export default function ManageEvents() {
             <h2 className="font-serif text-sera-navy text-2xl mb-5">New event</h2>
             <form onSubmit={handleCreateEvent} className="space-y-4">
               <div className="space-y-2">
+                <Label className="sera-label text-sera-navy text-[10px]">Quick start template</Label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  {eventTemplates.map((template) => (
+                    <button
+                      key={template.id}
+                      type="button"
+                      onClick={() => applyTemplate(template.id)}
+                      className={`text-left border px-3 py-2 transition ${
+                        selectedTemplateId === template.id
+                          ? "border-sera-oxblood bg-sera-ivory"
+                          : "border-sera-sand/60 bg-sera-ivory/60"
+                      }`}
+                    >
+                      <p className="text-xs uppercase tracking-wider text-sera-stone">{template.name}</p>
+                      <p className="text-[11px] text-sera-warm-grey mt-1">{template.vibe}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="border border-sera-sand/60 bg-sera-ivory/70 p-3 space-y-2">
+                <p className="text-xs uppercase tracking-wider text-sera-stone">Seamless setup</p>
+                <div className="space-y-1 text-xs text-sera-warm-grey">
+                  <p>{title.trim() ? "✅" : "◻️"} Event details</p>
+                  <p>{startsAt ? "✅" : "◻️"} Date & time</p>
+                  <p>{quickEnableQr || quickEnableNfc ? "✅" : "◻️"} Entry mode (QR/NFC)</p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
                 <Label className="sera-label text-sera-navy text-[10px]">Title</Label>
                 <Input value={title} onChange={(e) => setTitle(e.target.value)} required />
               </div>
@@ -846,6 +964,28 @@ export default function ManageEvents() {
               <div className="space-y-2">
                 <Label className="sera-label text-sera-navy text-[10px]">Capacity (optional)</Label>
                 <Input type="number" min={1} value={capacity} onChange={(e) => setCapacity(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label className="sera-label text-sera-navy text-[10px]">Reminder days (comma separated)</Label>
+                <Input value={reminderDaysInput} onChange={(e) => setReminderDaysInput(e.target.value)} placeholder="7, 3, 1" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
+                <label className="flex items-center gap-2 border border-sera-sand/60 bg-sera-ivory px-3 py-2">
+                  <input type="checkbox" checked={quickEnableQr} onChange={(e) => setQuickEnableQr(e.target.checked)} />
+                  Enable QR
+                </label>
+                <label className="flex items-center gap-2 border border-sera-sand/60 bg-sera-ivory px-3 py-2">
+                  <input type="checkbox" checked={quickEnableNfc} onChange={(e) => setQuickEnableNfc(e.target.checked)} />
+                  Enable NFC
+                </label>
+                <label className="flex items-center gap-2 border border-sera-sand/60 bg-sera-ivory px-3 py-2">
+                  <input
+                    type="checkbox"
+                    checked={quickPublishAfterCreate}
+                    onChange={(e) => setQuickPublishAfterCreate(e.target.checked)}
+                  />
+                  Publish now
+                </label>
               </div>
 
               {errorMessage && <p className="text-xs text-red-700">{errorMessage}</p>}
