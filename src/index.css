@@ -6,60 +6,97 @@
 
 @layer base {
   :root {
-    /* Light beige canvas (default) */
-    --background: 30 20% 91%;
-    --foreground: 0 0% 12%;
+    /* ============================================
+       Sera Society — Editorial palette
+       Navy / Ivory / Oxblood with warm neutrals
+       All values in HSL (no hsl() wrapper).
+       ============================================ */
+
+    /* Canvas */
+    --background: 36 22% 93%;        /* warm ivory-beige */
+    --foreground: 215 35% 14%;       /* near-navy ink */
 
     /* Surfaces */
-    --card: 34 22% 94%;
-    --card-foreground: 0 0% 12%;
-    --popover: 34 22% 94%;
-    --popover-foreground: 0 0% 12%;
+    --card: 36 25% 96%;
+    --card-foreground: 215 35% 14%;
+    --popover: 36 25% 96%;
+    --popover-foreground: 215 35% 14%;
 
     /* Brand */
     --primary: 215 50% 15%;
     --primary-foreground: 36 25% 96%;
-    --secondary: 30 12% 85%;
+    --secondary: 30 16% 86%;
     --secondary-foreground: 215 50% 15%;
 
-    --muted: 30 10% 90%;
-    --muted-foreground: 30 8% 45%;
+    --muted: 30 14% 90%;
+    --muted-foreground: 30 8% 38%;
 
-    --accent: 0 38% 21%;
+    --accent: 0 42% 24%;
     --accent-foreground: 36 25% 96%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 72% 42%;
+    --destructive-foreground: 36 25% 96%;
 
-    --border: 30 12% 82%;
-    --input: 30 12% 82%;
+    --border: 30 14% 80%;
+    --input: 30 14% 80%;
     --ring: 215 50% 15%;
 
     --radius: 0.375rem;
 
-    /* Sera palette */
+    /* ===== Sera palette (full set) =====
+       Every token below MUST exist — components reference them. */
+
+    /* Dark family */
     --sera-navy: 215 50% 15%;
-    --sera-deep-navy: 210 35% 17%;
-    --sera-beige: 30 20% 91%;
-    --sera-ivory: 36 25% 96%;
-    --sera-charcoal: 0 0% 12%;
+    --sera-deep-navy: 212 42% 12%;
+    --sera-ink: 213 30% 22%;            /* dark slate, used for borders on dark */
+    --sera-charcoal: 220 12% 10%;
+
+    /* Warm neutrals (light family) */
+    --sera-ivory: 36 30% 96%;
+    --sera-beige: 32 22% 90%;
+    --sera-sand: 30 18% 82%;            /* warm light tan */
+    --sera-stone: 30 8% 62%;            /* warm mid grey */
+    --sera-warm-grey: 25 6% 38%;        /* readable body text on light */
+
+    /* Accents */
+    --sera-oxblood: 0 42% 28%;
+    --sera-oxblood-soft: 8 48% 48%;
+    --sera-rosewood: 8 30% 38%;
+    --sera-moss: 110 18% 28%;
+    --sera-moss-muted: 110 14% 52%;
+
+    /* Surface variants */
+    --sera-surface-light: 36 25% 95%;
+    --sera-surface-warm: 32 22% 90%;
+    --sera-surface-cool: 210 14% 92%;
+
+    /* Sidebar (shadcn) */
+    --sidebar-background: 36 25% 96%;
+    --sidebar-foreground: 215 35% 14%;
+    --sidebar-primary: 215 50% 15%;
+    --sidebar-primary-foreground: 36 25% 96%;
+    --sidebar-accent: 30 14% 90%;
+    --sidebar-accent-foreground: 215 50% 15%;
+    --sidebar-border: 30 14% 80%;
+    --sidebar-ring: 215 50% 15%;
 
     /* Typography */
     --font-serif: "Cormorant Garamond", Georgia, serif;
     --font-sans: "Inter", system-ui, sans-serif;
   }
 
-  /* Keep .dark available for later, but not default */
   .dark {
     --background: 215 50% 15%;
     --foreground: 36 25% 96%;
-    --card: 210 35% 17%;
+    --card: 212 42% 12%;
     --card-foreground: 36 25% 96%;
-    --popover: 210 35% 17%;
+    --popover: 212 42% 12%;
     --popover-foreground: 36 25% 96%;
-    --border: 212 35% 25%;
-    --input: 212 35% 25%;
+    --border: 213 30% 22%;
+    --input: 213 30% 22%;
     --ring: 30 20% 91%;
+    --muted-foreground: 30 8% 70%;
   }
 
   html,
@@ -76,17 +113,14 @@
     font-family: var(--font-sans);
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-serif);
+    color: hsl(var(--sera-navy));
   }
 }
 
 @layer components {
+  /* ============ Typography utilities ============ */
   .sera-heading {
     font-family: var(--font-serif);
     font-weight: 300;
@@ -115,7 +149,23 @@
     text-transform: uppercase;
   }
 
-  /* Hero: dark gradient fades into beige */
+  /* ============ Surface utilities ============ */
+  .sera-surface-light {
+    background-color: hsl(var(--sera-surface-light));
+    color: hsl(var(--sera-navy));
+  }
+
+  .sera-surface-warm {
+    background-color: hsl(var(--sera-surface-warm));
+    color: hsl(var(--sera-navy));
+  }
+
+  .sera-surface-cool {
+    background-color: hsl(var(--sera-surface-cool));
+    color: hsl(var(--sera-navy));
+  }
+
+  /* ============ Gradients ============ */
   .sera-hero-gradient {
     background: linear-gradient(
       180deg,
@@ -125,13 +175,22 @@
     );
   }
 
-  /* Simple panel utility (for sections/cards on beige) */
+  .sera-gradient-navy {
+    background: linear-gradient(
+      180deg,
+      hsl(var(--sera-deep-navy)) 0%,
+      hsl(var(--sera-navy)) 100%
+    );
+    color: hsl(var(--sera-ivory));
+  }
+
+  /* ============ Panel / card ============ */
   .sera-panel {
     background-color: hsl(var(--card));
     border: 1px solid hsl(var(--border));
+  }
 
-    @layer components {
-  /* Navbar base */
+  /* ============ Navbar states ============ */
   .sera-nav {
     position: sticky;
     top: 0;
@@ -139,83 +198,24 @@
     transition: background-color 300ms ease, border-color 300ms ease, backdrop-filter 300ms ease;
   }
 
-  /* State: on hero (dark) */
   .sera-nav--hero {
     background: rgba(0, 0, 0, 0);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(10px);
   }
 
-  /* State: after scroll (light/paper) */
   .sera-nav--scrolled {
-    background: rgba(245, 242, 236, 0.82); /* beige-ish glass */
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    background: hsl(var(--sera-beige) / 0.85);
+    border-bottom: 1px solid hsl(var(--sera-navy) / 0.08);
     backdrop-filter: blur(12px);
   }
 
-  /* Link colors */
   .sera-navlink {
     transition: color 200ms ease, opacity 200ms ease;
     text-decoration: none;
   }
-  .sera-navlink--hero {
-    color: rgba(255, 255, 255, 0.78);
-  }
-  .sera-navlink--hero:hover {
-    color: rgba(255, 255, 255, 0.95);
-  }
-
-  .sera-navlink--scrolled {
-    color: rgba(0, 0, 0, 0.68);
-  }
-  .sera-navlink--scrolled:hover {
-    color: rgba(0, 0, 0, 0.90);
-  }
-
-  /* Brand title */
-  .sera-brand--hero {
-    color: rgba(255, 255, 255, 0.92);
-  }
-  .sera-brand--scrolled {
-    color: rgba(0, 0, 0, 0.90);
-  }
-
-  /* CTA buttons */
-  .sera-navbtn--hero {
-    border: 1px solid rgba(255, 255, 255, 0.38);
-    color: rgba(255, 255, 255, 0.92);
-    background: transparent;
-  }
-  .sera-navbtn--hero:hover {
-    background: rgba(255, 255, 255, 0.10);
-  }
-
-  .sera-navbtn--scrolled {
-    border: 1px solid rgba(0, 0, 0, 0.18);
-    color: rgba(0, 0, 0, 0.90);
-    background: transparent;
-  }
-  .sera-navbtn--scrolled:hover {
-    background: rgba(0, 0, 0, 0.06);
-  }
-
-  .sera-navprimary--hero {
-    background: rgba(255, 255, 255, 0.92);
-    color: rgba(0, 0, 0, 0.92);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-  .sera-navprimary--hero:hover {
-    background: rgba(255, 255, 255, 0.85);
-  }
-
-  .sera-navprimary--scrolled {
-    background: rgba(0, 0, 0, 0.92);
-    color: rgba(255, 255, 255, 0.96);
-    border: 1px solid rgba(0, 0, 0, 0.2);
-  }
-  .sera-navprimary--scrolled:hover {
-    background: rgba(0, 0, 0, 0.82);
-  }
-}
-  }
+  .sera-navlink--hero { color: hsl(var(--sera-ivory) / 0.78); }
+  .sera-navlink--hero:hover { color: hsl(var(--sera-ivory)); }
+  .sera-navlink--scrolled { color: hsl(var(--sera-navy) / 0.7); }
+  .sera-navlink--scrolled:hover { color: hsl(var(--sera-navy)); }
 }
