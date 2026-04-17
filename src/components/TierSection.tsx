@@ -212,11 +212,11 @@ export default function TierSection() {
     <section className="relative py-24 md:py-32">
       <div className="mx-auto w-full max-w-6xl px-6">
         <div className="text-center max-w-2xl mx-auto mb-14 md:mb-16">
-          <p className="sera-label text-sera-oxblood mb-4">Choose your level of hosting</p>
+          <p className="sera-label text-sera-oxblood mb-4">Plans built for your growth curve</p>
           <h2 className="sera-heading text-sera-navy text-3xl md:text-5xl">
-            Four tiers,
+            Four plans,
             <br />
-            <span className="italic">one standard of craft</span>
+            <span className="italic">one editorial backbone</span>
           </h2>
         </div>
 

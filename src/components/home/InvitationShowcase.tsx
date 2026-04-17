@@ -86,7 +86,7 @@ const invitationExamples = [
         <h3 className="font-serif text-sera-ivory text-2xl font-light mb-1">Rooftop Sunset</h3>
         <p className="font-serif text-sera-ivory/60 text-lg italic mb-4">Session</p>
         <p className="font-sans text-sera-ivory/80 text-[10px] font-medium">July 4 · Golden Hour</p>
-        <p className="font-sans text-sera-ivory/50 text-[9px] mt-1">The Standard · East Village</p>
+        <p className="font-sans text-sera-ivory/50 text-[9px] mt-1">Atelier Terrace · East Village</p>
         <div className="mt-5 px-6 py-2 bg-sera-ivory/10 backdrop-blur-sm text-sera-ivory text-[9px] tracking-[0.15em] uppercase">
           I'm In
         </div>
@@ -139,7 +139,7 @@ const invitationExamples = [
           <span className="text-sera-stone text-[8px]">·</span>
           <span className="font-sans text-sera-stone text-[9px]">8 PM</span>
         </div>
-        <p className="font-sans text-sera-stone text-[9px] mt-1">Soho House · NYC</p>
+        <p className="font-sans text-sera-stone text-[9px] mt-1">Atelier No. 9 · NYC</p>
       </div>
     ),
   },
@@ -157,15 +157,15 @@ export default function InvitationShowcase() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <p className="sera-label text-sera-oxblood mb-4">Invitation Design</p>
+          <p className="sera-label text-sera-oxblood mb-4">Visual Direction</p>
           <h2 className="sera-heading text-sera-navy text-3xl md:text-5xl mb-4">
             Design invitations that
             <br />
-            <span className="italic">set the tone</span>
+            <span className="italic">feel authored</span>
           </h2>
           <p className="sera-body text-sera-warm-grey max-w-xl mx-auto">
-            Create digital invitations and graphic flyers with full creative control.
-            From intimate dinners to headline events — every detail reflects your vision.
+            From restrained black-tie notes to energetic late-night posters, every composition
+            is intentionally built to carry your brand language.
           </p>
         </motion.div>
 

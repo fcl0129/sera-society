@@ -12,14 +12,15 @@ export default function CtaSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <p className="sera-label text-sera-oxblood mb-6">For Those Who Host Differently</p>
+          <p className="sera-label text-sera-oxblood mb-6">For Teams Building Distinctive Nights</p>
           <h2 className="sera-heading text-sera-navy text-4xl md:text-5xl mb-6">
-            Ready to elevate
+            Ready to launch
             <br />
-            <span className="italic">your next event?</span>
+            <span className="italic">a sharper era?</span>
           </h2>
           <p className="sera-body text-sera-warm-grey mb-10 max-w-lg mx-auto">
-            Sera is currently available by invitation. Request access to join organizers who are redefining how events are created and experienced.
+            Sera is currently onboarding selected organizers and creative teams. Request access to
+            begin your custom rollout.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button variant="sera" size="xl" asChild>
