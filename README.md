@@ -27,6 +27,15 @@ set owner_notification_email = 'you@yourdomain.com'
 where id = 1;
 ```
 
+Set sender + CTA URL for requester emails (sent from your `@serasociety.com` address):
+
+```sql
+update public.app_settings
+set access_request_from_email = 'noreply@serasociety.com',
+    access_request_platform_url = 'https://serasociety.com/platform'
+where id = 1;
+```
+
 ### 3) Make your user a master admin
 
 In **Auth → Users → your user → app_metadata**, set:
