@@ -141,6 +141,7 @@ export default function ManageEvents() {
   const [guestEmail, setGuestEmail] = useState("");
   const [loadingGuests, setLoadingGuests] = useState(false);
   const [ticketsByGuest, setTicketsByGuest] = useState<Record<string, number>>({});
+  const [latestDeviceTagUrl, setLatestDeviceTagUrl] = useState<string | null>(null);
 
   const [messageText, setMessageText] = useState("");
   const [messages, setMessages] = useState<EventMessageRow[]>([]);
@@ -583,6 +584,7 @@ export default function ManageEvents() {
 
   const handleIssueTicket = async (guestId: string) => {
     if (!selectedEvent) return;
+    setLatestDeviceTagUrl(null);
 
     const payload = {
       event_id: selectedEvent.id,
@@ -592,13 +594,24 @@ export default function ManageEvents() {
       status: "issued",
     };
 
-    const { error } = await supabase.from("drink_tickets").insert(payload);
-    if (error) {
+    const { data, error } = await supabase
+      .from("drink_tickets")
+      .insert(payload)
+      .select("nfc_tag")
+      .single();
+
+    if (error || !data) {
       setErrorMessage("Kunde inte utfärda drinkbiljett.");
       return;
     }
 
     setTicketsByGuest((prev) => ({ ...prev, [guestId]: (prev[guestId] ?? 0) + 1 }));
+    setSuccessMessage("Drinkbiljett utfärdad.");
+
+    if (selectedEvent.enable_nfc && data.nfc_tag) {
+      const deviceTagUrl = `${window.location.origin}/nfc-pass/${encodeURIComponent(data.nfc_tag)}`;
+      setLatestDeviceTagUrl(deviceTagUrl);
+    }
   };
 
   const handleSendHostMessage = async (e: FormEvent) => {
@@ -1006,6 +1019,28 @@ export default function ManageEvents() {
                   <Button type="button" variant="outline" size="sm" onClick={exportAttendance}>Export attendance CSV</Button>
                   <Button type="button" variant="outline" size="sm" onClick={exportTicketUsage}>Export ticket usage CSV</Button>
                 </div>
+
+                {latestDeviceTagUrl && (
+                  <div className="mb-4 p-3 border border-sera-sand/50 bg-sera-ivory/80 text-xs">
+                    <p className="uppercase tracking-wider text-sera-stone mb-2">NFC Device Pass</p>
+                    <p className="text-sera-warm-grey mb-2">
+                      Dela länken med gästen för att använda mobil/surfplatta som digital NFC-tagg.
+                    </p>
+                    <div className="flex flex-wrap gap-2 items-center">
+                      <a
+                        href={latestDeviceTagUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline underline-offset-4 break-all text-sera-oxblood"
+                      >
+                        {latestDeviceTagUrl}
+                      </a>
+                      <Button type="button" variant="outline" size="sm" onClick={() => void navigator.clipboard.writeText(latestDeviceTagUrl)}>
+                        Copy link
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
                 <form onSubmit={handleAddGuest} className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
                   <Input placeholder="Guest name" value={guestName} onChange={(e) => setGuestName(e.target.value)} required />
