@@ -27,6 +27,15 @@ set owner_notification_email = 'you@yourdomain.com'
 where id = 1;
 ```
 
+Set sender + CTA URL for requester emails (sent from your `@serasociety.com` address):
+
+```sql
+update public.app_settings
+set access_request_from_email = 'noreply@serasociety.com',
+    access_request_platform_url = 'https://serasociety.com/platform'
+where id = 1;
+```
+
 ### 3) Make your user a master admin
 
 In **Auth → Users → your user → app_metadata**, set:
@@ -48,7 +57,13 @@ You must ensure the email queue worker/function is deployed and running:
 Also ensure required secrets are set in Supabase Edge Functions:
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
-- `LOVABLE_API_KEY`
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_USER`
+- `SMTP_PASS`
+- `SMTP_FROM`
+- `SMTP_SECURE` (optional, default true for port 465 and false otherwise)
+- `CRON_SECRET` (recommended; required if `process-email-queue` is invoked by pg_cron without JWT)
 
 ### 5) Smoke test
 
@@ -57,6 +72,11 @@ Also ensure required secrets are set in Supabase Edge Functions:
 3. Log in as master and open `/master/access-requests`
 4. Approve/reject a request
 5. Verify email was queued/sent in `public.email_send_log`
+
+If you trigger `process-email-queue` from `pg_cron` + `net.http_post`, include:
+- `x-cron-secret: <CRON_SECRET>`
+
+This avoids JWT-format issues when using non-JWT API keys for scheduled calls.
 
 ## GitHub Actions automation
 
