@@ -1,5 +1,4 @@
 import TierSection from "@/components/TierSection";
-import SectionFade from "@/components/SectionFade";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -17,7 +16,7 @@ export default function Index() {
 
       <HeroSection />
 
-      {/* Tiers nära toppen */}
+      {/* Tier plans */}
       <TierSection />
 
       <FeaturesSection />

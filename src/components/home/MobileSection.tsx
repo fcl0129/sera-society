@@ -13,22 +13,22 @@ export default function MobileSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
           >
-            <p className="sera-label text-sera-moss mb-4">Mobile-First</p>
+            <p className="sera-label text-sera-moss mb-4">Handheld Control</p>
             <h2 className="sera-heading text-sera-navy text-3xl md:text-4xl mb-6">
-              Designed for the hand,
+              Built for movement,
               <br />
-              <span className="italic">not just the screen</span>
+              <span className="italic">not desk-bound software</span>
             </h2>
             <p className="sera-body text-sera-warm-grey mb-6">
-              Guests browse event pages and RSVP on their phones. Organizers manage check-ins from theirs.
-              Bartenders redeem drink tickets with a tap. Every view is built mobile-first.
+              From hosts at the door to bartenders on station, every workflow is tuned for fast
+              interactions, legibility in low light, and confident decision-making in motion.
             </p>
             <div className="space-y-3 mb-8">
               {[
-                "Guest RSVP and event browsing",
-                "Organizer check-in dashboard",
-                "Bartender drink-ticket scanner",
-                "Door staff QR validation",
+                "Guest RSVP & event narratives",
+                "Host-side check-in control",
+                "Bar redemption interface",
+                "Door team verification",
               ].map((item) => (
                 <div key={item} className="flex items-center gap-3">
                   <div className="w-1.5 h-1.5 rounded-full bg-sera-oxblood" />
