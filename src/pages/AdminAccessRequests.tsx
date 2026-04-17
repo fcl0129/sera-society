@@ -86,19 +86,37 @@ export default function AdminAccessRequests() {
     }
 
     const normalizedEmail = tierEmail.trim().toLowerCase();
-    const { error: upsertError } = await supabase.from("user_tier_access").upsert(
-      {
-        email: normalizedEmail,
-        max_tier: tierValue,
-      },
-      { onConflict: "email" },
-    );
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
-    if (upsertError) {
-      setError("Kunde inte spara tier-tilldelning.");
+    const { data: existing, error: findError } = await supabase
+      .from("user_tier_access")
+      .select("id")
+      .eq("email", normalizedEmail)
+      .maybeSingle();
+
+    if (findError) {
+      setError(`Kunde inte läsa befintlig tier-tilldelning: ${findError.message}`);
       return;
     }
 
+    const payload = {
+      email: normalizedEmail,
+      max_tier: tierValue,
+      assigned_by: session?.user.id ?? null,
+    };
+
+    const { error: writeError } = existing?.id
+      ? await supabase.from("user_tier_access").update(payload).eq("id", existing.id)
+      : await supabase.from("user_tier_access").insert(payload);
+
+    if (writeError) {
+      setError(`Kunde inte spara tier-tilldelning: ${writeError.message}`);
+      return;
+    }
+
+    setError(null);
     setTierEmail("");
     await loadTierAssignments();
   };
