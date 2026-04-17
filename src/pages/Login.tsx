@@ -147,6 +147,7 @@ export default function Login() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-sera-sand/70 hover:text-sera-ivory transition-colors"
                     >
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -185,6 +186,7 @@ export default function Login() {
           {view === "forgot" && !forgotSent && (
             <>
               <button
+                type="button"
                 onClick={() => setView("login")}
                 className="flex items-center gap-2 text-sera-sand/70 hover:text-sera-ivory transition-colors text-xs mb-8"
               >
@@ -196,7 +198,7 @@ export default function Login() {
                 <h2 className="sera-subheading text-sera-ivory text-2xl">Reset your password</h2>
                 <div className="mt-4 h-px w-16 bg-sera-sand/30" />
                 <p className="sera-body text-sera-sand/80 text-sm mt-3">
-                  Enter your email address and we'll send you a link to reset your password.
+                  Enter your email address and we&apos;ll send you a link to reset your password.
                 </p>
               </div>
               <form onSubmit={handleForgot} className="space-y-5">
@@ -222,6 +224,7 @@ export default function Login() {
           {view === "forgot" && forgotSent && (
             <>
               <button
+                type="button"
                 onClick={() => {
                   setView("login");
                   setForgotSent(false);
@@ -237,7 +240,7 @@ export default function Login() {
                 </div>
                 <h2 className="sera-subheading text-sera-ivory text-xl mb-3">Check your email</h2>
                 <p className="sera-body text-sera-sand/80 text-sm">
-                  If an account exists for {forgotEmail}, we've sent a password reset link.
+                  If an account exists for {forgotEmail}, we&apos;ve sent a password reset link.
                 </p>
               </div>
             </>
