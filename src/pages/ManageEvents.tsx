@@ -123,9 +123,9 @@ export default function ManageEvents() {
     setErrorMessage(null);
 
     const [{ data: guestsData, error: guestsError }, { data: checkinsData, error: checkinsError }, { data: ticketData, error: ticketError }] = await Promise.all([
-      supabase.from("guests").select("id,full_name,email,rsvp_status").eq("event_id", eventId).order("created_at", { ascending: false }),
-      supabase.from("checkins").select("id,guest_id").eq("event_id", eventId),
-      supabase.from("drink_tickets").select("id,guest_id,status").eq("event_id", eventId).neq("status", "void"),
+      (supabase as any).from("guests").select("id,full_name,email,rsvp_status").eq("event_id", eventId).order("created_at", { ascending: false }),
+      (supabase as any).from("checkins").select("id,guest_id").eq("event_id", eventId),
+      (supabase as any).from("drink_tickets").select("id,guest_id,status").eq("event_id", eventId).neq("status", "void"),
     ]);
 
     if (guestsError || checkinsError || ticketError) {
@@ -178,7 +178,7 @@ export default function ManageEvents() {
     const startsAtIso = new Date(startsAt).toISOString();
     const endsAtIso = endsAt ? new Date(endsAt).toISOString() : null;
 
-    const { error } = await supabase.from("events").insert({
+    const { error } = await (supabase as any).from("events").insert({
       organizer_id: user.id,
       title,
       venue: venue || null,
@@ -207,7 +207,7 @@ export default function ManageEvents() {
   const handleDeleteEvent = async (eventId: string) => {
     if (!window.confirm("Är du säker på att du vill radera detta event?")) return;
 
-    const { error } = await supabase.from("events").delete().eq("id", eventId);
+    const { error } = await (supabase as any).from("events").delete().eq("id", eventId);
     if (error) {
       setErrorMessage("Kunde inte radera event.");
       return;
@@ -225,7 +225,7 @@ export default function ManageEvents() {
 
   const handlePublishToggle = async (event: EventRow) => {
     const nextStatus = event.status === "published" ? "draft" : "published";
-    const { error } = await supabase.from("events").update({ status: nextStatus }).eq("id", event.id);
+    const { error } = await (supabase as any).from("events").update({ status: nextStatus }).eq("id", event.id);
 
     if (error) {
       setErrorMessage("Kunde inte uppdatera status.");
@@ -239,7 +239,7 @@ export default function ManageEvents() {
   const handleTicketModeToggle = async (mode: "qr" | "nfc", value: boolean) => {
     if (!selectedEventId) return;
     const payload = mode === "qr" ? { enable_qr: value } : { enable_nfc: value };
-    const { error } = await supabase.from("events").update(payload).eq("id", selectedEventId);
+    const { error } = await (supabase as any).from("events").update(payload).eq("id", selectedEventId);
 
     if (error) {
       setErrorMessage("Kunde inte uppdatera biljettläge.");
@@ -263,7 +263,7 @@ export default function ManageEvents() {
     e.preventDefault();
     if (!selectedEventId) return;
 
-    const { error } = await supabase.from("guests").insert({
+    const { error } = await (supabase as any).from("guests").insert({
       event_id: selectedEventId,
       full_name: guestName,
       email: guestEmail || null,
@@ -282,7 +282,7 @@ export default function ManageEvents() {
   };
 
   const handleRsvpChange = async (guestId: string, status: RsvpStatus) => {
-    const { error } = await supabase.from("guests").update({ rsvp_status: status }).eq("id", guestId);
+    const { error } = await (supabase as any).from("guests").update({ rsvp_status: status }).eq("id", guestId);
     if (error) {
       setErrorMessage("Kunde inte uppdatera RSVP.");
       return;
@@ -297,7 +297,7 @@ export default function ManageEvents() {
     const existingCheckinId = checkinsByGuest[guestId];
 
     if (existingCheckinId) {
-      const { error } = await supabase.from("checkins").delete().eq("id", existingCheckinId);
+      const { error } = await (supabase as any).from("checkins").delete().eq("id", existingCheckinId);
       if (error) {
         setErrorMessage("Kunde inte ångra check-in.");
         return;
@@ -346,7 +346,7 @@ export default function ManageEvents() {
       status: "issued",
     };
 
-    const { error } = await supabase.from("drink_tickets").insert(payload);
+    const { error } = await (supabase as any).from("drink_tickets").insert(payload);
     if (error) {
       setErrorMessage("Kunde inte utfärda drinkbiljett.");
       return;

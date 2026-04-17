@@ -66,8 +66,8 @@ export default function CheckIn() {
     if (!eventId) return;
 
     const [{ data: guestsData, error: guestsError }, { data: checkinsData, error: checkinsError }] = await Promise.all([
-      supabase.from("guests").select("id,full_name,rsvp_status").eq("event_id", eventId).order("full_name"),
-      supabase.from("checkins").select("id,guest_id").eq("event_id", eventId),
+      (supabase as any).from("guests").select("id,full_name,rsvp_status").eq("event_id", eventId).order("full_name"),
+      (supabase as any).from("checkins").select("id,guest_id").eq("event_id", eventId),
     ]);
 
     if (guestsError || checkinsError) {
@@ -96,7 +96,7 @@ export default function CheckIn() {
 
     const existing = checkins[guestId];
     if (existing) {
-      const { error } = await supabase.from("checkins").delete().eq("id", existing);
+      const { error } = await (supabase as any).from("checkins").delete().eq("id", existing);
       if (error) {
         setErrorMessage("Kunde inte ångra check-in.");
         return;

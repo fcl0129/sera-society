@@ -81,13 +81,13 @@ export default function Dashboard() {
 
       if (eventIds.length > 0) {
         const [{ count: totalGuestsCount }, { count: pendingGuestsCount }, { count: checkinsCount }] = await Promise.all([
-          supabase.from("guests").select("id", { count: "exact", head: true }).in("event_id", eventIds),
+          (supabase as any).from("guests").select("id", { count: "exact", head: true }).in("event_id", eventIds),
           supabase
             .from("guests")
             .select("id", { count: "exact", head: true })
             .in("event_id", eventIds)
             .eq("rsvp_status", "pending"),
-          supabase.from("checkins").select("id", { count: "exact", head: true }).in("event_id", eventIds),
+          (supabase as any).from("checkins").select("id", { count: "exact", head: true }).in("event_id", eventIds),
         ]);
 
         guestCount = totalGuestsCount ?? 0;
