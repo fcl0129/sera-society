@@ -8,7 +8,7 @@ import InviteCarouselSection from "@/components/home/InviteCarouselSection";
 import OperationsShowcase from "@/components/home/OperationsShowcase";
 import MobileSection from "@/components/home/MobileSection";
 import CtaSection from "@/components/home/CtaSection";
-import { DemoOne } from "@/components/ui/demo";
+import ScrollStorySection from "@/components/home/ScrollStorySection";
 
 export default function Index() {
   return (
@@ -17,7 +17,7 @@ export default function Index() {
 
       <HeroSection />
 
-      <DemoOne />
+      <ScrollStorySection />
 
       {/* Tier plans */}
       <TierSection />
