@@ -1,8 +1,10 @@
 import { useEffect, useId, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+
+import { Button } from "@/components/ui/button";
+import { Glass } from "@/components/ui/glass";
 
 const navLinks = [
   { label: "Platform", href: "/platform" },
@@ -15,7 +17,6 @@ const navLinks = [
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
-  const isHome = location.pathname === "/";
   const shouldReduceMotion = useReducedMotion();
   const mobileMenuId = useId();
   const mobileMenuAnimation = shouldReduceMotion
@@ -27,14 +28,7 @@ export default function Navbar() {
   }, [location.pathname]);
 
   return (
-    <nav
-      aria-label="Primary"
-      className={`fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300 ${
-        isHome
-          ? "bg-sera-deep-navy/70 border-sera-ivory/10 backdrop-blur-xl"
-          : "bg-sera-ivory/95 border-sera-navy/10 backdrop-blur-xl"
-      }`}
-    >
+    <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 md:px-6 md:pt-6">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-sera-accent focus:px-3 focus:py-2 focus:text-sera-ink"
@@ -42,35 +36,22 @@ export default function Navbar() {
         Skip to main content
       </a>
 
-      <div className="max-w-7xl mx-auto px-6 pt-2 pb-4">
-        <div
-          className={`hidden md:flex items-center justify-between mb-3 text-[10px] tracking-[0.16em] uppercase ${
-            isHome ? "text-sera-sand/70" : "text-sera-warm-grey"
-          }`}
-        >
-          <span>Curated Event Infrastructure</span>
-          <span>New York · London · Paris</span>
-        </div>
-
-        <div className="flex items-center justify-between gap-6">
-          <Link to="/" className="flex flex-col leading-none">
-            <span
-              className={`font-serif text-2xl font-light tracking-[0.04em] ${
-                isHome ? "text-sera-ivory" : "text-sera-navy"
-              }`}
-            >
+      <Glass
+        strength="strong"
+        glow
+        className="mx-auto w-full max-w-7xl border-white/20 bg-sera-deep-navy/65 px-4 py-3 md:px-6"
+      >
+        <div className="flex items-center justify-between gap-4">
+          <Link to="/" className="flex min-w-0 flex-col leading-none">
+            <span className="truncate font-serif text-xl font-light tracking-[0.03em] text-sera-ivory md:text-2xl">
               Sera Society
             </span>
-            <span
-              className={`text-[10px] tracking-[0.18em] uppercase mt-1 ${
-                isHome ? "text-sera-sand/70" : "text-sera-warm-grey"
-              }`}
-            >
-              Edition 01
+            <span className="mt-1 text-[10px] uppercase tracking-[0.18em] text-sera-sand/75">
+              Event Operations System
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden items-center gap-7 md:flex">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.href;
 
@@ -80,9 +61,7 @@ export default function Navbar() {
                   to={link.href}
                   aria-current={isActive ? "page" : undefined}
                   className={`sera-label transition-colors ${
-                    isHome
-                      ? "text-sera-sand/85 hover:text-sera-ivory"
-                      : "text-sera-navy/70 hover:text-sera-navy"
+                    isActive ? "text-sera-ivory" : "text-sera-sand/80 hover:text-sera-ivory"
                   }`}
                 >
                   {link.label}
@@ -91,9 +70,11 @@ export default function Navbar() {
             })}
           </div>
 
-          <div className="hidden md:flex items-center gap-3">
-            <Button variant={isHome ? "sera-ivory" : "sera-outline"} size="sm" asChild>
-              <Link to="/login">Log in</Link>
+          <div className="hidden items-center gap-3 md:flex">
+            <Button variant="sera-outline" size="sm" asChild>
+              <Link to="/login" className="border-sera-ivory/60 text-sera-ivory hover:bg-sera-ivory hover:text-sera-navy">
+                Log in
+              </Link>
             </Button>
             <Button variant="sera-accent" size="sm" asChild>
               <Link to="/request-access">Request Access</Link>
@@ -103,67 +84,63 @@ export default function Navbar() {
           <button
             type="button"
             onClick={() => setOpen((prev) => !prev)}
-            className={`md:hidden ${isHome ? "text-sera-ivory" : "text-sera-navy"}`}
+            className="text-sera-ivory md:hidden"
             aria-label="Toggle menu"
             aria-expanded={open}
             aria-controls={mobileMenuId}
           >
-            {open ? <X size={24} /> : <Menu size={24} />}
+            {open ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
-      </div>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            id={mobileMenuId}
-            initial={shouldReduceMotion ? false : mobileMenuAnimation}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={mobileMenuAnimation}
-            className={`md:hidden border-t overflow-hidden ${
-              isHome ? "bg-sera-deep-navy border-sera-ink" : "bg-sera-ivory border-sera-navy/10"
-            }`}
-          >
-            <div className="px-6 py-6 flex flex-col gap-4">
-              {navLinks.map((link) => {
-                const isActive = location.pathname === link.href;
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              id={mobileMenuId}
+              initial={shouldReduceMotion ? false : mobileMenuAnimation}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={mobileMenuAnimation}
+              className="mt-4 overflow-hidden border-t border-white/15"
+            >
+              <div className="flex flex-col gap-3 pt-4">
+                {navLinks.map((link) => {
+                  const isActive = location.pathname === link.href;
 
-                return (
-                  <Link
-                    key={link.href}
-                    to={link.href}
-                    onClick={() => setOpen(false)}
-                    aria-current={isActive ? "page" : undefined}
-                    className={`sera-label transition-colors py-2 ${
-                      isHome
-                        ? "text-sera-sand hover:text-sera-ivory"
-                        : "text-sera-warm-grey hover:text-sera-navy"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
-              <div
-                className={`pt-4 border-t flex flex-col gap-3 ${
-                  isHome ? "border-sera-ink" : "border-sera-navy/10"
-                }`}
-              >
-                <Button variant={isHome ? "sera-ivory" : "sera-outline"} asChild>
-                  <Link to="/login" onClick={() => setOpen(false)}>
-                    Log in
-                  </Link>
-                </Button>
-                <Button variant="sera-accent" asChild>
-                  <Link to="/request-access" onClick={() => setOpen(false)}>
-                    Request Access
-                  </Link>
-                </Button>
+                  return (
+                    <Link
+                      key={link.href}
+                      to={link.href}
+                      onClick={() => setOpen(false)}
+                      aria-current={isActive ? "page" : undefined}
+                      className={`sera-label py-2 transition-colors ${
+                        isActive ? "text-sera-ivory" : "text-sera-sand hover:text-sera-ivory"
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  );
+                })}
+                <div className="mt-2 flex flex-col gap-3 border-t border-white/10 pt-4">
+                  <Button variant="sera-outline" asChild>
+                    <Link
+                      to="/login"
+                      onClick={() => setOpen(false)}
+                      className="border-sera-ivory/60 text-sera-ivory hover:bg-sera-ivory hover:text-sera-navy"
+                    >
+                      Log in
+                    </Link>
+                  </Button>
+                  <Button variant="sera-accent" asChild>
+                    <Link to="/request-access" onClick={() => setOpen(false)}>
+                      Request Access
+                    </Link>
+                  </Button>
+                </div>
               </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </Glass>
+    </header>
   );
 }
