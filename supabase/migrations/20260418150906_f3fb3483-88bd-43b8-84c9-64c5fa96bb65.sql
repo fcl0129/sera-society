@@ -420,10 +420,25 @@ BEGIN
     SELECT 1
     FROM information_schema.columns
     WHERE table_schema = 'public' AND table_name = 'events' AND column_name = 'id'
+  ) AND EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'event_guests' AND column_name = 'event_id'
+  ) AND EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'event_guests' AND column_name = 'guest_id'
   ) THEN
     CREATE POLICY "Events: guests view own"
       ON public.events FOR SELECT TO authenticated
-      USING (EXISTS (SELECT 1 FROM public.event_guests eg WHERE eg.event_id = id AND eg.guest_id = auth.uid()));
+      USING (
+        EXISTS (
+          SELECT 1
+          FROM public.event_guests eg
+          WHERE eg.event_id = public.events.id
+            AND eg.guest_id = auth.uid()
+        )
+      );
   END IF;
 END $$;
 
@@ -535,10 +550,25 @@ BEGIN
     SELECT 1
     FROM information_schema.columns
     WHERE table_schema = 'public' AND table_name = 'nfc_tags' AND column_name = 'event_id'
+  ) AND EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'event_guests' AND column_name = 'event_id'
+  ) AND EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'event_guests' AND column_name = 'guest_id'
   ) THEN
     CREATE POLICY "Tags: guest view"
       ON public.nfc_tags FOR SELECT TO authenticated
-      USING (active AND EXISTS (SELECT 1 FROM public.event_guests eg WHERE eg.event_id = nfc_tags.event_id AND eg.guest_id = auth.uid()));
+      USING (
+        active AND EXISTS (
+          SELECT 1
+          FROM public.event_guests eg
+          WHERE eg.event_id = public.nfc_tags.event_id
+            AND eg.guest_id = auth.uid()
+        )
+      );
   END IF;
 END $$;
 
