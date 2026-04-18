@@ -31,20 +31,20 @@ export default function InvitationShowcase() {
   return (
     <section className="sera-section px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
-        <div className="mx-auto mb-10 max-w-3xl text-center">
+        <div className="mx-auto mb-12 max-w-3xl text-center md:mb-14">
           <p className="sera-label mb-4 text-sera-oxblood">Invitation system</p>
           <h2 className="sera-heading text-3xl text-sera-ivory sm:text-4xl">Invitation outputs generated inside the Sera product workflow</h2>
-          <p className="sera-body mt-4 text-sm text-sera-mist/80 sm:text-base">
+          <p className="sera-body mt-4 text-sm text-sera-mist/90 sm:text-base">
             Every style below is a production-ready output from Sera templates, so pre-event communication
             stays aligned with the same system used for RSVP, check-in, and redemption.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
           {invitationExamples.map((item, i) => (
             <motion.article
               key={item.id}
-              className="group overflow-hidden rounded-2xl border border-sera-mist/25 bg-sera-navy/75 shadow-[0_24px_56px_-40px_rgba(6,10,18,0.95)] transition-all duration-300 hover:border-sera-mist/40"
+              className="group overflow-hidden rounded-2xl border border-sera-mist/30 bg-sera-navy/80 shadow-[0_24px_56px_-40px_rgba(6,10,18,0.95)] transition-all duration-300 hover:border-sera-mist/45"
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -53,14 +53,14 @@ export default function InvitationShowcase() {
               <div className="relative">
                 <img src={item.src} alt={item.label} className="aspect-[3/4] w-full object-cover" loading="lazy" />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-sera-charcoal/90 via-sera-charcoal/15 to-transparent" />
-                <span className="absolute left-4 top-4 inline-flex items-center border border-sera-mist/35 bg-sera-charcoal/80 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.16em] text-sera-mist/95">
+                <span className="absolute left-4 top-4 inline-flex items-center border border-sera-mist/40 bg-sera-charcoal/88 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.16em] text-sera-mist/95">
                   {item.outputType}
                 </span>
               </div>
               <div className="p-5">
                 <p className="sera-label text-sera-mist/70">{item.question}</p>
                 <h3 className="sera-subheading mt-2 text-xl text-sera-ivory">{item.label}</h3>
-                <p className="sera-body mt-2 text-sm text-sera-mist/80">{item.detail}</p>
+                <p className="sera-body mt-2 text-sm text-sera-mist/85">{item.detail}</p>
               </div>
             </motion.article>
           ))}

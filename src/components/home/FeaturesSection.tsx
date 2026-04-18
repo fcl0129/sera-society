@@ -44,17 +44,17 @@ export default function FeaturesSection() {
   return (
     <section className="sera-section px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+        <div className="mb-12 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
           <div>
-            <p className="sera-label mb-4 text-sera-stone">How it works</p>
+            <p className="sera-label mb-4 text-sera-stone/90">How it works</p>
             <h2 className="sera-heading text-3xl text-sera-navy sm:text-4xl">A single product, not a stack of tools</h2>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             {metrics.map((metric) => (
-              <div key={metric.label} className="rounded-xl border border-white/45 bg-white/65 p-3 text-center backdrop-blur-sm sm:p-4">
-                <p className="text-xs uppercase tracking-[0.15em] text-sera-warm-grey">{metric.label}</p>
-                <p className="mt-2 text-sm font-medium text-sera-navy">{metric.value}</p>
+              <div key={metric.label} className="rounded-xl border border-white/55 bg-white/72 p-3 text-center shadow-[0_14px_34px_-28px_rgba(8,14,28,0.7)] sm:p-4">
+                <p className="text-xs uppercase tracking-[0.15em] text-sera-stone">{metric.label}</p>
+                <p className="mt-2 text-sm font-medium text-sera-navy/95">{metric.value}</p>
               </div>
             ))}
           </div>
@@ -64,7 +64,7 @@ export default function FeaturesSection() {
           {features.map((feature, i) => (
             <motion.article
               key={feature.title}
-              className="rounded-2xl border border-sera-sand/75 bg-sera-ivory/75 p-5 sm:p-6"
+              className="rounded-2xl border border-sera-sand/70 bg-sera-ivory/82 p-5 shadow-[0_18px_42px_-32px_rgba(8,14,28,0.78)] sm:p-6"
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -72,7 +72,7 @@ export default function FeaturesSection() {
             >
               <feature.icon className="mb-4 h-5 w-5 text-sera-oxblood" strokeWidth={1.7} />
               <h3 className="sera-subheading text-xl text-sera-navy">{feature.title}</h3>
-              <p className="sera-body mt-2 text-sm text-sera-warm-grey">{feature.desc}</p>
+              <p className="sera-body mt-2 text-sm text-sera-ink/80">{feature.desc}</p>
             </motion.article>
           ))}
         </div>
