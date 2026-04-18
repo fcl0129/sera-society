@@ -34,10 +34,33 @@ export function useAuthState(): AuthState {
         currentSession.user.email?.split("@")[0] ??
         "Sera Member";
 
-      await (supabase as any).from("profiles").upsert({
+      const metadataRole =
+        currentSession.user.app_metadata?.role === "host_admin" ||
+        currentSession.user.app_metadata?.role === "bartender" ||
+        currentSession.user.app_metadata?.role === "guest"
+          ? (currentSession.user.app_metadata.role as AppRole)
+          : currentSession.user.user_metadata?.role === "host_admin" ||
+              currentSession.user.user_metadata?.role === "bartender" ||
+              currentSession.user.user_metadata?.role === "guest"
+            ? (currentSession.user.user_metadata.role as AppRole)
+            : undefined;
+
+      const profilePayload: {
+        id: string;
+        full_name: string;
+        email: string | null;
+        role?: AppRole;
+      } = {
         id: currentSession.user.id,
         full_name: fallbackName,
-      });
+        email: currentSession.user.email ?? null,
+      };
+
+      if (metadataRole) {
+        profilePayload.role = metadataRole;
+      }
+
+      await (supabase as any).from("profiles").upsert(profilePayload);
 
       const { data } = await supabase
         .from("profiles")
