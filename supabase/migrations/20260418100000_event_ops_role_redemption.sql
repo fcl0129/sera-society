@@ -48,36 +48,31 @@ BEGIN
     WHERE table_schema = 'public'
       AND table_name = 'drink_tickets'
   ) THEN
-    -- Drop old constraint if present
     EXECUTE 'ALTER TABLE public.drink_tickets DROP CONSTRAINT IF EXISTS drink_tickets_status_check';
 
-    -- Allow both legacy and new values during transition
     EXECUTE $sql$
       ALTER TABLE public.drink_tickets
       ADD CONSTRAINT drink_tickets_status_check
-      CHECK (status IN (''issued'', ''active'', ''redeemed'', ''revoked''))
+      CHECK (status IN ('issued', 'active', 'redeemed', 'revoked'))
     $sql$;
 
-    -- Migrate legacy rows
     EXECUTE $sql$
       UPDATE public.drink_tickets
-      SET status = ''active''
-      WHERE status = ''issued''
+      SET status = 'active'
+      WHERE status = 'issued'
     $sql$;
 
-    -- Tighten to final allowed values
     EXECUTE 'ALTER TABLE public.drink_tickets DROP CONSTRAINT IF EXISTS drink_tickets_status_check';
 
     EXECUTE $sql$
       ALTER TABLE public.drink_tickets
       ADD CONSTRAINT drink_tickets_status_check
-      CHECK (status IN (''active'', ''redeemed'', ''revoked''))
+      CHECK (status IN ('active', 'redeemed', 'revoked'))
     $sql$;
 
-    -- Set default for new rows
     EXECUTE $sql$
       ALTER TABLE public.drink_tickets
-      ALTER COLUMN status SET DEFAULT ''active''
+      ALTER COLUMN status SET DEFAULT 'active'
     $sql$;
   END IF;
 END
