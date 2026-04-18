@@ -1,11 +1,19 @@
 -- Tier feature expansion (Essential, Social, Host, Occasions)
 
-ALTER TABLE public.events
-  ADD COLUMN IF NOT EXISTS tier TEXT NOT NULL DEFAULT 'essential' CHECK (tier IN ('essential', 'social', 'host', 'occasions')),
-  ADD COLUMN IF NOT EXISTS reminder_days INT[] NOT NULL DEFAULT ARRAY[3],
-  ADD COLUMN IF NOT EXISTS rsvp_cutoff_at TIMESTAMPTZ,
-  ADD COLUMN IF NOT EXISTS contact_host_email TEXT,
-  ADD COLUMN IF NOT EXISTS test_mode BOOLEAN NOT NULL DEFAULT false;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'events'
+  ) THEN
+    ALTER TABLE public.events
+      ADD COLUMN IF NOT EXISTS tier TEXT NOT NULL DEFAULT 'essential' CHECK (tier IN ('essential', 'social', 'host', 'occasions')),
+      ADD COLUMN IF NOT EXISTS reminder_days INT[] NOT NULL DEFAULT ARRAY[3],
+      ADD COLUMN IF NOT EXISTS rsvp_cutoff_at TIMESTAMPTZ,
+      ADD COLUMN IF NOT EXISTS contact_host_email TEXT,
+      ADD COLUMN IF NOT EXISTS test_mode BOOLEAN NOT NULL DEFAULT false;
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS public.event_messages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

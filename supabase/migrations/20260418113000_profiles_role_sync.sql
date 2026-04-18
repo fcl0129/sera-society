@@ -22,16 +22,10 @@ BEGIN
     SET role = 'guest'
     WHERE role IS NULL OR btrim(role) = '';
 
-    -- Only add the constraint if it is not already present
-    IF NOT EXISTS (
-      SELECT 1
-      FROM pg_constraint
-      WHERE conname = 'profiles_role_check'
-    ) THEN
-      ALTER TABLE public.profiles
-        ADD CONSTRAINT profiles_role_check
-        CHECK (role IN ('host_admin', 'bartender', 'guest'));
-    END IF;
+    ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_role_check;
+    ALTER TABLE public.profiles
+      ADD CONSTRAINT profiles_role_check
+      CHECK (role IN ('host_admin', 'bartender', 'guest'));
   END IF;
 END
 $$;

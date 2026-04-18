@@ -15,19 +15,24 @@ EXCEPTION WHEN duplicate_object THEN
   NULL;
 END $$;
 
-ALTER TABLE public.profiles
-  ADD COLUMN IF NOT EXISTS display_name TEXT,
-  ADD COLUMN IF NOT EXISTS email TEXT;
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='profiles') THEN
+    ALTER TABLE public.profiles
+      ADD COLUMN IF NOT EXISTS display_name TEXT,
+      ADD COLUMN IF NOT EXISTS email TEXT;
 
-UPDATE public.profiles
-SET display_name = COALESCE(display_name, full_name)
-WHERE display_name IS NULL;
+    UPDATE public.profiles
+    SET display_name = COALESCE(display_name, full_name)
+    WHERE display_name IS NULL;
 
-UPDATE public.profiles
-SET email = COALESCE(email, lower(auth.users.email))
-FROM auth.users
-WHERE auth.users.id = profiles.id
-  AND profiles.email IS NULL;
+    UPDATE public.profiles
+    SET email = COALESCE(email, lower(auth.users.email))
+    FROM auth.users
+    WHERE auth.users.id = profiles.id
+      AND profiles.email IS NULL;
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS public.staff_assignments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -43,6 +48,7 @@ CREATE INDEX IF NOT EXISTS staff_assignments_user_idx ON public.staff_assignment
 ALTER TABLE public.staff_assignments ENABLE ROW LEVEL SECURITY;
 
 DO $$ BEGIN
+  DROP POLICY IF EXISTS "Staff assignments readable by organizer or assigned user" ON public.staff_assignments;
   CREATE POLICY "Staff assignments readable by organizer or assigned user"
     ON public.staff_assignments FOR SELECT
     TO authenticated
@@ -57,6 +63,7 @@ EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
 DO $$ BEGIN
+  DROP POLICY IF EXISTS "Staff assignments managed by organizer" ON public.staff_assignments;
   CREATE POLICY "Staff assignments managed by organizer"
     ON public.staff_assignments FOR ALL
     TO authenticated
@@ -77,14 +84,19 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
-ALTER TABLE public.events
-  ADD COLUMN IF NOT EXISTS slug TEXT;
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='events') THEN
+    ALTER TABLE public.events
+      ADD COLUMN IF NOT EXISTS slug TEXT;
 
-UPDATE public.events
-SET slug = COALESCE(slug, regexp_replace(lower(title), '[^a-z0-9]+', '-', 'g') || '-' || left(id::text, 8))
-WHERE slug IS NULL;
+    UPDATE public.events
+    SET slug = COALESCE(slug, regexp_replace(lower(title), '[^a-z0-9]+', '-', 'g') || '-' || left(id::text, 8))
+    WHERE slug IS NULL;
 
-CREATE UNIQUE INDEX IF NOT EXISTS events_slug_idx ON public.events(slug);
+    CREATE UNIQUE INDEX IF NOT EXISTS events_slug_idx ON public.events(slug);
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS public.redemption_points (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -101,6 +113,7 @@ CREATE INDEX IF NOT EXISTS redemption_points_event_idx ON public.redemption_poin
 ALTER TABLE public.redemption_points ENABLE ROW LEVEL SECURITY;
 
 DO $$ BEGIN
+  DROP POLICY IF EXISTS "Redemption points organizer manage" ON public.redemption_points;
   CREATE POLICY "Redemption points organizer manage"
     ON public.redemption_points FOR ALL
     TO authenticated
@@ -122,6 +135,7 @@ EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
 DO $$ BEGIN
+  DROP POLICY IF EXISTS "Redemption points staff read" ON public.redemption_points;
   CREATE POLICY "Redemption points staff read"
     ON public.redemption_points FOR SELECT
     TO authenticated
@@ -165,6 +179,7 @@ CREATE TRIGGER tickets_touch BEFORE UPDATE ON public.tickets
   FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
 
 DO $$ BEGIN
+  DROP POLICY IF EXISTS "Tickets guest read own" ON public.tickets;
   CREATE POLICY "Tickets guest read own"
     ON public.tickets FOR SELECT
     TO authenticated
@@ -173,6 +188,7 @@ EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
 DO $$ BEGIN
+  DROP POLICY IF EXISTS "Tickets organizer and staff read" ON public.tickets;
   CREATE POLICY "Tickets organizer and staff read"
     ON public.tickets FOR SELECT
     TO authenticated
@@ -185,6 +201,7 @@ EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
 DO $$ BEGIN
+  DROP POLICY IF EXISTS "Tickets organizer manage" ON public.tickets;
   CREATE POLICY "Tickets organizer manage"
     ON public.tickets FOR ALL
     TO authenticated
@@ -214,6 +231,7 @@ CREATE INDEX IF NOT EXISTS redemptions_event_created_idx ON public.redemptions(e
 CREATE INDEX IF NOT EXISTS redemptions_ticket_idx ON public.redemptions(ticket_id);
 
 DO $$ BEGIN
+  DROP POLICY IF EXISTS "Redemptions organizer and staff read" ON public.redemptions;
   CREATE POLICY "Redemptions organizer and staff read"
     ON public.redemptions FOR SELECT
     TO authenticated
