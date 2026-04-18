@@ -298,9 +298,58 @@ CREATE TABLE IF NOT EXISTS public.redemptions (
   metadata JSONB NOT NULL DEFAULT '{}'::jsonb
 );
 
-ALTER TABLE public.redemptions ENABLE ROW LEVEL SECURITY;
-CREATE INDEX IF NOT EXISTS redemptions_event_created_idx ON public.redemptions(event_id, created_at DESC);
-CREATE INDEX IF NOT EXISTS redemptions_ticket_idx ON public.redemptions(ticket_id);
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='redemptions') THEN
+    ALTER TABLE public.redemptions ADD COLUMN IF NOT EXISTS event_id UUID REFERENCES public.events(id) ON DELETE SET NULL;
+    ALTER TABLE public.redemptions ADD COLUMN IF NOT EXISTS redemption_point_id UUID REFERENCES public.redemption_points(id) ON DELETE SET NULL;
+    ALTER TABLE public.redemptions ADD COLUMN IF NOT EXISTS redeemed_by_user_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL;
+    ALTER TABLE public.redemptions ADD COLUMN IF NOT EXISTS method TEXT;
+    ALTER TABLE public.redemptions ADD COLUMN IF NOT EXISTS result TEXT;
+    ALTER TABLE public.redemptions ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT now();
+    ALTER TABLE public.redemptions ADD COLUMN IF NOT EXISTS metadata JSONB NOT NULL DEFAULT '{}'::jsonb;
+
+    IF EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema='public' AND table_name='redemptions' AND column_name='method'
+    ) THEN
+      ALTER TABLE public.redemptions DROP CONSTRAINT IF EXISTS redemptions_method_check;
+      ALTER TABLE public.redemptions ADD CONSTRAINT redemptions_method_check
+        CHECK (method IN ('qr', 'nfc'));
+    END IF;
+
+    IF EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema='public' AND table_name='redemptions' AND column_name='result'
+    ) THEN
+      ALTER TABLE public.redemptions DROP CONSTRAINT IF EXISTS redemptions_result_check;
+      ALTER TABLE public.redemptions ADD CONSTRAINT redemptions_result_check
+        CHECK (result IN ('success', 'already_redeemed', 'invalid', 'blocked'));
+    END IF;
+
+    ALTER TABLE public.redemptions ENABLE ROW LEVEL SECURITY;
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='redemptions' AND column_name='event_id'
+  ) AND EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='redemptions' AND column_name='created_at'
+  ) THEN
+    CREATE INDEX IF NOT EXISTS redemptions_event_created_idx ON public.redemptions(event_id, created_at DESC);
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='redemptions' AND column_name='ticket_id'
+  ) THEN
+    CREATE INDEX IF NOT EXISTS redemptions_ticket_idx ON public.redemptions(ticket_id);
+  END IF;
+END $$;
 
 DO $$ BEGIN
   DROP POLICY IF EXISTS "Redemptions organizer and staff read" ON public.redemptions;
