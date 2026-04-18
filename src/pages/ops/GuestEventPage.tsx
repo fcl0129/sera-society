@@ -51,7 +51,8 @@ export default function GuestEventPage() {
     return {
       available: tickets.filter((ticket) => ticket.status === "active").length,
       redeemed: tickets.filter((ticket) => ticket.status === "redeemed").length,
-      hasAccess: tickets.some((ticket) => ticket.status === "active"),
+      hasAnyTickets: tickets.length > 0,
+      hasActiveAccess: tickets.some((ticket) => ticket.status === "active"),
     };
   }, [data?.tickets]);
 
@@ -64,82 +65,83 @@ export default function GuestEventPage() {
   return (
     <div className="min-h-screen bg-sera-surface-light">
       <main className="mx-auto max-w-3xl px-4 py-8 md:px-8 md:py-12">
-        <section className="rounded-3xl border border-sera-sand/40 bg-gradient-to-b from-sera-ivory to-sera-ivory/80 p-7 md:p-10 shadow-[0_10px_30px_rgba(25,34,51,0.06)]">
-          <p className="sera-label mb-4 text-sera-stone">Your evening</p>
+        <section className="rounded-3xl border border-sera-sand/35 bg-gradient-to-b from-sera-ivory to-sera-ivory/85 p-7 md:p-10 shadow-[0_12px_32px_rgba(25,34,51,0.06)]">
+          <p className="sera-label mb-4 text-sera-stone">Guest access</p>
 
           {data?.event ? (
             <>
               <h1 className="font-serif text-3xl leading-tight text-sera-navy md:text-5xl">{data.event.title}</h1>
               <p className="mt-4 max-w-xl text-sera-warm-grey">
-                Welcome, {guestFirstName}. Your invitation details are prepared below for a smooth arrival.
+                Welcome, {guestFirstName}. Your evening details are curated here for a seamless arrival.
               </p>
               <div className="mt-6 space-y-2 border-t border-sera-sand/40 pt-5 text-sm text-sera-warm-grey md:text-base">
                 <p>{eventDateTimeFormatter.format(new Date(data.event.starts_at))}</p>
-                <p>{data.event.venue ?? "Venue details will be shared with your host release."}</p>
+                <p>{data.event.venue ?? "Venue details will be shared by your host shortly."}</p>
               </div>
             </>
           ) : (
             <>
-              <h1 className="font-serif text-3xl leading-tight text-sera-navy md:text-5xl">Your invitation is being prepared</h1>
+              <h1 className="font-serif text-3xl leading-tight text-sera-navy md:text-5xl">Your evening is being prepared</h1>
               <p className="mt-4 max-w-xl text-sera-warm-grey">
-                Event details will appear here as soon as your host releases your evening access.
+                Your host will release event details here once your access is ready.
               </p>
             </>
           )}
         </section>
 
         <section className="mt-8 rounded-2xl border border-sera-sand/40 bg-sera-ivory/95 p-6 md:p-8">
-          <div className="flex items-end justify-between gap-4 border-b border-sera-sand/40 pb-4">
+          <div className="flex flex-wrap items-start justify-between gap-4 border-b border-sera-sand/35 pb-5">
             <div>
               <p className="sera-label text-sera-stone">Your access</p>
-              <h2 className="mt-1 font-serif text-2xl text-sera-navy">Drink service</h2>
+              <h2 className="mt-1 font-serif text-2xl text-sera-navy">Invitation status</h2>
             </div>
-            {!isLoading && data?.event && (
-              <p className="text-right text-sm text-sera-warm-grey">
-                {ticketStats.available > 0
-                  ? `${ticketStats.available} ready for the evening`
-                  : "Awaiting release"}
-              </p>
+            {!isLoading && (
+              <Badge variant="outline" className="rounded-full border-sera-sand/60 bg-sera-ivory px-3 py-1 text-sera-navy">
+                {!data?.event
+                  ? "Awaiting release"
+                  : ticketStats.hasActiveAccess
+                    ? "Included with your evening"
+                    : ticketStats.hasAnyTickets
+                      ? "Presented this evening"
+                      : "Awaiting release"}
+              </Badge>
             )}
           </div>
 
-          {isLoading ? (
-            <p className="mt-6 text-sm text-sera-warm-grey">Preparing your evening details…</p>
-          ) : (
-            <div className="mt-5 space-y-3">
-              {(data?.tickets ?? []).map((ticket) => (
-                <article
-                  key={ticket.id}
-                  className="flex items-center justify-between rounded-xl border border-sera-sand/35 bg-sera-surface-light/50 px-4 py-3"
-                >
-                  <div>
-                    <p className="text-sm tracking-wide text-sera-navy">{ticket.ticket_code}</p>
-                    <p className="mt-1 text-xs text-sera-warm-grey">
-                      {ticket.redeemed_at
-                        ? `Presented at ${new Date(ticket.redeemed_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`
-                        : "Ready for the evening"}
-                    </p>
-                  </div>
-                  <Badge variant="outline" className="border-sera-sand/60 bg-sera-ivory/80 text-sera-navy">
-                    {ticket.status === "redeemed" ? "Presented" : "Available"}
-                  </Badge>
-                </article>
-              ))}
+          {isLoading ? <p className="mt-6 text-sm text-sera-warm-grey">Preparing your evening details…</p> : null}
 
-              {(data?.tickets ?? []).length === 0 && (
-                <div className="rounded-xl border border-dashed border-sera-sand/60 bg-sera-surface-light/40 p-5">
-                  <p className="text-sm text-sera-warm-grey">Access will appear here once your host opens drink service.</p>
+          {!isLoading && (
+            <div className="mt-6 space-y-6">
+              <div className="space-y-2">
+                <p className="text-lg text-sera-navy">
+                  {!data?.event
+                    ? "Your invitation is in preparation."
+                    : ticketStats.hasActiveAccess
+                      ? "Drink service is included with your evening."
+                      : ticketStats.hasAnyTickets
+                        ? "Your issued service has been presented."
+                        : "Drink service will appear once released by your host."}
+                </p>
+                <p className="text-sm text-sera-warm-grey">
+                  {!data?.event
+                    ? "Please check back shortly for your full event details."
+                    : ticketStats.hasActiveAccess
+                      ? `${ticketStats.available} invitation ${ticketStats.available === 1 ? "selection is" : "selections are"} available to present.`
+                      : ticketStats.redeemed > 0
+                        ? `${ticketStats.redeemed} invitation ${ticketStats.redeemed === 1 ? "selection has" : "selections have"} already been presented this evening.`
+                        : "Your host is finalizing access and timing."}
+                </p>
+              </div>
+
+              {data?.event && ticketStats.hasActiveAccess && (
+                <div className="border-t border-sera-sand/35 pt-5">
+                  <Button variant="sera" className="h-11 min-w-44">
+                    Present access
+                  </Button>
                 </div>
               )}
             </div>
           )}
-
-          <div className="mt-6 flex items-center justify-between gap-4 border-t border-sera-sand/40 pt-5">
-            <p className="text-sm text-sera-warm-grey">Your invitation includes {ticketStats.redeemed} already presented this evening.</p>
-            <Button variant="sera" className="h-11 min-w-44" disabled={!ticketStats.hasAccess}>
-              Access drink service
-            </Button>
-          </div>
         </section>
       </main>
     </div>
