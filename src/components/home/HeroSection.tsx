@@ -9,7 +9,7 @@ const heroWords = ["private dinners", "launch nights", "member salons", "brand a
 
 export default function HeroSection() {
   return (
-    <section className="relative overflow-hidden pt-32 pb-20 md:pt-40 md:pb-28">
+    <section className="relative overflow-hidden pt-32 pb-24 md:pt-40 md:pb-32">
       <div
         aria-hidden="true"
         className="absolute inset-0"
@@ -38,7 +38,7 @@ export default function HeroSection() {
             className="sera-label mb-8 text-sera-sand/70"
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55 }}
+            transition={{ duration: 0.6 }}
           >
             Sera Society · The operating layer for modern hospitality
           </motion.p>
@@ -47,7 +47,7 @@ export default function HeroSection() {
             className="sera-heading mb-8 text-5xl leading-[0.95] text-sera-ivory md:text-7xl lg:text-[86px]"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.05 }}
+            transition={{ duration: 0.6, delay: 0.08 }}
           >
             Host unforgettable
             <br />
@@ -62,7 +62,7 @@ export default function HeroSection() {
             className="sera-body mb-10 max-w-2xl text-base text-sera-sand/85 md:text-lg"
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, delay: 0.14 }}
+            transition={{ duration: 0.6, delay: 0.16 }}
           >
             Design invitation pages, manage RSVPs, run check-in, and redeem drinks from one polished
             system. Sera gives your team the control of operations software with the feel of a luxury
@@ -73,7 +73,7 @@ export default function HeroSection() {
             className="flex flex-col items-start gap-4 sm:flex-row sm:items-center"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.24 }}
           >
             <Button variant="sera-ivory" size="xl" asChild>
               <Link to="/request-access">Request Access</Link>
@@ -93,7 +93,7 @@ export default function HeroSection() {
           className="relative"
           initial={{ opacity: 0, x: 24 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.75, delay: 0.18 }}
+          transition={{ duration: 0.7, delay: 0.22 }}
         >
           <div className="relative overflow-hidden border border-sera-ivory/20 bg-sera-charcoal/50 p-5 backdrop-blur-sm md:p-7">
             <div className="mb-5 flex items-center justify-between border-b border-sera-ivory/15 pb-4">

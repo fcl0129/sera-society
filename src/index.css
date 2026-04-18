@@ -184,9 +184,21 @@
   .sera-label {
     font-family: var(--font-sans);
     font-weight: 500;
-    font-size: 0.6875rem;
-    letter-spacing: 0.12em;
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
+  }
+
+  .sera-section {
+    padding-top: 6rem;
+    padding-bottom: 6rem;
+  }
+
+  @media (min-width: 768px) {
+    .sera-section {
+      padding-top: 8rem;
+      padding-bottom: 8rem;
+    }
   }
 
   /* ============ Surface utilities ============ */
