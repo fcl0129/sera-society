@@ -62,6 +62,12 @@ BEGIN
       WHERE status = 'issued'
     $sql$;
 
+    EXECUTE $sql$
+      UPDATE public.drink_tickets
+      SET status = 'revoked'
+      WHERE status = 'void'
+    $sql$;
+
     EXECUTE 'ALTER TABLE public.drink_tickets DROP CONSTRAINT IF EXISTS drink_tickets_status_check';
 
     EXECUTE $sql$

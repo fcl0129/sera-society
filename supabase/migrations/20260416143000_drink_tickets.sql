@@ -1,8 +1,16 @@
 -- Drink ticket configuration + redemption model (QR/NFC)
 
-ALTER TABLE public.events
-  ADD COLUMN IF NOT EXISTS enable_qr BOOLEAN NOT NULL DEFAULT true,
-  ADD COLUMN IF NOT EXISTS enable_nfc BOOLEAN NOT NULL DEFAULT false;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'events'
+  ) THEN
+    ALTER TABLE public.events
+      ADD COLUMN IF NOT EXISTS enable_qr BOOLEAN NOT NULL DEFAULT true,
+      ADD COLUMN IF NOT EXISTS enable_nfc BOOLEAN NOT NULL DEFAULT false;
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS public.drink_tickets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -19,6 +27,7 @@ CREATE TABLE IF NOT EXISTS public.drink_tickets (
 ALTER TABLE public.drink_tickets ENABLE ROW LEVEL SECURITY;
 
 DO $$ BEGIN
+  DROP POLICY IF EXISTS "Organizers can manage drink tickets for own events" ON public.drink_tickets;
   CREATE POLICY "Organizers can manage drink tickets for own events"
     ON public.drink_tickets FOR ALL
     USING (
@@ -37,7 +46,7 @@ DO $$ BEGIN
           AND e.organizer_id = auth.uid()
       )
     );
-EXCEPTION WHEN duplicate_object THEN NULL;
+EXCEPTION WHEN undefined_table THEN NULL;
 END $$;
 
 CREATE INDEX IF NOT EXISTS idx_drink_tickets_event ON public.drink_tickets(event_id);

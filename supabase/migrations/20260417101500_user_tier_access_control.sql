@@ -117,8 +117,16 @@ BEGIN
 END;
 $$;
 
-DROP TRIGGER IF EXISTS trg_enforce_event_tier_access ON public.events;
-CREATE TRIGGER trg_enforce_event_tier_access
-BEFORE INSERT OR UPDATE OF tier, organizer_id ON public.events
-FOR EACH ROW
-EXECUTE FUNCTION public.enforce_event_tier_access();
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema='public' AND table_name='events'
+  ) THEN
+    DROP TRIGGER IF EXISTS trg_enforce_event_tier_access ON public.events;
+    CREATE TRIGGER trg_enforce_event_tier_access
+    BEFORE INSERT OR UPDATE OF tier, organizer_id ON public.events
+    FOR EACH ROW
+    EXECUTE FUNCTION public.enforce_event_tier_access();
+  END IF;
+END $$;
