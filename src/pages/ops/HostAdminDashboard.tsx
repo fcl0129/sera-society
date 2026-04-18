@@ -51,6 +51,12 @@ const fmt = new Intl.DateTimeFormat(undefined, {
   minute: "2-digit",
 });
 
+function isMissingEventsDescriptionColumnError(error: unknown) {
+  if (!error || typeof error !== "object") return false;
+  const message = "message" in error && typeof error.message === "string" ? error.message : "";
+  return message.includes("description") && message.includes("events") && message.includes("schema cache");
+}
+
 export default function HostAdminDashboard() {
   const { fullName, email } = useAuthState();
   const navigate = useNavigate();
@@ -62,12 +68,23 @@ export default function HostAdminDashboard() {
   const eventsQuery = useQuery({
     queryKey: ["organizer-events"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const eventsQuery = (supabase as any)
         .from("events")
         .select("id, title, venue, description, starts_at, status, organizer_id")
         .order("starts_at", { ascending: true });
-      if (error) throw error;
-      return (data ?? []) as EventRow[];
+      const { data, error } = await eventsQuery;
+      if (!error) return (data ?? []) as EventRow[];
+
+      if (isMissingEventsDescriptionColumnError(error)) {
+        const fallback = await (supabase as any)
+          .from("events")
+          .select("id, title, venue, starts_at, status, organizer_id")
+          .order("starts_at", { ascending: true });
+        if (fallback.error) throw fallback.error;
+        return (fallback.data ?? []).map((event: any) => ({ ...event, description: null })) as EventRow[];
+      }
+
+      throw error;
     },
   });
 
@@ -340,25 +357,51 @@ function CreateEventForm({ onCreated }: { onCreated: (id: string) => void }) {
       setBusy(false);
       return;
     }
+    const payload = {
+      organizer_id: u.user.id,
+      title,
+      venue: venue || null,
+      description: description || null,
+      starts_at: new Date(startsAt).toISOString(),
+      status: "draft",
+    };
+
     const { data, error } = await (supabase as any)
       .from("events")
-      .insert({
-        organizer_id: u.user.id,
-        title,
-        venue: venue || null,
-        description: description || null,
-        starts_at: new Date(startsAt).toISOString(),
-        status: "draft",
-      })
+      .insert(payload)
       .select("id")
       .single();
+
+    let createdEvent = data;
+    let createError = error;
+
+    if (createError && isMissingEventsDescriptionColumnError(createError)) {
+      const fallback = await (supabase as any)
+        .from("events")
+        .insert({
+          organizer_id: u.user.id,
+          title,
+          venue: venue || null,
+          starts_at: new Date(startsAt).toISOString(),
+          status: "draft",
+        })
+        .select("id")
+        .single();
+      createdEvent = fallback.data;
+      createError = fallback.error;
+    }
+
     setBusy(false);
-    if (error) {
-      toast.error(error.message);
+    if (createError) {
+      toast.error(createError.message);
+      return;
+    }
+    if (!createdEvent?.id) {
+      toast.error("Event created but no id was returned.");
       return;
     }
     toast.success("Event created");
-    onCreated(data.id);
+    onCreated(createdEvent.id);
   };
 
   return (
