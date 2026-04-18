@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
-import { landingPathForRole } from "@/lib/auth";
+import { landingPathForRole, resolveUserRole } from "@/lib/auth";
 
 type View = "login" | "magic" | "magic-sent";
 
@@ -49,16 +49,7 @@ export default function Login() {
     }
 
     // Read role from profiles to land in the right place
-    const userId = data.user?.id;
-    let role: "host_admin" | "bartender" | "guest" = "guest";
-    if (userId) {
-      const { data: profile } = await (supabase as any)
-        .from("profiles")
-        .select("role")
-        .eq("id", userId)
-        .maybeSingle();
-      if (profile?.role) role = profile.role;
-    }
+    const role = await resolveUserRole(data.user?.id, data.user?.email);
 
     setIsLoggingIn(false);
     navigate(fromPath ?? landingPathForRole(role), { replace: true });
