@@ -169,48 +169,120 @@ CREATE TABLE IF NOT EXISTS public.tickets (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-ALTER TABLE public.tickets ENABLE ROW LEVEL SECURITY;
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='tickets') THEN
+    ALTER TABLE public.tickets ADD COLUMN IF NOT EXISTS owner_user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE;
+    ALTER TABLE public.tickets ADD COLUMN IF NOT EXISTS ticket_type TEXT;
+    ALTER TABLE public.tickets ADD COLUMN IF NOT EXISTS code TEXT;
+    ALTER TABLE public.tickets ADD COLUMN IF NOT EXISTS qr_payload TEXT;
+    ALTER TABLE public.tickets ADD COLUMN IF NOT EXISTS nfc_payload TEXT;
+    ALTER TABLE public.tickets ADD COLUMN IF NOT EXISTS redemption_limit INTEGER NOT NULL DEFAULT 1;
+    ALTER TABLE public.tickets ADD COLUMN IF NOT EXISTS redeemed_count INTEGER NOT NULL DEFAULT 0;
+    ALTER TABLE public.tickets ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT now();
 
-CREATE INDEX IF NOT EXISTS tickets_event_owner_idx ON public.tickets(event_id, owner_user_id);
-CREATE INDEX IF NOT EXISTS tickets_code_idx ON public.tickets(code);
+    IF EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema='public' AND table_name='tickets' AND column_name='guest_id'
+    ) THEN
+      UPDATE public.tickets
+      SET owner_user_id = COALESCE(owner_user_id, guest_id)
+      WHERE owner_user_id IS NULL;
+    END IF;
+
+    IF EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema='public' AND table_name='tickets' AND column_name='status'
+    ) THEN
+      ALTER TABLE public.tickets DROP CONSTRAINT IF EXISTS tickets_status_check;
+      ALTER TABLE public.tickets ADD CONSTRAINT tickets_status_check
+        CHECK (status IN ('active', 'redeemed', 'cancelled', 'expired'));
+    END IF;
+
+    ALTER TABLE public.tickets ENABLE ROW LEVEL SECURITY;
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='tickets' AND column_name='event_id'
+  ) AND EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='tickets' AND column_name='owner_user_id'
+  ) THEN
+    CREATE INDEX IF NOT EXISTS tickets_event_owner_idx ON public.tickets(event_id, owner_user_id);
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='tickets' AND column_name='code'
+  ) THEN
+    CREATE INDEX IF NOT EXISTS tickets_code_idx ON public.tickets(code);
+  END IF;
+END $$;
 
 DROP TRIGGER IF EXISTS tickets_touch ON public.tickets;
-CREATE TRIGGER tickets_touch BEFORE UPDATE ON public.tickets
-  FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='tickets' AND column_name='updated_at'
+  ) THEN
+    CREATE TRIGGER tickets_touch BEFORE UPDATE ON public.tickets
+      FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
+  END IF;
+END $$;
 
 DO $$ BEGIN
   DROP POLICY IF EXISTS "Tickets guest read own" ON public.tickets;
-  CREATE POLICY "Tickets guest read own"
-    ON public.tickets FOR SELECT
-    TO authenticated
-    USING (owner_user_id = auth.uid());
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='tickets' AND column_name='owner_user_id'
+  ) THEN
+    CREATE POLICY "Tickets guest read own"
+      ON public.tickets FOR SELECT
+      TO authenticated
+      USING (owner_user_id = auth.uid());
+  END IF;
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
 DO $$ BEGIN
   DROP POLICY IF EXISTS "Tickets organizer and staff read" ON public.tickets;
-  CREATE POLICY "Tickets organizer and staff read"
-    ON public.tickets FOR SELECT
-    TO authenticated
-    USING (
-      EXISTS (SELECT 1 FROM public.events e WHERE e.id = tickets.event_id AND e.organizer_id = auth.uid())
-      OR EXISTS (SELECT 1 FROM public.staff_assignments sa WHERE sa.event_id = tickets.event_id AND sa.user_id = auth.uid())
-      OR public.has_role(auth.uid(), 'host_admin')
-    );
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='tickets' AND column_name='event_id'
+  ) THEN
+    CREATE POLICY "Tickets organizer and staff read"
+      ON public.tickets FOR SELECT
+      TO authenticated
+      USING (
+        EXISTS (SELECT 1 FROM public.events e WHERE e.id = tickets.event_id AND e.organizer_id = auth.uid())
+        OR EXISTS (SELECT 1 FROM public.staff_assignments sa WHERE sa.event_id = tickets.event_id AND sa.user_id = auth.uid())
+        OR public.has_role(auth.uid(), 'host_admin')
+      );
+  END IF;
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
 DO $$ BEGIN
   DROP POLICY IF EXISTS "Tickets organizer manage" ON public.tickets;
-  CREATE POLICY "Tickets organizer manage"
-    ON public.tickets FOR ALL
-    TO authenticated
-    USING (
-      EXISTS (SELECT 1 FROM public.events e WHERE e.id = tickets.event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(), 'host_admin')))
-    )
-    WITH CHECK (
-      EXISTS (SELECT 1 FROM public.events e WHERE e.id = tickets.event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(), 'host_admin')))
-    );
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='tickets' AND column_name='event_id'
+  ) THEN
+    CREATE POLICY "Tickets organizer manage"
+      ON public.tickets FOR ALL
+      TO authenticated
+      USING (
+        EXISTS (SELECT 1 FROM public.events e WHERE e.id = tickets.event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(), 'host_admin')))
+      )
+      WITH CHECK (
+        EXISTS (SELECT 1 FROM public.events e WHERE e.id = tickets.event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(), 'host_admin')))
+      );
+  END IF;
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
@@ -232,14 +304,27 @@ CREATE INDEX IF NOT EXISTS redemptions_ticket_idx ON public.redemptions(ticket_i
 
 DO $$ BEGIN
   DROP POLICY IF EXISTS "Redemptions organizer and staff read" ON public.redemptions;
-  CREATE POLICY "Redemptions organizer and staff read"
-    ON public.redemptions FOR SELECT
-    TO authenticated
-    USING (
-      EXISTS (SELECT 1 FROM public.events e WHERE e.id = redemptions.event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(), 'host_admin')))
-      OR EXISTS (SELECT 1 FROM public.staff_assignments sa WHERE sa.event_id = redemptions.event_id AND sa.user_id = auth.uid())
-      OR EXISTS (SELECT 1 FROM public.tickets t WHERE t.id = redemptions.ticket_id AND t.owner_user_id = auth.uid())
-    );
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='redemptions' AND column_name='event_id'
+  ) THEN
+    CREATE POLICY "Redemptions organizer and staff read"
+      ON public.redemptions FOR SELECT
+      TO authenticated
+      USING (
+        EXISTS (SELECT 1 FROM public.events e WHERE e.id = redemptions.event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(), 'host_admin')))
+        OR EXISTS (SELECT 1 FROM public.staff_assignments sa WHERE sa.event_id = redemptions.event_id AND sa.user_id = auth.uid())
+        OR EXISTS (
+          SELECT 1
+          FROM public.tickets t
+          WHERE t.id = redemptions.ticket_id
+            AND (
+              (EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='tickets' AND column_name='owner_user_id') AND t.owner_user_id = auth.uid())
+              OR (EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='tickets' AND column_name='guest_id') AND t.guest_id = auth.uid())
+            )
+        )
+      );
+  END IF;
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
@@ -277,8 +362,6 @@ DECLARE
   v_ticket public.tickets%ROWTYPE;
   v_allowed boolean;
   v_now timestamptz := now();
-  v_result text;
-  v_msg text;
 BEGIN
   IF auth.uid() IS NULL THEN
     RETURN jsonb_build_object('ok', false, 'code', 'unauthorized', 'message', 'Sign in required');
