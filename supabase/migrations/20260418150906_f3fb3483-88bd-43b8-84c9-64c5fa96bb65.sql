@@ -74,7 +74,16 @@ BEGIN
   END IF;
 END $$;
 
-CREATE UNIQUE INDEX IF NOT EXISTS profiles_email_idx ON public.profiles (lower(email));
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'email'
+  ) THEN
+    CREATE UNIQUE INDEX IF NOT EXISTS profiles_email_idx ON public.profiles (lower(email));
+  END IF;
+END $$;
 
 CREATE OR REPLACE FUNCTION public.has_role(_user_id UUID, _role public.app_role)
 RETURNS BOOLEAN
@@ -130,19 +139,50 @@ END;
 $$;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created
-AFTER INSERT ON auth.users
-FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'auth' AND table_name = 'users' AND column_name = 'email'
+  ) AND EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'auth' AND table_name = 'users' AND column_name = 'raw_user_meta_data'
+  ) THEN
+    CREATE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+  END IF;
+END $$;
 
 DROP TRIGGER IF EXISTS profiles_touch ON public.profiles;
-CREATE TRIGGER profiles_touch
-BEFORE UPDATE ON public.profiles
-FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'updated_at'
+  ) THEN
+    CREATE TRIGGER profiles_touch
+    BEFORE UPDATE ON public.profiles
+    FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
+  END IF;
+END $$;
 
 DROP POLICY IF EXISTS "Profiles: self-read" ON public.profiles;
-CREATE POLICY "Profiles: self-read"
-  ON public.profiles FOR SELECT TO authenticated
-  USING (auth.uid() = id);
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'id'
+  ) THEN
+    CREATE POLICY "Profiles: self-read"
+      ON public.profiles FOR SELECT TO authenticated
+      USING (auth.uid() = id);
+  END IF;
+END $$;
 
 DROP POLICY IF EXISTS "Profiles: admin-read-all" ON public.profiles;
 CREATE POLICY "Profiles: admin-read-all"
@@ -155,10 +195,23 @@ CREATE POLICY "Profiles: bartender-read-all"
   USING (public.has_role(auth.uid(), 'bartender'));
 
 DROP POLICY IF EXISTS "Profiles: self-update-name" ON public.profiles;
-CREATE POLICY "Profiles: self-update-name"
-  ON public.profiles FOR UPDATE TO authenticated
-  USING (auth.uid() = id)
-  WITH CHECK (auth.uid() = id AND role = (SELECT role FROM public.profiles WHERE id = auth.uid()));
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'id'
+  ) AND EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'role'
+  ) THEN
+    CREATE POLICY "Profiles: self-update-name"
+      ON public.profiles FOR UPDATE TO authenticated
+      USING (auth.uid() = id)
+      WITH CHECK (auth.uid() = id AND role = (SELECT role FROM public.profiles WHERE id = auth.uid()));
+  END IF;
+END $$;
 
 DROP POLICY IF EXISTS "Profiles: admin-update" ON public.profiles;
 CREATE POLICY "Profiles: admin-update"
@@ -187,12 +240,30 @@ DO $$ BEGIN
   END IF;
 END $$;
 
-CREATE INDEX IF NOT EXISTS events_organizer_idx ON public.events(organizer_id);
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'events' AND column_name = 'organizer_id'
+  ) THEN
+    CREATE INDEX IF NOT EXISTS events_organizer_idx ON public.events(organizer_id);
+  END IF;
+END $$;
 
 DROP TRIGGER IF EXISTS events_touch ON public.events;
-CREATE TRIGGER events_touch
-BEFORE UPDATE ON public.events
-FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'events' AND column_name = 'updated_at'
+  ) THEN
+    CREATE TRIGGER events_touch
+    BEFORE UPDATE ON public.events
+    FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS public.event_guests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -205,8 +276,23 @@ CREATE TABLE IF NOT EXISTS public.event_guests (
   UNIQUE (event_id, guest_id)
 );
 ALTER TABLE public.event_guests ENABLE ROW LEVEL SECURITY;
-CREATE INDEX IF NOT EXISTS event_guests_event_idx ON public.event_guests(event_id);
-CREATE INDEX IF NOT EXISTS event_guests_guest_idx ON public.event_guests(guest_id);
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'event_guests' AND column_name = 'event_id'
+  ) THEN
+    CREATE INDEX IF NOT EXISTS event_guests_event_idx ON public.event_guests(event_id);
+  END IF;
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'event_guests' AND column_name = 'guest_id'
+  ) THEN
+    CREATE INDEX IF NOT EXISTS event_guests_guest_idx ON public.event_guests(guest_id);
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS public.drink_tickets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -222,21 +308,46 @@ CREATE TABLE IF NOT EXISTS public.drink_tickets (
 
 DO $$ BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='drink_tickets') THEN
-    ALTER TABLE public.drink_tickets DROP CONSTRAINT IF EXISTS drink_tickets_status_check;
-    ALTER TABLE public.drink_tickets ADD CONSTRAINT drink_tickets_status_check
-      CHECK (status IN ('active', 'redeemed', 'revoked'));
-    ALTER TABLE public.drink_tickets DROP CONSTRAINT IF EXISTS drink_tickets_redemption_method_check;
-    ALTER TABLE public.drink_tickets ADD CONSTRAINT drink_tickets_redemption_method_check
-      CHECK (redemption_method IS NULL OR redemption_method IN ('nfc_tag','qr','manual','device_emulation'));
-    UPDATE public.drink_tickets SET status='active' WHERE status='issued';
-    UPDATE public.drink_tickets SET status='revoked' WHERE status='void';
-    ALTER TABLE public.drink_tickets ALTER COLUMN status SET DEFAULT 'active';
+    IF EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema='public' AND table_name='drink_tickets' AND column_name='status'
+    ) THEN
+      ALTER TABLE public.drink_tickets DROP CONSTRAINT IF EXISTS drink_tickets_status_check;
+      ALTER TABLE public.drink_tickets ADD CONSTRAINT drink_tickets_status_check
+        CHECK (status IN ('active', 'redeemed', 'revoked'));
+      UPDATE public.drink_tickets SET status='active' WHERE status='issued';
+      UPDATE public.drink_tickets SET status='revoked' WHERE status='void';
+      ALTER TABLE public.drink_tickets ALTER COLUMN status SET DEFAULT 'active';
+    END IF;
+    IF EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema='public' AND table_name='drink_tickets' AND column_name='redemption_method'
+    ) THEN
+      ALTER TABLE public.drink_tickets DROP CONSTRAINT IF EXISTS drink_tickets_redemption_method_check;
+      ALTER TABLE public.drink_tickets ADD CONSTRAINT drink_tickets_redemption_method_check
+        CHECK (redemption_method IS NULL OR redemption_method IN ('nfc_tag','qr','manual','device_emulation'));
+    END IF;
     ALTER TABLE public.drink_tickets ENABLE ROW LEVEL SECURITY;
   END IF;
 END $$;
 
-CREATE INDEX IF NOT EXISTS tickets_event_idx ON public.drink_tickets(event_id);
-CREATE INDEX IF NOT EXISTS tickets_guest_idx ON public.drink_tickets(guest_id);
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'drink_tickets' AND column_name = 'event_id'
+  ) THEN
+    CREATE INDEX IF NOT EXISTS tickets_event_idx ON public.drink_tickets(event_id);
+  END IF;
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'drink_tickets' AND column_name = 'guest_id'
+  ) THEN
+    CREATE INDEX IF NOT EXISTS tickets_guest_idx ON public.drink_tickets(guest_id);
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS public.nfc_tags (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -247,7 +358,16 @@ CREATE TABLE IF NOT EXISTS public.nfc_tags (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 ALTER TABLE public.nfc_tags ENABLE ROW LEVEL SECURITY;
-CREATE INDEX IF NOT EXISTS nfc_tags_event_idx ON public.nfc_tags(event_id);
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'nfc_tags' AND column_name = 'event_id'
+  ) THEN
+    CREATE INDEX IF NOT EXISTS nfc_tags_event_idx ON public.nfc_tags(event_id);
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS public.ticket_redemptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -260,35 +380,95 @@ CREATE TABLE IF NOT EXISTS public.ticket_redemptions (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 ALTER TABLE public.ticket_redemptions ENABLE ROW LEVEL SECURITY;
-CREATE INDEX IF NOT EXISTS redemptions_event_idx ON public.ticket_redemptions(event_id);
-CREATE INDEX IF NOT EXISTS redemptions_ticket_idx ON public.ticket_redemptions(ticket_id);
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'ticket_redemptions' AND column_name = 'event_id'
+  ) THEN
+    CREATE INDEX IF NOT EXISTS redemptions_event_idx ON public.ticket_redemptions(event_id);
+  END IF;
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'ticket_redemptions' AND column_name = 'ticket_id'
+  ) THEN
+    CREATE INDEX IF NOT EXISTS redemptions_ticket_idx ON public.ticket_redemptions(ticket_id);
+  END IF;
+END $$;
 
 DROP POLICY IF EXISTS "Events: organizer manage" ON public.events;
-CREATE POLICY "Events: organizer manage"
-  ON public.events FOR ALL TO authenticated
-  USING (organizer_id = auth.uid() OR public.has_role(auth.uid(), 'host_admin'))
-  WITH CHECK (organizer_id = auth.uid() OR public.has_role(auth.uid(), 'host_admin'));
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'events' AND column_name = 'organizer_id'
+  ) THEN
+    CREATE POLICY "Events: organizer manage"
+      ON public.events FOR ALL TO authenticated
+      USING (organizer_id = auth.uid() OR public.has_role(auth.uid(), 'host_admin'))
+      WITH CHECK (organizer_id = auth.uid() OR public.has_role(auth.uid(), 'host_admin'));
+  END IF;
+END $$;
 
 DROP POLICY IF EXISTS "Events: guests view own" ON public.events;
-CREATE POLICY "Events: guests view own"
-  ON public.events FOR SELECT TO authenticated
-  USING (EXISTS (SELECT 1 FROM public.event_guests eg WHERE eg.event_id = id AND eg.guest_id = auth.uid()));
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'events' AND column_name = 'id'
+  ) THEN
+    CREATE POLICY "Events: guests view own"
+      ON public.events FOR SELECT TO authenticated
+      USING (EXISTS (SELECT 1 FROM public.event_guests eg WHERE eg.event_id = id AND eg.guest_id = auth.uid()));
+  END IF;
+END $$;
 
 DROP POLICY IF EXISTS "Events: bartenders view active" ON public.events;
-CREATE POLICY "Events: bartenders view active"
-  ON public.events FOR SELECT TO authenticated
-  USING (public.has_role(auth.uid(), 'bartender') AND status = 'published');
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'events' AND column_name = 'status'
+  ) THEN
+    CREATE POLICY "Events: bartenders view active"
+      ON public.events FOR SELECT TO authenticated
+      USING (public.has_role(auth.uid(), 'bartender') AND status = 'published');
+  END IF;
+END $$;
 
 DROP POLICY IF EXISTS "EventGuests: organizer manage" ON public.event_guests;
-CREATE POLICY "EventGuests: organizer manage"
-  ON public.event_guests FOR ALL TO authenticated
-  USING (EXISTS (SELECT 1 FROM public.events e WHERE e.id = event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(),'host_admin'))))
-  WITH CHECK (EXISTS (SELECT 1 FROM public.events e WHERE e.id = event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(),'host_admin'))));
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'event_guests' AND column_name = 'event_id'
+  ) THEN
+    CREATE POLICY "EventGuests: organizer manage"
+      ON public.event_guests FOR ALL TO authenticated
+      USING (EXISTS (SELECT 1 FROM public.events e WHERE e.id = event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(),'host_admin'))))
+      WITH CHECK (EXISTS (SELECT 1 FROM public.events e WHERE e.id = event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(),'host_admin'))));
+  END IF;
+END $$;
 
 DROP POLICY IF EXISTS "EventGuests: guest view self" ON public.event_guests;
-CREATE POLICY "EventGuests: guest view self"
-  ON public.event_guests FOR SELECT TO authenticated
-  USING (guest_id = auth.uid());
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'event_guests' AND column_name = 'guest_id'
+  ) THEN
+    CREATE POLICY "EventGuests: guest view self"
+      ON public.event_guests FOR SELECT TO authenticated
+      USING (guest_id = auth.uid());
+  END IF;
+END $$;
 
 DROP POLICY IF EXISTS "EventGuests: bartender view" ON public.event_guests;
 CREATE POLICY "EventGuests: bartender view"
@@ -296,15 +476,33 @@ CREATE POLICY "EventGuests: bartender view"
   USING (public.has_role(auth.uid(), 'bartender'));
 
 DROP POLICY IF EXISTS "Tickets: organizer manage" ON public.drink_tickets;
-CREATE POLICY "Tickets: organizer manage"
-  ON public.drink_tickets FOR ALL TO authenticated
-  USING (EXISTS (SELECT 1 FROM public.events e WHERE e.id = event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(),'host_admin'))))
-  WITH CHECK (EXISTS (SELECT 1 FROM public.events e WHERE e.id = event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(),'host_admin'))));
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'drink_tickets' AND column_name = 'event_id'
+  ) THEN
+    CREATE POLICY "Tickets: organizer manage"
+      ON public.drink_tickets FOR ALL TO authenticated
+      USING (EXISTS (SELECT 1 FROM public.events e WHERE e.id = event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(),'host_admin'))))
+      WITH CHECK (EXISTS (SELECT 1 FROM public.events e WHERE e.id = event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(),'host_admin'))));
+  END IF;
+END $$;
 
 DROP POLICY IF EXISTS "Tickets: guest view self" ON public.drink_tickets;
-CREATE POLICY "Tickets: guest view self"
-  ON public.drink_tickets FOR SELECT TO authenticated
-  USING (guest_id = auth.uid());
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'drink_tickets' AND column_name = 'guest_id'
+  ) THEN
+    CREATE POLICY "Tickets: guest view self"
+      ON public.drink_tickets FOR SELECT TO authenticated
+      USING (guest_id = auth.uid());
+  END IF;
+END $$;
 
 DROP POLICY IF EXISTS "Tickets: bartender view" ON public.drink_tickets;
 CREATE POLICY "Tickets: bartender view"
@@ -312,15 +510,37 @@ CREATE POLICY "Tickets: bartender view"
   USING (public.has_role(auth.uid(), 'bartender'));
 
 DROP POLICY IF EXISTS "Tags: organizer manage" ON public.nfc_tags;
-CREATE POLICY "Tags: organizer manage"
-  ON public.nfc_tags FOR ALL TO authenticated
-  USING (EXISTS (SELECT 1 FROM public.events e WHERE e.id = event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(),'host_admin'))))
-  WITH CHECK (EXISTS (SELECT 1 FROM public.events e WHERE e.id = event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(),'host_admin'))));
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'nfc_tags' AND column_name = 'event_id'
+  ) THEN
+    CREATE POLICY "Tags: organizer manage"
+      ON public.nfc_tags FOR ALL TO authenticated
+      USING (EXISTS (SELECT 1 FROM public.events e WHERE e.id = event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(),'host_admin'))))
+      WITH CHECK (EXISTS (SELECT 1 FROM public.events e WHERE e.id = event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(),'host_admin'))));
+  END IF;
+END $$;
 
 DROP POLICY IF EXISTS "Tags: guest view" ON public.nfc_tags;
-CREATE POLICY "Tags: guest view"
-  ON public.nfc_tags FOR SELECT TO authenticated
-  USING (active AND EXISTS (SELECT 1 FROM public.event_guests eg WHERE eg.event_id = nfc_tags.event_id AND eg.guest_id = auth.uid()));
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'nfc_tags' AND column_name = 'active'
+  ) AND EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'nfc_tags' AND column_name = 'event_id'
+  ) THEN
+    CREATE POLICY "Tags: guest view"
+      ON public.nfc_tags FOR SELECT TO authenticated
+      USING (active AND EXISTS (SELECT 1 FROM public.event_guests eg WHERE eg.event_id = nfc_tags.event_id AND eg.guest_id = auth.uid()));
+  END IF;
+END $$;
 
 DROP POLICY IF EXISTS "Tags: bartender view" ON public.nfc_tags;
 CREATE POLICY "Tags: bartender view"
@@ -328,14 +548,32 @@ CREATE POLICY "Tags: bartender view"
   USING (public.has_role(auth.uid(), 'bartender'));
 
 DROP POLICY IF EXISTS "Redemptions: organizer view" ON public.ticket_redemptions;
-CREATE POLICY "Redemptions: organizer view"
-  ON public.ticket_redemptions FOR SELECT TO authenticated
-  USING (EXISTS (SELECT 1 FROM public.events e WHERE e.id = event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(),'host_admin'))));
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'ticket_redemptions' AND column_name = 'event_id'
+  ) THEN
+    CREATE POLICY "Redemptions: organizer view"
+      ON public.ticket_redemptions FOR SELECT TO authenticated
+      USING (EXISTS (SELECT 1 FROM public.events e WHERE e.id = event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(),'host_admin'))));
+  END IF;
+END $$;
 
 DROP POLICY IF EXISTS "Redemptions: guest view self" ON public.ticket_redemptions;
-CREATE POLICY "Redemptions: guest view self"
-  ON public.ticket_redemptions FOR SELECT TO authenticated
-  USING (guest_id = auth.uid());
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'ticket_redemptions' AND column_name = 'guest_id'
+  ) THEN
+    CREATE POLICY "Redemptions: guest view self"
+      ON public.ticket_redemptions FOR SELECT TO authenticated
+      USING (guest_id = auth.uid());
+  END IF;
+END $$;
 
 DROP POLICY IF EXISTS "Redemptions: bartender view" ON public.ticket_redemptions;
 CREATE POLICY "Redemptions: bartender view"
