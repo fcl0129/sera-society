@@ -44,7 +44,7 @@ const App = () => (
           <Route
             path="/ops/host"
             element={
-              <RoleRoute allow={["host_admin"]}>
+              <RoleRoute allow={["host_admin", "organizer", "admin"]}>
                 <HostAdminDashboard />
               </RoleRoute>
             }
@@ -52,7 +52,7 @@ const App = () => (
           <Route
             path="/ops/bartender"
             element={
-              <RoleRoute allow={["bartender", "host_admin"]}>
+              <RoleRoute allow={["bartender", "host_admin", "organizer", "admin"]}>
                 <BartenderPanel />
               </RoleRoute>
             }
@@ -60,7 +60,7 @@ const App = () => (
           <Route
             path="/ops/guest"
             element={
-              <RoleRoute allow={["guest", "host_admin", "bartender"]}>
+              <RoleRoute allow={["guest", "host_admin", "bartender", "organizer", "admin"]}>
                 <GuestEventPage />
               </RoleRoute>
             }
