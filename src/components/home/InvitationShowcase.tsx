@@ -19,8 +19,8 @@ const showcaseItems = [
   },
   {
     icon: Sparkles,
-    title: "Premium templates",
-    desc: "Start from curated templates built by designers who understand event culture.",
+    title: "Curated starting points",
+    desc: "Begin from refined invitation directions, then shape every detail to your event voice.",
   },
 ];
 
@@ -147,7 +147,7 @@ const invitationExamples = [
 
 export default function InvitationShowcase() {
   return (
-    <section className="py-24 md:py-32 sera-surface-warm">
+    <section className="sera-section sera-surface-warm">
       <div className="max-w-6xl mx-auto px-6">
         {/* Header */}
         <motion.div
@@ -178,7 +178,7 @@ export default function InvitationShowcase() {
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
+              transition={{ duration: 0.55, delay: i * 0.07 }}
             >
               {inv.content}
               {/* Hover overlay with label */}
@@ -198,7 +198,7 @@ export default function InvitationShowcase() {
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
+              transition={{ duration: 0.55, delay: i * 0.07 }}
             >
               <div className="w-10 h-10 bg-sera-navy/5 flex items-center justify-center flex-shrink-0">
                 <item.icon className="w-5 h-5 text-sera-oxblood" strokeWidth={1.5} />
