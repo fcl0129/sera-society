@@ -1,0 +1,9 @@
+<svg width="768" height="1152" viewBox="0 0 768 1152" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="768" height="1152" fill="#121D2A"/>
+  <rect x="638" y="88" width="52" height="52" transform="rotate(45 638 88)" stroke="#D9C6AF" stroke-opacity="0.35" stroke-width="2"/>
+  <text x="84" y="810" fill="#7A9272" font-size="20" font-family="Inter" letter-spacing="7">EXCLUSIVE PREVIEW</text>
+  <text x="84" y="930" fill="#F4EEE7" font-size="138" font-family="Cormorant Garamond">MAISON</text>
+  <text x="84" y="1018" fill="#D6C7B8" font-size="78" font-style="italic" font-family="Cormorant Garamond">Première</text>
+  <line x1="84" y1="1050" x2="560" y2="1050" stroke="#D6C7B8" stroke-opacity="0.4" stroke-width="2"/>
+  <text x="84" y="1090" fill="#F4EEE7" font-size="24" font-family="Inter">09.20.26 · 8 PM</text>
+</svg>

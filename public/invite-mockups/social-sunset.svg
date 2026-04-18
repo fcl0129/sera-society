@@ -1,0 +1,16 @@
+<svg width="768" height="1152" viewBox="0 0 768 1152" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="768" y2="1152" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5C2020"/>
+      <stop offset="1" stop-color="#9D5757"/>
+    </linearGradient>
+  </defs>
+  <rect width="768" height="1152" fill="url(#g)"/>
+  <circle cx="384" cy="290" r="78" stroke="#F4EEE7" stroke-opacity="0.35" stroke-width="4"/>
+  <text x="384" y="315" text-anchor="middle" fill="#F4EEE7" font-size="80" font-style="italic" font-family="Cormorant Garamond">S</text>
+  <text x="384" y="430" text-anchor="middle" fill="#F4EEE7" fill-opacity="0.75" font-size="20" font-family="Inter" letter-spacing="5">JOIN US FOR</text>
+  <text x="384" y="560" text-anchor="middle" fill="#F4EEE7" font-size="92" font-family="Cormorant Garamond">Rooftop Sunset</text>
+  <text x="384" y="640" text-anchor="middle" fill="#F4EEE7" fill-opacity="0.75" font-size="66" font-style="italic" font-family="Cormorant Garamond">Session</text>
+  <text x="384" y="740" text-anchor="middle" fill="#F4EEE7" fill-opacity="0.9" font-size="26" font-family="Inter">July 4 · Golden Hour</text>
+  <text x="384" y="785" text-anchor="middle" fill="#F4EEE7" fill-opacity="0.6" font-size="20" font-family="Inter">Atelier Terrace · East Village</text>
+</svg>
