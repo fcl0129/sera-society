@@ -39,7 +39,7 @@ export default function Navbar() {
       <Glass
         strength="strong"
         glow
-        className="mx-auto w-full max-w-7xl border-white/20 bg-sera-deep-navy/65 px-4 py-3 md:px-6"
+        className="mx-auto w-full max-w-7xl border-white/20 bg-sera-deep-navy/65 px-4 py-3 md:px-6 transition-colors duration-200 hover:border-white/30"
       >
         <div className="flex items-center justify-between gap-4">
           <Link to="/" className="flex min-w-0 flex-col leading-none">
@@ -52,6 +52,10 @@ export default function Navbar() {
           </Link>
 
           <div className="hidden items-center gap-7 md:flex">
+            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/30 bg-emerald-300/10 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-emerald-200/95">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-200" />
+              Live
+            </span>
             {navLinks.map((link) => {
               const isActive = location.pathname === link.href;
 
@@ -60,8 +64,10 @@ export default function Navbar() {
                   key={link.href}
                   to={link.href}
                   aria-current={isActive ? "page" : undefined}
-                  className={`sera-label transition-colors ${
-                    isActive ? "text-sera-ivory" : "text-sera-sand/80 hover:text-sera-ivory"
+                  className={`sera-label relative transition-all duration-200 after:absolute after:-bottom-1 after:left-0 after:h-px after:w-full after:origin-left after:bg-sera-ivory/70 after:transition-transform after:duration-200 ${
+                    isActive
+                      ? "text-sera-ivory after:scale-x-100"
+                      : "text-sera-sand/80 hover:text-sera-ivory after:scale-x-0 hover:after:scale-x-100"
                   }`}
                 >
                   {link.label}
@@ -71,12 +77,12 @@ export default function Navbar() {
           </div>
 
           <div className="hidden items-center gap-3 md:flex">
-            <Button variant="sera-outline" size="sm" asChild>
+            <Button variant="sera-outline" size="sm" className="transition-transform duration-200 hover:-translate-y-0.5" asChild>
               <Link to="/login" className="border-sera-ivory/60 text-sera-ivory hover:bg-sera-ivory hover:text-sera-navy">
                 Log in
               </Link>
             </Button>
-            <Button variant="sera-accent" size="sm" asChild>
+            <Button variant="sera-accent" size="sm" className="transition-transform duration-200 hover:-translate-y-0.5" asChild>
               <Link to="/request-access">Request Access</Link>
             </Button>
           </div>
