@@ -57,7 +57,7 @@ const invitationExamples = [
           <p className="font-sans text-sera-oxblood-soft text-[9px] font-bold tracking-[0.3em] uppercase">Live Event</p>
         </div>
         <div>
-          <h3 className="font-serif text-sera-ivory text-4xl sm:text-5xl font-light leading-[0.95] mb-3">
+          <h3 className="sera-accent-serif text-sera-ivory text-4xl sm:text-5xl font-light leading-[0.95] mb-3">
             AFTER
             <br />
             <span className="italic text-sera-oxblood-soft">DARK</span>
@@ -80,11 +80,11 @@ const invitationExamples = [
     content: (
       <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
         <div className="w-16 h-16 rounded-full border-2 border-sera-ivory/30 flex items-center justify-center mb-5">
-          <span className="font-serif text-sera-ivory text-2xl italic">S</span>
+          <span className="sera-accent-serif text-sera-ivory text-2xl italic">S</span>
         </div>
         <p className="font-sans text-sera-ivory/70 text-[9px] tracking-[0.2em] uppercase mb-3">Join Us For</p>
-        <h3 className="font-serif text-sera-ivory text-2xl font-light mb-1">Rooftop Sunset</h3>
-        <p className="font-serif text-sera-ivory/60 text-lg italic mb-4">Session</p>
+        <h3 className="sera-accent-serif text-sera-ivory text-2xl font-light mb-1">Rooftop Sunset</h3>
+        <p className="sera-accent-serif text-sera-ivory/60 text-lg italic mb-4">Session</p>
         <p className="font-sans text-sera-ivory/80 text-[10px] font-medium">July 4 · Golden Hour</p>
         <p className="font-sans text-sera-ivory/50 text-[9px] mt-1">Atelier Terrace · East Village</p>
         <div className="mt-5 px-6 py-2 bg-sera-ivory/10 backdrop-blur-sm text-sera-ivory text-[9px] tracking-[0.15em] uppercase">
@@ -102,14 +102,14 @@ const invitationExamples = [
         <div className="absolute inset-4 border border-sera-navy/15" />
         <div className="absolute inset-6 border border-sera-navy/8" />
         <p className="font-sans text-sera-warm-grey text-[8px] tracking-[0.25em] uppercase mb-5 relative z-10">The Pleasure of Your Company</p>
-        <h3 className="font-serif text-sera-navy text-2xl font-light leading-tight mb-2 relative z-10">
+        <h3 className="sera-accent-serif text-sera-navy text-2xl font-light leading-tight mb-2 relative z-10">
           Annual Gala
           <br />
           <span className="italic text-sera-oxblood">Dinner</span>
         </h3>
         <div className="w-6 h-px bg-sera-navy/30 my-4 relative z-10" />
-        <p className="font-serif text-sera-navy/70 text-xs italic mb-1 relative z-10">Saturday, the Twelfth of September</p>
-        <p className="font-serif text-sera-navy/50 text-[10px] italic relative z-10">Two Thousand Twenty-Six</p>
+        <p className="sera-accent-serif text-sera-navy/70 text-xs italic mb-1 relative z-10">Saturday, the Twelfth of September</p>
+        <p className="sera-accent-serif text-sera-navy/50 text-[10px] italic relative z-10">Two Thousand Twenty-Six</p>
         <p className="font-sans text-sera-warm-grey text-[9px] mt-4 relative z-10">Black Tie · 7 o'clock</p>
         <div className="mt-4 px-5 py-1.5 border border-sera-navy/20 text-sera-navy text-[9px] tracking-[0.15em] uppercase relative z-10">
           Respond
@@ -127,10 +127,10 @@ const invitationExamples = [
           <div className="w-8 h-8 border border-sera-sand/30 rotate-45" />
         </div>
         <p className="font-sans text-sera-moss-muted text-[8px] tracking-[0.3em] uppercase mb-2">Exclusive Preview</p>
-        <h3 className="font-serif text-sera-ivory text-3xl sm:text-4xl font-light leading-[0.95] mb-1">
+        <h3 className="sera-accent-serif text-sera-ivory text-3xl sm:text-4xl font-light leading-[0.95] mb-1">
           MAISON
         </h3>
-        <h3 className="font-serif text-sera-sand text-xl italic mb-4">
+        <h3 className="sera-accent-serif text-sera-sand text-xl italic mb-4">
           Première
         </h3>
         <div className="w-full h-px bg-gradient-to-r from-sera-sand/40 to-transparent mb-3" />

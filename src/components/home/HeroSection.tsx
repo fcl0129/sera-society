@@ -112,7 +112,7 @@ export default function HeroSection() {
               ].map(([label, value]) => (
                 <div key={label} className="border border-sera-ivory/12 bg-sera-navy/30 p-4">
                   <p className="text-xs uppercase tracking-[0.15em] text-sera-sand/65">{label}</p>
-                  <p className="mt-2 font-serif text-2xl text-sera-ivory">{value}</p>
+                  <p className="sera-metric mt-2 text-sera-ivory">{value}</p>
                 </div>
               ))}
             </div>
