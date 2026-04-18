@@ -8,10 +8,11 @@ interface HeroProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: React.ReactNode;
   subtitle?: string;
   images: { src: string; alt: string }[];
+  slideDetails?: { heading: string; description: string }[];
 }
 
 export const HeroSection = React.forwardRef<HTMLDivElement, HeroProps>(
-  ({ title, subtitle, images, className, ...props }, ref) => {
+  ({ title, subtitle, images, slideDetails, className, ...props }, ref) => {
     const [currentIndex, setCurrentIndex] = React.useState(
       Math.floor(images.length / 2),
     );
@@ -32,6 +33,7 @@ export const HeroSection = React.forwardRef<HTMLDivElement, HeroProps>(
     }, [handleNext]);
 
     const hasHeader = Boolean(title) || Boolean(subtitle?.trim());
+    const currentSlideDetail = slideDetails?.[currentIndex];
 
     return (
       <div
@@ -124,6 +126,17 @@ export const HeroSection = React.forwardRef<HTMLDivElement, HeroProps>(
               <ChevronRight className="h-5 w-5" />
             </Button>
           </div>
+
+          {currentSlideDetail && (
+            <div className="max-w-3xl space-y-3 text-center">
+              <h3 className="sera-heading text-sera-navy text-2xl sm:text-3xl md:text-4xl">
+                {currentSlideDetail.heading}
+              </h3>
+              <p className="sera-body text-muted-foreground md:text-lg">
+                {currentSlideDetail.description}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     );
