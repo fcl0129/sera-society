@@ -26,7 +26,7 @@ export default function Login() {
   const [forgotMessage, setForgotMessage] = useState<string | null>(null);
   const [forgotSent, setForgotSent] = useState(false);
 
-  const redirectPath = (location.state as { from?: string } | null)?.from ?? "/dashboard";
+  const redirectPath = (location.state as { from?: string } | null)?.from ?? "/ops";
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
