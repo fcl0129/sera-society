@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Instagram, Linkedin, PartyPopper, Ticket, Twitter } from "lucide-react";
+import { AtSign, Instagram, Linkedin, PartyPopper, Ticket } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -215,7 +215,7 @@ function MemberRow({
                 className="rounded p-1 text-muted-foreground transition-all duration-150 hover:scale-110 hover:bg-foreground/10 hover:text-foreground"
                 title="X / Twitter"
               >
-                <Twitter size={10} />
+                <AtSign size={10} />
               </a>
             )}
             {member.social?.linkedin && (
