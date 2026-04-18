@@ -14,6 +14,64 @@ export type Database = {
   }
   public: {
     Tables: {
+      drink_tickets: {
+        Row: {
+          created_at: string
+          event_id: string
+          guest_id: string
+          id: string
+          redeemed_at: string | null
+          redeemed_by: string | null
+          redemption_method: string | null
+          status: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          guest_id: string
+          id?: string
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          redemption_method?: string | null
+          status?: string
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          guest_id?: string
+          id?: string
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          redemption_method?: string | null
+          status?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drink_tickets_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drink_tickets_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drink_tickets_redeemed_by_fkey"
+            columns: ["redeemed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -101,6 +159,160 @@ export type Database = {
         }
         Relationships: []
       }
+      event_guests: {
+        Row: {
+          created_at: string
+          event_id: string
+          guest_id: string
+          id: string
+          invited_email: string
+          notes: string | null
+          tier: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          guest_id: string
+          id?: string
+          invited_email: string
+          notes?: string | null
+          tier?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          guest_id?: string
+          id?: string
+          invited_email?: string
+          notes?: string | null
+          tier?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_guests_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_guests_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          created_at: string
+          description: string | null
+          ends_at: string | null
+          id: string
+          organizer_id: string
+          starts_at: string
+          status: string
+          title: string
+          updated_at: string
+          venue: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          organizer_id: string
+          starts_at: string
+          status?: string
+          title: string
+          updated_at?: string
+          venue?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          organizer_id?: string
+          starts_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          venue?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nfc_tags: {
+        Row: {
+          active: boolean
+          created_at: string
+          event_id: string
+          id: string
+          payload_id: string
+          station_label: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          event_id: string
+          id?: string
+          payload_id: string
+          station_label: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          event_id?: string
+          id?: string
+          payload_id?: string
+          station_label?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nfc_tags_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
@@ -125,11 +337,77 @@ export type Database = {
         }
         Relationships: []
       }
+      ticket_redemptions: {
+        Row: {
+          created_at: string
+          event_id: string
+          guest_id: string
+          id: string
+          method: string
+          redeemed_by: string | null
+          station_label: string | null
+          ticket_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          guest_id: string
+          id?: string
+          method: string
+          redeemed_by?: string | null
+          station_label?: string | null
+          ticket_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          guest_id?: string
+          id?: string
+          method?: string
+          redeemed_by?: string | null
+          station_label?: string | null
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_redemptions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_redemptions_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_redemptions_redeemed_by_fkey"
+            columns: ["redeemed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_redemptions_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "drink_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      current_role: {
+        Args: never
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -137,6 +415,13 @@ export type Database = {
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
       }
       move_to_dlq: {
         Args: {
@@ -155,9 +440,13 @@ export type Database = {
           read_ct: number
         }[]
       }
+      redeem_ticket: {
+        Args: { _method: string; _station_label?: string; _token: string }
+        Returns: Json
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "guest" | "bartender" | "host_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -284,6 +573,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["guest", "bartender", "host_admin"],
+    },
   },
 } as const
