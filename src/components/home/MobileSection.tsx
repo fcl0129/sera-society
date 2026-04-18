@@ -12,7 +12,7 @@ const mobilePoints = [
 export default function MobileSection() {
   return (
     <section className="sera-section px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2">
+      <div className="mx-auto grid max-w-6xl items-center gap-8 sm:gap-10 lg:grid-cols-2">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -35,13 +35,13 @@ export default function MobileSection() {
             ))}
           </ul>
 
-          <Button className="mt-8" variant="sera" size="lg" asChild>
+          <Button className="mt-8 w-full sm:w-auto" variant="sera" size="lg" asChild>
             <Link to="/platform">See platform detail</Link>
           </Button>
         </motion.div>
 
         <motion.div
-          className="mx-auto w-full max-w-sm rounded-[2rem] border border-white/40 bg-white/40 p-4 shadow-[0_24px_70px_-40px_rgba(16,24,40,0.6)] backdrop-blur-lg"
+          className="mx-auto w-full max-w-sm rounded-[2rem] border border-white/50 bg-white/60 p-3 sm:p-4 shadow-[0_20px_50px_-36px_rgba(16,24,40,0.6)] backdrop-blur-sm"
           initial={{ opacity: 0, x: 20 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}

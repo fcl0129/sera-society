@@ -53,7 +53,7 @@ export default function Navbar() {
 
           <div className="hidden items-center gap-7 md:flex">
             <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/30 bg-emerald-300/10 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-emerald-200/95">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-200" />
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-200 motion-reduce:animate-none" />
               Live
             </span>
             {navLinks.map((link) => {
@@ -64,7 +64,7 @@ export default function Navbar() {
                   key={link.href}
                   to={link.href}
                   aria-current={isActive ? "page" : undefined}
-                  className={`sera-label relative transition-all duration-200 after:absolute after:-bottom-1 after:left-0 after:h-px after:w-full after:origin-left after:bg-sera-ivory/70 after:transition-transform after:duration-200 ${
+                  className={`sera-label relative rounded-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sera-ivory focus-visible:ring-offset-2 focus-visible:ring-offset-sera-deep-navy after:absolute after:-bottom-1 after:left-0 after:h-px after:w-full after:origin-left after:bg-sera-ivory/70 after:transition-transform after:duration-200 ${
                     isActive
                       ? "text-sera-ivory after:scale-x-100"
                       : "text-sera-sand/80 hover:text-sera-ivory after:scale-x-0 hover:after:scale-x-100"
@@ -90,7 +90,7 @@ export default function Navbar() {
           <button
             type="button"
             onClick={() => setOpen((prev) => !prev)}
-            className="text-sera-ivory md:hidden"
+            className="rounded-sm text-sera-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sera-ivory focus-visible:ring-offset-2 focus-visible:ring-offset-sera-deep-navy md:hidden"
             aria-label="Toggle menu"
             aria-expanded={open}
             aria-controls={mobileMenuId}
@@ -118,7 +118,7 @@ export default function Navbar() {
                       to={link.href}
                       onClick={() => setOpen(false)}
                       aria-current={isActive ? "page" : undefined}
-                      className={`sera-label py-2 transition-colors ${
+                      className={`sera-label rounded-sm py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sera-ivory focus-visible:ring-offset-2 focus-visible:ring-offset-sera-deep-navy ${
                         isActive ? "text-sera-ivory" : "text-sera-sand hover:text-sera-ivory"
                       }`}
                     >

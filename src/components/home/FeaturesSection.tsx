@@ -52,7 +52,7 @@ export default function FeaturesSection() {
 
           <div className="grid grid-cols-3 gap-3">
             {metrics.map((metric) => (
-              <div key={metric.label} className="rounded-xl border border-white/35 bg-white/40 p-4 text-center backdrop-blur-md">
+              <div key={metric.label} className="rounded-xl border border-white/45 bg-white/65 p-3 text-center backdrop-blur-sm sm:p-4">
                 <p className="text-xs uppercase tracking-[0.15em] text-sera-warm-grey">{metric.label}</p>
                 <p className="mt-2 text-sm font-medium text-sera-navy">{metric.value}</p>
               </div>
@@ -64,7 +64,7 @@ export default function FeaturesSection() {
           {features.map((feature, i) => (
             <motion.article
               key={feature.title}
-              className="rounded-2xl border border-sera-sand/70 bg-sera-ivory/60 p-6"
+              className="rounded-2xl border border-sera-sand/75 bg-sera-ivory/75 p-5 sm:p-6"
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
