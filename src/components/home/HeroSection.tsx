@@ -1,18 +1,23 @@
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+
+import { Button } from "@/components/ui/button";
+import { GooeyTextMorphing } from "@/components/ui/gooey-text-morphing";
+import { Splite } from "@/components/ui/splite";
+
+const heroWords = ["private dinners", "launch nights", "member salons", "brand activations"];
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen overflow-hidden pt-36 md:pt-44 pb-20 md:pb-28">
+    <section className="relative overflow-hidden pt-32 pb-20 md:pt-40 md:pb-28">
       <div
         aria-hidden="true"
         className="absolute inset-0"
         style={{
           background: `
-            radial-gradient(900px 480px at 10% 12%, rgba(155, 80, 80, 0.18), transparent 60%),
-            radial-gradient(760px 420px at 82% 20%, rgba(214, 198, 160, 0.20), transparent 60%),
-            linear-gradient(160deg, hsl(var(--sera-deep-navy)) 0%, hsl(var(--sera-navy)) 48%, hsl(var(--sera-charcoal)) 100%)
+            radial-gradient(900px 500px at 8% 14%, rgba(155, 80, 80, 0.2), transparent 62%),
+            radial-gradient(760px 420px at 85% 14%, rgba(214, 198, 160, 0.2), transparent 62%),
+            linear-gradient(155deg, hsl(var(--sera-deep-navy)) 0%, hsl(var(--sera-navy)) 52%, hsl(var(--sera-charcoal)) 100%)
           `,
         }}
       />
@@ -22,57 +27,62 @@ export default function HeroSection() {
         className="absolute inset-0 opacity-[0.08]"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px)",
-          backgroundSize: "64px 64px",
+            "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
         }}
       />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 grid lg:grid-cols-[1.1fr_0.9fr] gap-14 lg:gap-10 items-end">
+      <div className="relative z-10 mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
         <div>
           <motion.p
-            className="sera-label text-sera-sand/70 mb-8"
-            initial={{ opacity: 0, y: 20 }}
+            className="sera-label mb-8 text-sera-sand/70"
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.55 }}
           >
-            An editorial operating system for modern hosts
+            Sera Society · The operating layer for modern hospitality
           </motion.p>
 
           <motion.h1
-            className="sera-heading text-sera-ivory text-5xl md:text-7xl lg:text-[92px] leading-[0.95] mb-8"
-            initial={{ opacity: 0, y: 26 }}
+            className="sera-heading mb-8 text-5xl leading-[0.95] text-sera-ivory md:text-7xl lg:text-[86px]"
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.08 }}
+            transition={{ duration: 0.7, delay: 0.05 }}
           >
-            Rewriting what
+            Host unforgettable
             <br />
-            a private event
+            <span className="text-sera-beige">
+              <GooeyTextMorphing words={heroWords} interval={2200} />
+            </span>
             <br />
-            <span className="italic text-sera-beige">can feel like.</span>
+            with precision.
           </motion.h1>
 
           <motion.p
-            className="sera-body text-sera-sand/85 text-base md:text-lg max-w-2xl mb-10"
-            initial={{ opacity: 0, y: 20 }}
+            className="sera-body mb-10 max-w-2xl text-base text-sera-sand/85 md:text-lg"
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
+            transition={{ duration: 0.65, delay: 0.14 }}
           >
-            Sera Society brings invitation design, RSVP orchestration, access control, and guest
-            operations into one polished canvas—with a visual language that feels authored, not
-            templated.
+            Design invitation pages, manage RSVPs, run check-in, and redeem drinks from one polished
+            system. Sera gives your team the control of operations software with the feel of a luxury
+            brand experience.
           </motion.p>
 
           <motion.div
-            className="flex flex-col sm:flex-row items-start sm:items-center gap-4"
-            initial={{ opacity: 0, y: 18 }}
+            className="flex flex-col items-start gap-4 sm:flex-row sm:items-center"
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
           >
             <Button variant="sera-ivory" size="xl" asChild>
               <Link to="/request-access">Request Access</Link>
             </Button>
             <Button variant="sera-outline" size="xl" asChild>
-              <Link to="/platform" className="border-sera-ivory/60 text-sera-ivory hover:bg-sera-ivory hover:text-sera-navy">
+              <Link
+                to="/platform"
+                className="border-sera-ivory/60 text-sera-ivory hover:bg-sera-ivory hover:text-sera-navy"
+              >
                 Explore Platform
               </Link>
             </Button>
@@ -83,24 +93,37 @@ export default function HeroSection() {
           className="relative"
           initial={{ opacity: 0, x: 24 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          transition={{ duration: 0.75, delay: 0.18 }}
         >
-          <div className="border border-sera-ivory/20 p-6 md:p-8 bg-sera-charcoal/45 backdrop-blur-sm">
-            <p className="sera-label text-sera-sand/75 mb-6">Issue 01 · Launch Narrative</p>
-            <div className="space-y-5">
+          <div className="relative overflow-hidden border border-sera-ivory/20 bg-sera-charcoal/50 p-5 backdrop-blur-sm md:p-7">
+            <div className="mb-5 flex items-center justify-between border-b border-sera-ivory/15 pb-4">
+              <p className="sera-label text-sera-sand/75">Live Event Control</p>
+              <span className="rounded-full border border-emerald-300/35 bg-emerald-300/10 px-2 py-1 text-[10px] uppercase tracking-[0.2em] text-emerald-200">
+                Session Active
+              </span>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
               {[
-                ["01", "A distinct visual identity", "No default gradients. No generic social-club cues."],
-                ["02", "Precision in guest flow", "Invitation, RSVP, entry, and bar redemption in one rhythm."],
-                ["03", "Brandable by design", "Typography, layout, and motion that can become your signature."],
-              ].map(([num, title, text]) => (
-                <div key={num} className="grid grid-cols-[38px_1fr] gap-4 border-t border-sera-ivory/10 pt-4 first:border-t-0 first:pt-0">
-                  <span className="font-serif text-sera-oxblood-soft text-xl">{num}</span>
-                  <div>
-                    <h3 className="font-serif text-sera-ivory text-xl leading-tight">{title}</h3>
-                    <p className="text-sera-stone text-sm mt-1">{text}</p>
-                  </div>
+                ["RSVP confirmations", "92%"],
+                ["Guests checked in", "184"],
+                ["Tickets redeemed", "347"],
+                ["Avg. entry wait", "38 sec"],
+              ].map(([label, value]) => (
+                <div key={label} className="border border-sera-ivory/12 bg-sera-navy/30 p-4">
+                  <p className="text-xs uppercase tracking-[0.15em] text-sera-sand/65">{label}</p>
+                  <p className="mt-2 font-serif text-2xl text-sera-ivory">{value}</p>
                 </div>
               ))}
+            </div>
+
+            <div className="relative mt-5 hidden h-52 overflow-hidden border border-sera-ivory/12 lg:block">
+              <Splite
+                scene="https://my.spline.design/particlesphere-9a5f9f8b4f3e8f8a92f5f7f1b2238a1b/"
+                title="Sera hero ambient scene"
+                loading="lazy"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-sera-charcoal via-transparent to-transparent" />
             </div>
           </div>
         </motion.div>
