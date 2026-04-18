@@ -6,8 +6,9 @@ import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
+import { landingPathForRole } from "@/lib/auth";
 
-type View = "login" | "forgot";
+type View = "login" | "magic" | "magic-sent";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -17,28 +18,27 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [forgotEmail, setForgotEmail] = useState("");
+  const [magicEmail, setMagicEmail] = useState("");
 
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [isSendingReset, setIsSendingReset] = useState(false);
+  const [isSendingMagic, setIsSendingMagic] = useState(false);
 
   const [loginMessage, setLoginMessage] = useState<string | null>(null);
-  const [forgotMessage, setForgotMessage] = useState<string | null>(null);
-  const [forgotSent, setForgotSent] = useState(false);
+  const [magicMessage, setMagicMessage] = useState<string | null>(null);
 
-  const redirectPath = (location.state as { from?: string } | null)?.from ?? "/ops";
+  const fromPath = (location.state as { from?: string } | null)?.from ?? null;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isSupabaseConfigured) {
-      setLoginMessage("Supabase är inte konfigurerat ännu. Lägg till miljövariabler i Lovable.");
+      setLoginMessage("Sign-in is not configured yet.");
       return;
     }
     setIsLoggingIn(true);
     setLoginMessage(null);
 
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: loginEmail,
+      email: loginEmail.trim(),
       password: loginPassword,
     });
 
@@ -48,32 +48,46 @@ export default function Login() {
       return;
     }
 
+    // Read role from profiles to land in the right place
+    const userId = data.user?.id;
+    let role: "host_admin" | "bartender" | "guest" = "guest";
+    if (userId) {
+      const { data: profile } = await (supabase as any)
+        .from("profiles")
+        .select("role")
+        .eq("id", userId)
+        .maybeSingle();
+      if (profile?.role) role = profile.role;
+    }
+
     setIsLoggingIn(false);
-    const role = data?.user?.app_metadata?.role;
-    navigate(role === "master" ? "/master/access-requests" : redirectPath, { replace: true });
+    navigate(fromPath ?? landingPathForRole(role), { replace: true });
   };
 
-  const handleForgot = async (e: React.FormEvent) => {
+  const handleMagic = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isSupabaseConfigured) {
-      setForgotMessage("Supabase är inte konfigurerat ännu. Lägg till miljövariabler i Lovable.");
+      setMagicMessage("Sign-in is not configured yet.");
       return;
     }
-    setIsSendingReset(true);
-    setForgotMessage(null);
+    setIsSendingMagic(true);
+    setMagicMessage(null);
 
-    const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
-      redirectTo: `${window.location.origin}/login`,
+    const { error } = await supabase.auth.signInWithOtp({
+      email: magicEmail.trim(),
+      options: {
+        emailRedirectTo: `${window.location.origin}/ops`,
+      },
     });
 
     if (error) {
-      setForgotMessage(error.message);
-      setIsSendingReset(false);
+      setMagicMessage(error.message);
+      setIsSendingMagic(false);
       return;
     }
 
-    setForgotSent(true);
-    setIsSendingReset(false);
+    setView("magic-sent");
+    setIsSendingMagic(false);
   };
 
   return (
@@ -97,7 +111,7 @@ export default function Login() {
             <span className="italic">back</span>
           </h1>
           <p className="sera-body text-sera-sand text-lg max-w-sm">
-            Access your organizer dashboard, manage events, and power your next evening.
+            Access your dashboard, manage your evening, and power your next service.
           </p>
         </div>
         <p className="text-sera-sand/70 text-xs italic font-serif">Better late than ordinary.</p>
@@ -117,8 +131,8 @@ export default function Login() {
           {view === "login" && (
             <>
               <div className="mb-8">
-                <p className="sera-label text-sera-sand/70 mb-2">Organizer Access</p>
-                <h2 className="sera-subheading text-sera-ivory text-2xl">Sign in to Sera</h2>
+                <p className="sera-label text-sera-sand/70 mb-2">Sign in</p>
+                <h2 className="sera-subheading text-sera-ivory text-2xl">Welcome to Sera</h2>
                 <div className="mt-4 h-px w-16 bg-sera-sand/30" />
               </div>
               <form onSubmit={handleLogin} className="space-y-5">
@@ -155,21 +169,27 @@ export default function Login() {
                   </div>
                 </div>
                 {loginMessage && <p className="text-xs text-sera-sand">{loginMessage}</p>}
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => setView("forgot")}
-                    className="text-xs text-sera-sand/75 hover:text-sera-ivory transition-colors font-sans"
-                  >
-                    Forgot password?
-                  </button>
-                </div>
                 <Button variant="sera-ivory" size="lg" className="w-full" type="submit" disabled={isLoggingIn}>
-                  {isLoggingIn ? "Signing in..." : "Continue"}
+                  {isLoggingIn ? "Signing in…" : "Continue"}
                 </Button>
               </form>
+
+              <div className="mt-6 flex items-center gap-3">
+                <div className="h-px flex-1 bg-sera-sand/20" />
+                <span className="text-[10px] uppercase tracking-[0.2em] text-sera-sand/60">or</span>
+                <div className="h-px flex-1 bg-sera-sand/20" />
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setView("magic")}
+                className="mt-6 w-full text-center text-sera-sand hover:text-sera-ivory text-sm transition-colors underline underline-offset-4"
+              >
+                Email me a magic link
+              </button>
+
               <p className="mt-8 text-center text-xs text-sera-sand/90">
-                Need invite-only access?{" "}
+                No account?{" "}
                 <Link
                   to="/request-access"
                   className="text-sera-sand hover:text-sera-ivory transition-colors underline underline-offset-4"
@@ -177,13 +197,10 @@ export default function Login() {
                   Request an invitation
                 </Link>
               </p>
-              <p className="mt-2 text-center text-xs text-sera-sand/90">
-                Are you the owner? <span className="text-sera-sand">Use your master account to sign in.</span>
-              </p>
             </>
           )}
 
-          {view === "forgot" && !forgotSent && (
+          {view === "magic" && (
             <>
               <button
                 type="button"
@@ -191,59 +208,53 @@ export default function Login() {
                 className="flex items-center gap-2 text-sera-sand/70 hover:text-sera-ivory transition-colors text-xs mb-8"
               >
                 <ArrowLeft size={14} />
-                <span className="font-sans">Back to login</span>
+                <span className="font-sans">Back</span>
               </button>
               <div className="mb-8">
-                <p className="sera-label text-sera-sand/70 mb-2">Password Reset</p>
-                <h2 className="sera-subheading text-sera-ivory text-2xl">Reset your password</h2>
+                <p className="sera-label text-sera-sand/70 mb-2">Magic link</p>
+                <h2 className="sera-subheading text-sera-ivory text-2xl">Sign in by email</h2>
                 <div className="mt-4 h-px w-16 bg-sera-sand/30" />
                 <p className="sera-body text-sera-sand/80 text-sm mt-3">
-                  Enter your email address and we&apos;ll send you a link to reset your password.
+                  We&apos;ll send a one-tap sign-in link to your inbox.
                 </p>
               </div>
-              <form onSubmit={handleForgot} className="space-y-5">
+              <form onSubmit={handleMagic} className="space-y-5">
                 <div className="space-y-2">
                   <Label className="sera-label text-sera-sand text-[10px]">Email</Label>
                   <Input
                     type="email"
-                    value={forgotEmail}
-                    onChange={(e) => setForgotEmail(e.target.value)}
+                    value={magicEmail}
+                    onChange={(e) => setMagicEmail(e.target.value)}
                     placeholder="you@example.com"
                     className="bg-sera-navy/55 border-sera-sand/25 text-sera-ivory placeholder:text-sera-sand/45 rounded-none h-11 font-sans text-sm focus:border-sera-sand"
                     required
                   />
                 </div>
-                {forgotMessage && <p className="text-xs text-sera-sand">{forgotMessage}</p>}
-                <Button variant="sera-ivory" size="lg" className="w-full" type="submit" disabled={isSendingReset}>
-                  {isSendingReset ? "Sending..." : "Send Reset Link"}
+                {magicMessage && <p className="text-xs text-sera-sand">{magicMessage}</p>}
+                <Button variant="sera-ivory" size="lg" className="w-full" type="submit" disabled={isSendingMagic}>
+                  {isSendingMagic ? "Sending…" : "Send magic link"}
                 </Button>
               </form>
             </>
           )}
 
-          {view === "forgot" && forgotSent && (
-            <>
+          {view === "magic-sent" && (
+            <div className="text-center py-8">
+              <div className="w-12 h-12 border border-sera-sand/40 rounded-full flex items-center justify-center mx-auto mb-6">
+                <span className="text-sera-ivory text-lg">✓</span>
+              </div>
+              <h2 className="sera-subheading text-sera-ivory text-xl mb-3">Check your email</h2>
+              <p className="sera-body text-sera-sand/80 text-sm">
+                We sent a sign-in link to {magicEmail}. Tap it to enter Sera.
+              </p>
               <button
                 type="button"
-                onClick={() => {
-                  setView("login");
-                  setForgotSent(false);
-                }}
-                className="flex items-center gap-2 text-sera-sand/70 hover:text-sera-ivory transition-colors text-xs mb-8"
+                onClick={() => setView("login")}
+                className="mt-6 text-xs text-sera-sand/70 hover:text-sera-ivory underline underline-offset-4"
               >
-                <ArrowLeft size={14} />
-                <span className="font-sans">Back to login</span>
+                Use password instead
               </button>
-              <div className="text-center py-8">
-                <div className="w-12 h-12 border border-sera-sand/40 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="text-sera-ivory text-lg">✓</span>
-                </div>
-                <h2 className="sera-subheading text-sera-ivory text-xl mb-3">Check your email</h2>
-                <p className="sera-body text-sera-sand/80 text-sm">
-                  If an account exists for {forgotEmail}, we&apos;ve sent a password reset link.
-                </p>
-              </div>
-            </>
+            </div>
           )}
         </motion.div>
       </div>

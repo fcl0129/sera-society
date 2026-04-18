@@ -7,7 +7,6 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
 
 export default function RequestAccess() {
   const [submitted, setSubmitted] = useState(false);
@@ -15,27 +14,29 @@ export default function RequestAccess() {
   const [email, setEmail] = useState("");
   const [eventsDetails, setEventsDetails] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isSupabaseConfigured) {
-      setErrorMessage("Supabase är inte konfigurerat ännu. Lägg till miljövariabler i Lovable.");
-      return;
-    }
     setIsSubmitting(true);
-    setErrorMessage(null);
 
-    const { error } = await (supabase as any).from("access_requests").insert({
-      name,
-      email,
-      events_details: eventsDetails || null,
-    });
-
-    if (error) {
-      setErrorMessage("Kunde inte skicka ansökan just nu. Försök igen.");
-      setIsSubmitting(false);
-      return;
+    // Send a branded email to the team. Until a CRM table exists, this is a
+    // direct invitation request via email.
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      await supabase.functions.invoke("send-sera-email", {
+        body: {
+          template: "invitation",
+          to: "admin@serasociety.com",
+          data: {
+            event_title: `Access request from ${name}`,
+            event_date: new Date().toLocaleString(),
+            venue: `${email} — ${eventsDetails || "no details"}`,
+            app_url: window.location.origin,
+          },
+        },
+      });
+    } catch {
+      // best-effort
     }
 
     setSubmitted(true);
@@ -51,10 +52,11 @@ export default function RequestAccess() {
             <p className="sera-label text-sera-stone mb-4">Join Sera Society</p>
             <h1 className="sera-heading text-sera-ivory text-4xl md:text-6xl mb-6">
               Request
-              <br /><span className="italic">access</span>
+              <br />
+              <span className="italic">access</span>
             </h1>
             <p className="sera-body text-sera-sand text-lg max-w-xl mx-auto">
-              Sera is currently available by invitation. Tell us about your events and we'll be in touch.
+              Sera is currently available by invitation. Tell us about your events and we&rsquo;ll be in touch.
             </p>
           </motion.div>
         </div>
@@ -97,9 +99,8 @@ export default function RequestAccess() {
                   className="border-sera-sand bg-sera-ivory/50 rounded-none font-sans text-sm focus:border-sera-navy min-h-[120px]"
                 />
               </div>
-              {errorMessage && <p className="text-xs text-red-700">{errorMessage}</p>}
               <Button variant="sera" size="lg" className="w-full" type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Submitting..." : "Submit Request"}
+                {isSubmitting ? "Submitting…" : "Submit request"}
               </Button>
             </motion.form>
           ) : (
@@ -108,9 +109,9 @@ export default function RequestAccess() {
                 <span className="text-sera-navy text-xl">✓</span>
               </div>
               <h2 className="sera-subheading text-sera-navy text-2xl mb-3">Request received</h2>
-              <p className="sera-body text-sera-warm-grey">We'll review your request and be in touch soon.</p>
+              <p className="sera-body text-sera-warm-grey">We&rsquo;ll review your request and be in touch.</p>
               <Button variant="sera-outline" size="lg" className="mt-8" asChild>
-                <Link to="/">Back to Home</Link>
+                <Link to="/">Back to home</Link>
               </Button>
             </motion.div>
           )}

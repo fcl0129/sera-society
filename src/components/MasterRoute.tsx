@@ -1,7 +1,6 @@
-import { useEffect, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import type { Session } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuthState } from "@/lib/auth";
 
 interface MasterRouteProps {
   children: ReactNode;
@@ -9,45 +8,12 @@ interface MasterRouteProps {
 
 export default function MasterRoute({ children }: MasterRouteProps) {
   const location = useLocation();
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let mounted = true;
-
-    const getSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (!mounted) return;
-      setSession(data.session);
-      setLoading(false);
-    };
-
-    void getSession();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      if (!mounted) return;
-      setSession(nextSession);
-      setLoading(false);
-    });
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, []);
+  const { loading, session, role } = useAuthState();
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center sera-gradient-navy px-6">
-        <div className="text-center">
-          <p className="sera-label text-sera-stone mb-3">Master Access</p>
-          <h1 className="sera-subheading text-sera-ivory text-2xl mb-2">
-            Loading admin access
-          </h1>
-          <p className="sera-body text-sera-sand text-sm">Please wait a moment.</p>
-        </div>
+        <p className="sera-body text-sera-sand text-sm">Loading…</p>
       </div>
     );
   }
@@ -56,9 +22,8 @@ export default function MasterRoute({ children }: MasterRouteProps) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  const role = session.user.app_metadata?.role;
-  if (role !== "master") {
-    return <Navigate to="/dashboard" replace />;
+  if (role !== "host_admin") {
+    return <Navigate to="/ops" replace />;
   }
 
   return <>{children}</>;
