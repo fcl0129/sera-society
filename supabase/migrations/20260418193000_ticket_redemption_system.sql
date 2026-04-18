@@ -22,15 +22,15 @@ BEGIN
       ADD COLUMN IF NOT EXISTS display_name TEXT,
       ADD COLUMN IF NOT EXISTS email TEXT;
 
-    UPDATE public.profiles
-    SET display_name = COALESCE(display_name, full_name)
-    WHERE display_name IS NULL;
+    UPDATE public.profiles AS p
+    SET display_name = COALESCE(p.display_name, p.full_name)
+    WHERE p.display_name IS NULL;
 
-    UPDATE public.profiles
-    SET email = COALESCE(email, lower(auth.users.email))
-    FROM auth.users
-    WHERE auth.users.id = profiles.id
-      AND profiles.email IS NULL;
+    UPDATE public.profiles AS p
+    SET email = COALESCE(p.email, lower(u.email))
+    FROM auth.users AS u
+    WHERE u.id = p.id
+      AND p.email IS NULL;
   END IF;
 END $$;
 
