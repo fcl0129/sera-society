@@ -4,7 +4,6 @@ import Footer from "@/components/Footer";
 
 import HeroSection from "@/components/home/HeroSection";
 import FeaturesSection from "@/components/home/FeaturesSection";
-import InvitationShowcase from "@/components/home/InvitationShowcase";
 import InviteCarouselSection from "@/components/home/InviteCarouselSection";
 import OperationsShowcase from "@/components/home/OperationsShowcase";
 import MobileSection from "@/components/home/MobileSection";
@@ -23,8 +22,6 @@ export default function Index() {
       <FeaturesSection />
 
       <InviteCarouselSection />
-
-      <InvitationShowcase />
 
       <OperationsShowcase />
       <MobileSection />

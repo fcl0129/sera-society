@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface HeroProps extends React.HTMLAttributes<HTMLDivElement> {
-  title: React.ReactNode;
-  subtitle: string;
+  title?: React.ReactNode;
+  subtitle?: string;
   images: { src: string; alt: string }[];
 }
 
@@ -31,6 +31,8 @@ export const HeroSection = React.forwardRef<HTMLDivElement, HeroProps>(
       return () => clearInterval(timer);
     }, [handleNext]);
 
+    const hasHeader = Boolean(title) || Boolean(subtitle?.trim());
+
     return (
       <div
         ref={ref}
@@ -46,14 +48,20 @@ export const HeroSection = React.forwardRef<HTMLDivElement, HeroProps>(
         </div>
 
         <div className="z-10 flex w-full max-w-6xl flex-col items-center text-center space-y-8 md:space-y-12">
-          <div className="space-y-4">
-            <h2 className="sera-heading text-sera-navy text-4xl sm:text-5xl md:text-6xl max-w-4xl">
-              {title}
-            </h2>
-            <p className="sera-body max-w-2xl mx-auto text-muted-foreground md:text-xl">
-              {subtitle}
-            </p>
-          </div>
+          {hasHeader && (
+            <div className="space-y-4">
+              {title && (
+                <h2 className="sera-heading text-sera-navy text-4xl sm:text-5xl md:text-6xl max-w-4xl">
+                  {title}
+                </h2>
+              )}
+              {subtitle?.trim() && (
+                <p className="sera-body max-w-2xl mx-auto text-muted-foreground md:text-xl">
+                  {subtitle}
+                </p>
+              )}
+            </div>
+          )}
 
           <div className="relative w-full h-[350px] md:h-[450px] flex items-center justify-center">
             <div className="relative w-full h-full flex items-center justify-center [perspective:1000px]">

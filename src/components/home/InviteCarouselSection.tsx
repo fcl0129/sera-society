@@ -26,14 +26,8 @@ const invitationMockups = [
 export default function InviteCarouselSection() {
   return (
     <HeroSection
-      title={
-        <>
-          Sera invitation mockups
-          <br />
-          <span className="italic text-sera-oxblood">ready for your next guest list</span>
-        </>
-      }
-      subtitle="Preview your invite styles in a premium carousel and choose the visual tone that fits your event — from formal dinners to after-dark drops."
+      title={null}
+      subtitle=""
       images={invitationMockups}
       className="sera-surface-warm"
     />
