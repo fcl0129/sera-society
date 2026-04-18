@@ -1,0 +1,9 @@
+<svg width="768" height="1152" viewBox="0 0 768 1152" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="768" height="1152" fill="#191A1E"/>
+  <text x="84" y="120" fill="#A55353" font-size="22" font-family="Inter" letter-spacing="7">LIVE EVENT</text>
+  <text x="84" y="700" fill="#F4EEE7" font-size="150" font-family="Cormorant Garamond">AFTER</text>
+  <text x="84" y="820" fill="#C98282" font-size="150" font-style="italic" font-family="Cormorant Garamond">DARK</text>
+  <line x1="84" y1="870" x2="684" y2="870" stroke="#7A6C60" stroke-opacity="0.45" stroke-width="2"/>
+  <text x="84" y="935" fill="#E6D8C8" font-size="28" font-family="Inter">SAT 08.15 · 10PM — LATE</text>
+  <text x="84" y="980" fill="#B7A99A" font-size="22" font-family="Inter">Warehouse 9 · Downtown LA</text>
+</svg>

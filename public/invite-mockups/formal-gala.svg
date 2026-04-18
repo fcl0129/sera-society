@@ -1,0 +1,12 @@
+<svg width="768" height="1152" viewBox="0 0 768 1152" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="768" height="1152" fill="#F4EEE7"/>
+  <rect x="48" y="48" width="672" height="1056" stroke="#1C2B39" stroke-opacity="0.15" stroke-width="2"/>
+  <rect x="72" y="72" width="624" height="1008" stroke="#1C2B39" stroke-opacity="0.08" stroke-width="2"/>
+  <text x="384" y="250" text-anchor="middle" fill="#746B62" font-size="20" font-family="Inter" letter-spacing="6">THE PLEASURE OF YOUR COMPANY</text>
+  <text x="384" y="450" text-anchor="middle" fill="#1C2B39" font-size="108" font-family="Cormorant Garamond">Annual Gala</text>
+  <text x="384" y="540" text-anchor="middle" fill="#6A2A2A" font-size="96" font-style="italic" font-family="Cormorant Garamond">Dinner</text>
+  <line x1="348" y1="610" x2="420" y2="610" stroke="#1C2B39" stroke-opacity="0.3" stroke-width="2"/>
+  <text x="384" y="690" text-anchor="middle" fill="#3D4B58" fill-opacity="0.8" font-size="30" font-style="italic" font-family="Cormorant Garamond">Saturday, the Twelfth of September</text>
+  <text x="384" y="740" text-anchor="middle" fill="#3D4B58" fill-opacity="0.6" font-size="24" font-style="italic" font-family="Cormorant Garamond">Two Thousand Twenty-Six</text>
+  <text x="384" y="820" text-anchor="middle" fill="#746B62" font-size="22" font-family="Inter">Black Tie · 7 o'clock</text>
+</svg>
