@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
-import { Navigate } from "react-router-dom";
-import type { AppRole } from "@/lib/auth";
-import { useAuthState } from "@/lib/auth";
+import { Navigate, useLocation } from "react-router-dom";
+import { landingPathForRole, useAuthState, type AppRole } from "@/lib/auth";
 
 interface RoleRouteProps {
   children: ReactNode;
@@ -10,22 +9,22 @@ interface RoleRouteProps {
 
 export default function RoleRoute({ children, allow }: RoleRouteProps) {
   const { loading, session, role } = useAuthState();
+  const location = useLocation();
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center sera-gradient-navy px-6">
-        <p className="sera-body text-sera-sand text-sm">Loading your access profile...</p>
+        <p className="sera-body text-sera-sand text-sm">Loading…</p>
       </div>
     );
   }
 
   if (!session) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
   if (!role || !allow.includes(role)) {
-    const fallback = role === "host_admin" ? "/ops/host" : role === "bartender" ? "/ops/bartender" : "/ops/guest";
-    return <Navigate to={fallback} replace />;
+    return <Navigate to={landingPathForRole(role)} replace />;
   }
 
   return <>{children}</>;
