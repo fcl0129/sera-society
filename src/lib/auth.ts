@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-export type AppRole = "host_admin" | "bartender" | "guest";
+export type AppRole = "host_admin" | "organizer" | "admin" | "bartender" | "guest";
 
 export type AuthState = {
   loading: boolean;
@@ -31,8 +31,8 @@ export async function resolveUserRole(
     .maybeSingle();
 
   const profileRole = profile?.role as AppRole | undefined;
-  if (profileRole === "host_admin" || profileRole === "bartender" || profileRole === "guest") {
-    return profileRole;
+  if (["host_admin", "organizer", "admin", "bartender", "guest"].includes(profileRole ?? "")) {
+    return profileRole as AppRole;
   }
 
   if (!isAllowlistedAdmin(normalizedEmail)) {
@@ -120,7 +120,7 @@ export function useAuthState(): AuthState {
 }
 
 export function landingPathForRole(role: AppRole | null): string {
-  if (role === "host_admin") return "/ops/host";
+  if (role === "host_admin" || role === "organizer" || role === "admin") return "/ops/host";
   if (role === "bartender") return "/ops/bartender";
   return "/ops/guest";
 }
