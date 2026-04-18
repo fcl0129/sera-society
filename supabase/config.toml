@@ -1,10 +1,14 @@
 project_id = "vzlfodtloglreyojpdgi"
 
 [auth]
-enable_signup = false
+enable_signup = true
 
 [functions]
   [functions.auth-email-hook]
     verify_jwt = false
   [functions.process-email-queue]
+    verify_jwt = false
+  [functions.send-sera-email]
+    verify_jwt = false
+  [functions.redeem-ticket]
     verify_jwt = false
