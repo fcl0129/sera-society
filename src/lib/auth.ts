@@ -17,6 +17,40 @@ const ADMIN_ALLOWLIST = ["admin@serasociety.com"];
 const isAllowlistedAdmin = (email: string | null | undefined) =>
   !!email && ADMIN_ALLOWLIST.includes(email.toLowerCase());
 
+export async function resolveUserRole(
+  userId: string | null | undefined,
+  email: string | null | undefined
+): Promise<AppRole> {
+  if (!userId) return "guest";
+
+  const normalizedEmail = email?.trim().toLowerCase() ?? null;
+  const { data: profile } = await (supabase as any)
+    .from("profiles")
+    .select("role")
+    .eq("id", userId)
+    .maybeSingle();
+
+  const profileRole = profile?.role as AppRole | undefined;
+  if (profileRole === "host_admin" || profileRole === "bartender" || profileRole === "guest") {
+    return profileRole;
+  }
+
+  if (!isAllowlistedAdmin(normalizedEmail)) {
+    return "guest";
+  }
+
+  await (supabase as any).from("profiles").upsert(
+    {
+      id: userId,
+      email: normalizedEmail,
+      role: "host_admin",
+    },
+    { onConflict: "id" }
+  );
+
+  return "host_admin";
+}
+
 export function useAuthState(): AuthState {
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
@@ -46,17 +80,7 @@ export function useAuthState(): AuthState {
 
       if (!active) return;
 
-      let resolvedRole: AppRole = (profile?.role as AppRole | undefined) ?? "guest";
-
-      // Hardcoded admin allowlist: ensure this account is host_admin even if
-      // the profile row hasn't been backfilled yet.
-      if (isAllowlistedAdmin(currentSession.user.email) && resolvedRole !== "host_admin") {
-        await (supabase as any)
-          .from("profiles")
-          .update({ role: "host_admin" })
-          .eq("id", currentSession.user.id);
-        resolvedRole = "host_admin";
-      }
+      const resolvedRole = await resolveUserRole(currentSession.user.id, currentSession.user.email);
 
       setRole(resolvedRole);
       setFullName(profile?.full_name ?? null);
