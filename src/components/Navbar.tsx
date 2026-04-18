@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 const navLinks = [
   { label: "Platform", href: "/platform" },
@@ -16,15 +16,32 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const isHome = location.pathname === "/";
+  const shouldReduceMotion = useReducedMotion();
+  const mobileMenuId = useId();
+  const mobileMenuAnimation = shouldReduceMotion
+    ? { opacity: 1, height: "auto" as const }
+    : { opacity: 0, height: 0 };
+
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname]);
 
   return (
     <nav
+      aria-label="Primary"
       className={`fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300 ${
         isHome
           ? "bg-sera-deep-navy/70 border-sera-ivory/10 backdrop-blur-xl"
           : "bg-sera-ivory/95 border-sera-navy/10 backdrop-blur-xl"
       }`}
     >
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-sera-accent focus:px-3 focus:py-2 focus:text-sera-ink"
+      >
+        Skip to main content
+      </a>
+
       <div className="max-w-7xl mx-auto px-6 pt-2 pb-4">
         <div
           className={`hidden md:flex items-center justify-between mb-3 text-[10px] tracking-[0.16em] uppercase ${
@@ -54,19 +71,24 @@ export default function Navbar() {
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                to={link.href}
-                className={`sera-label transition-colors ${
-                  isHome
-                    ? "text-sera-sand/85 hover:text-sera-ivory"
-                    : "text-sera-navy/70 hover:text-sera-navy"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = location.pathname === link.href;
+
+              return (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  aria-current={isActive ? "page" : undefined}
+                  className={`sera-label transition-colors ${
+                    isHome
+                      ? "text-sera-sand/85 hover:text-sera-ivory"
+                      : "text-sera-navy/70 hover:text-sera-navy"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </div>
 
           <div className="hidden md:flex items-center gap-3">
@@ -79,9 +101,12 @@ export default function Navbar() {
           </div>
 
           <button
-            onClick={() => setOpen(!open)}
+            type="button"
+            onClick={() => setOpen((prev) => !prev)}
             className={`md:hidden ${isHome ? "text-sera-ivory" : "text-sera-navy"}`}
             aria-label="Toggle menu"
+            aria-expanded={open}
+            aria-controls={mobileMenuId}
           >
             {open ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -91,29 +116,39 @@ export default function Navbar() {
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
+            id={mobileMenuId}
+            initial={shouldReduceMotion ? false : mobileMenuAnimation}
             animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
+            exit={mobileMenuAnimation}
             className={`md:hidden border-t overflow-hidden ${
               isHome ? "bg-sera-deep-navy border-sera-ink" : "bg-sera-ivory border-sera-navy/10"
             }`}
           >
             <div className="px-6 py-6 flex flex-col gap-4">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  to={link.href}
-                  onClick={() => setOpen(false)}
-                  className={`sera-label transition-colors py-2 ${
-                    isHome
-                      ? "text-sera-sand hover:text-sera-ivory"
-                      : "text-sera-warm-grey hover:text-sera-navy"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <div className={`pt-4 border-t flex flex-col gap-3 ${isHome ? "border-sera-ink" : "border-sera-navy/10"}`}>
+              {navLinks.map((link) => {
+                const isActive = location.pathname === link.href;
+
+                return (
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    onClick={() => setOpen(false)}
+                    aria-current={isActive ? "page" : undefined}
+                    className={`sera-label transition-colors py-2 ${
+                      isHome
+                        ? "text-sera-sand hover:text-sera-ivory"
+                        : "text-sera-warm-grey hover:text-sera-navy"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+              <div
+                className={`pt-4 border-t flex flex-col gap-3 ${
+                  isHome ? "border-sera-ink" : "border-sera-navy/10"
+                }`}
+              >
                 <Button variant={isHome ? "sera-ivory" : "sera-outline"} asChild>
                   <Link to="/login" onClick={() => setOpen(false)}>
                     Log in

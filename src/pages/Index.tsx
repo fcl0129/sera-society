@@ -14,25 +14,27 @@ import ScrollStorySection from "@/components/home/ScrollStorySection";
 
 export default function Index() {
   return (
-   <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
       <Navbar />
 
-      <HeroSection />
+      <main id="main-content">
+        <HeroSection />
 
-      <ScrollStorySection />
-      <ExperienceSection />
-      <InvitationShowcase />
+        <ScrollStorySection />
+        <ExperienceSection />
+        <InvitationShowcase />
 
-      {/* Tier plans */}
-      <TierSection />
+        {/* Tier plans */}
+        <TierSection />
 
-      <FeaturesSection />
+        <FeaturesSection />
 
-      <InviteCarouselSection />
+        <InviteCarouselSection />
 
-      <OperationsShowcase />
-      <MobileSection />
-      <CtaSection />
+        <OperationsShowcase />
+        <MobileSection />
+        <CtaSection />
+      </main>
 
       <Footer />
     </div>
