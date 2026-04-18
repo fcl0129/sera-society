@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Glass } from "@/components/ui/glass";
 
 const liveMetrics = [
-  ["RSVP confirmations", "92%"],
-  ["Guests checked in", "184"],
-  ["Tickets redeemed", "347"],
-  ["Avg. entry wait", "38 sec"],
+  ["RSVP confirmations", "92.4%", "+1.8% / 5m"],
+  ["Guests checked in", "184", "Gate throughput 26/min"],
+  ["Tickets redeemed", "347", "Sync < 1.2s"],
+  ["Avg. entry wait", "00:38", "-00:06 vs last wave"],
 ] as const;
 
 export default function HeroSection() {
@@ -34,7 +34,13 @@ export default function HeroSection() {
           transition={{ duration: 0.6 }}
         >
           <Glass strength="default" className="border-white/15 bg-sera-deep-navy/50 p-6 sm:p-8 lg:p-10">
-            <p className="sera-label mb-5 text-sera-sand/80">Sera · Operating system for modern hospitality</p>
+            <div className="mb-5 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-sera-sand/80">
+              <span className="sera-label">Sera · Operating system for modern hospitality</span>
+              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/30 bg-emerald-300/10 px-2 py-1 font-mono text-emerald-200/95">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-200" />
+                Live
+              </span>
+            </div>
 
             <h1 className="sera-heading text-balance text-4xl leading-[0.98] text-white sm:text-5xl lg:text-7xl">
               Run every guest touchpoint from one event operating interface.
@@ -46,10 +52,10 @@ export default function HeroSection() {
             </p>
 
             <div className="mt-8 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-              <Button variant="sera-ivory" size="xl" asChild>
+              <Button variant="sera-ivory" size="xl" className="transition-transform duration-200 hover:-translate-y-0.5" asChild>
                 <Link to="/request-access">Request Access</Link>
               </Button>
-              <Button variant="sera-outline" size="xl" asChild>
+              <Button variant="sera-outline" size="xl" className="transition-transform duration-200 hover:-translate-y-0.5" asChild>
                 <Link
                   to="/platform"
                   className="border-sera-ivory/60 text-sera-ivory hover:bg-sera-ivory hover:text-sera-navy"
@@ -70,28 +76,36 @@ export default function HeroSection() {
           <Glass strength="strong" glow className="border-white/20 bg-sera-charcoal/55 p-5 sm:p-6 lg:p-7">
             <div className="mb-5 flex items-center justify-between border-b border-sera-ivory/15 pb-4">
               <p className="sera-label text-sera-sand/75">Live Event Preview</p>
-              <span className="rounded-full border border-emerald-300/35 bg-emerald-300/10 px-2 py-1 text-[10px] uppercase tracking-[0.2em] text-emerald-200">
+              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/35 bg-emerald-300/10 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-200">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-200" />
                 Session Active
               </span>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              {liveMetrics.map(([label, value]) => (
+              {liveMetrics.map(([label, value, note]) => (
                 <Glass
                   key={label}
                   strength="light"
-                  className="border-white/10 bg-sera-navy/45 p-4"
+                  className="border-white/10 bg-sera-navy/45 p-4 transition-all duration-200 hover:border-white/20 hover:bg-sera-navy/55"
                 >
                   <p className="text-xs uppercase tracking-[0.15em] text-sera-sand/70">{label}</p>
-                  <p className="sera-metric mt-2 text-sera-ivory">{value}</p>
+                  <p className="sera-metric mt-2 font-mono tracking-tight text-sera-ivory">{value}</p>
+                  <p className="mt-1 font-mono text-[11px] text-sera-sand/70">{note}</p>
                 </Glass>
               ))}
             </div>
 
             <div className="mt-5 border border-white/10 bg-sera-deep-navy/65 p-4">
-              <p className="sera-label text-sera-sand/70">Now Monitoring</p>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="sera-label text-sera-sand/70">Now Monitoring</p>
+                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-sera-sand/65">Session ID · SERA-0418</p>
+              </div>
               <p className="mt-2 text-sm text-sera-sand/90">
                 Spring Collection Launch · Main Entrance, VIP Lane, and Bar Station connected.
+              </p>
+              <p className="mt-3 border-t border-white/10 pt-3 font-mono text-[11px] text-sera-sand/70">
+                Last sync 20:46:12 UTC
               </p>
             </div>
           </Glass>

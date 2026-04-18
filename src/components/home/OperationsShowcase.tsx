@@ -6,21 +6,29 @@ const ops = [
     icon: ScanLine,
     title: "Door scanning",
     desc: "Unique credentials verify instantly to keep queues moving.",
+    metric: "26 scans/min",
+    state: "Nominal",
   },
   {
     icon: Smartphone,
     title: "Tap check-in",
     desc: "NFC flows accelerate return guests and VIP entry moments.",
+    metric: "02.1s avg tap",
+    state: "Live",
   },
   {
     icon: Beer,
     title: "Live redemption",
     desc: "Hospitality allocations update immediately at every service station.",
+    metric: "347 redeemed",
+    state: "Syncing",
   },
   {
     icon: UserCheck,
     title: "Attendance view",
     desc: "Hosts and operators share one real-time picture of room momentum.",
+    metric: "184 in venue",
+    state: "Updated",
   },
 ];
 
@@ -43,15 +51,25 @@ export default function OperationsShowcase() {
           {ops.map((op, i) => (
             <motion.article
               key={op.title}
-              className="rounded-2xl border border-white/15 bg-white/5 p-6"
+              className="rounded-2xl border border-white/15 bg-white/5 p-6 transition-colors duration-200 hover:border-white/25 hover:bg-white/[0.07]"
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -2 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.05 }}
             >
-              <op.icon className="mb-4 h-5 w-5 text-sera-oxblood-soft" strokeWidth={1.7} />
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <op.icon className="h-5 w-5 text-sera-oxblood-soft" strokeWidth={1.7} />
+                <span className="inline-flex items-center gap-1 rounded-full border border-white/20 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.15em] text-sera-sand/85">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-200/85" />
+                  {op.state}
+                </span>
+              </div>
               <h3 className="sera-subheading text-xl text-sera-ivory">{op.title}</h3>
               <p className="sera-body mt-2 text-sm text-sera-stone">{op.desc}</p>
+              <div className="mt-4 border-t border-white/10 pt-3 font-mono text-[11px] uppercase tracking-[0.14em] text-sera-sand/75">
+                {op.metric}
+              </div>
             </motion.article>
           ))}
         </div>
