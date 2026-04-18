@@ -1,80 +1,79 @@
 import { motion } from "framer-motion";
-import { CalendarDays, Palette, Users, Globe, Ticket, ShieldCheck } from "lucide-react";
+import { CalendarDays, Palette, Users, ScanLine, Ticket, ShieldCheck } from "lucide-react";
 
 const features = [
   {
     icon: CalendarDays,
     title: "Event architecture",
-    desc: "Shape each gathering with intentional structure—capacity, pacing, and timeline in one control plane.",
+    desc: "Configure schedules, access rules, and event structure in one place.",
   },
   {
     icon: Palette,
-    title: "Editorial invitation studio",
-    desc: "Build distinctive invitation systems with expressive typography, layout rhythm, and art direction.",
+    title: "Invitation direction",
+    desc: "Design visual systems that stay consistent from first invite to event page.",
   },
   {
     icon: Users,
     title: "Guest intelligence",
-    desc: "Track attendance, plus-ones, preferences, and segments with live clarity before doors open.",
+    desc: "Track attendance intent, plus-ones, and segments before doors open.",
   },
   {
-    icon: Globe,
-    title: "Narrative event pages",
-    desc: "Publish immersive event pages that feel like magazines, not generic registration forms.",
+    icon: ScanLine,
+    title: "Fast check-in",
+    desc: "Verify guests in seconds with clear status and role-aware access.",
   },
   {
     icon: Ticket,
-    title: "Cashless hospitality",
-    desc: "Issue drink allocations and benefits digitally, with redemptions synced to every station in real time.",
+    title: "Redemption controls",
+    desc: "Issue and validate hospitality allocations with live remaining counts.",
   },
   {
     icon: ShieldCheck,
-    title: "Door precision",
-    desc: "Coordinate hosts, staff, and bar teams with one source of truth for access and status.",
+    title: "Staff alignment",
+    desc: "Keep hosts, door teams, and service stations synced on one event state.",
   },
+];
+
+const metrics = [
+  { label: "Surface area", value: "One system" },
+  { label: "Ops visibility", value: "Live" },
+  { label: "Staff context", value: "Role-based" },
 ];
 
 export default function FeaturesSection() {
   return (
-    <section className="py-24 md:py-32 bg-sera-ivory">
-      <div className="max-w-7xl mx-auto px-6">
-        <motion.div
-          className="grid lg:grid-cols-[0.8fr_1.2fr] gap-12 mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
+    <section className="sera-section px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
           <div>
-            <p className="sera-label text-sera-oxblood mb-4">System Capabilities</p>
-            <h2 className="sera-heading text-sera-navy text-4xl md:text-6xl leading-[0.98]">
-              Tools for hosts
-              <br />
-              with a point
-              <br />
-              <span className="italic">of view</span>
-            </h2>
+            <p className="sera-label mb-4 text-sera-stone">How it works</p>
+            <h2 className="sera-heading text-3xl text-sera-navy sm:text-4xl">A single product, not a stack of tools</h2>
           </div>
-          <p className="sera-body text-sera-warm-grey text-lg max-w-2xl lg:pt-16">
-            We designed Sera to feel like an editorial suite and an operations desk at once. Every
-            feature is crafted to support a sharper brand expression and cleaner event execution.
-          </p>
-        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border border-sera-sand/70">
+          <div className="grid grid-cols-3 gap-3">
+            {metrics.map((metric) => (
+              <div key={metric.label} className="rounded-xl border border-white/35 bg-white/40 p-4 text-center backdrop-blur-md">
+                <p className="text-xs uppercase tracking-[0.15em] text-sera-warm-grey">{metric.label}</p>
+                <p className="mt-2 text-sm font-medium text-sera-navy">{metric.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {features.map((feature, i) => (
-            <motion.div
+            <motion.article
               key={feature.title}
-              className="group p-8 md:p-9 border-b border-sera-sand/70 md:[&:nth-child(odd)]:border-r lg:[&:not(:nth-child(3n))]:border-r lg:[&:nth-last-child(-n+3)]:border-b-0 md:[&:nth-last-child(-n+2)]:border-b-0"
-              initial={{ opacity: 0, y: 20 }}
+              className="rounded-2xl border border-sera-sand/70 bg-sera-ivory/60 p-6"
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.45, delay: i * 0.06 }}
+              transition={{ duration: 0.4, delay: i * 0.05 }}
             >
-              <feature.icon className="w-5 h-5 text-sera-oxblood mb-5" strokeWidth={1.6} />
-              <h3 className="sera-subheading text-sera-navy text-2xl mb-3 leading-tight">{feature.title}</h3>
-              <p className="sera-body text-sera-warm-grey text-sm">{feature.desc}</p>
-            </motion.div>
+              <feature.icon className="mb-4 h-5 w-5 text-sera-oxblood" strokeWidth={1.7} />
+              <h3 className="sera-subheading text-xl text-sera-navy">{feature.title}</h3>
+              <p className="sera-body mt-2 text-sm text-sera-warm-grey">{feature.desc}</p>
+            </motion.article>
           ))}
         </div>
       </div>
