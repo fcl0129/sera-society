@@ -14,7 +14,7 @@ const liveMetrics = [
 
 export default function HeroSection() {
   return (
-    <section className="relative overflow-hidden pb-20 pt-36 md:pb-28 md:pt-44">
+    <section className="relative overflow-hidden pb-16 pt-32 md:pb-28 md:pt-44">
       <div
         aria-hidden="true"
         className="absolute inset-0"
@@ -33,11 +33,11 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <Glass strength="default" className="border-white/15 bg-sera-deep-navy/50 p-6 sm:p-8 lg:p-10">
+          <Glass strength="default" className="border-white/20 bg-sera-deep-navy/70 p-6 sm:p-8 lg:p-10">
             <div className="mb-5 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-sera-sand/80">
               <span className="sera-label">Sera · Operating system for modern hospitality</span>
               <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/30 bg-emerald-300/10 px-2 py-1 font-mono text-emerald-200/95">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-200" />
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-200 motion-reduce:animate-none" />
                 Live
               </span>
             </div>
@@ -58,7 +58,7 @@ export default function HeroSection() {
               <Button variant="sera-outline" size="xl" className="transition-transform duration-200 hover:-translate-y-0.5" asChild>
                 <Link
                   to="/platform"
-                  className="border-sera-ivory/60 text-sera-ivory hover:bg-sera-ivory hover:text-sera-navy"
+                  className="border-sera-ivory/70 text-sera-ivory hover:bg-sera-ivory hover:text-sera-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sera-ivory focus-visible:ring-offset-2 focus-visible:ring-offset-sera-deep-navy"
                 >
                   Explore Platform <ArrowUpRight />
                 </Link>
@@ -73,11 +73,11 @@ export default function HeroSection() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.7, delay: 0.12 }}
         >
-          <Glass strength="strong" glow className="border-white/20 bg-sera-charcoal/55 p-5 sm:p-6 lg:p-7">
+          <Glass strength="default" glow className="border-white/20 bg-sera-charcoal/65 p-5 sm:p-6 lg:p-7">
             <div className="mb-5 flex items-center justify-between border-b border-sera-ivory/15 pb-4">
               <p className="sera-label text-sera-sand/75">Live Event Preview</p>
               <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/35 bg-emerald-300/10 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-200">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-200" />
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-200 motion-reduce:animate-none" />
                 Session Active
               </span>
             </div>
@@ -87,7 +87,7 @@ export default function HeroSection() {
                 <Glass
                   key={label}
                   strength="light"
-                  className="border-white/10 bg-sera-navy/45 p-4 transition-all duration-200 hover:border-white/20 hover:bg-sera-navy/55"
+                  className="border-white/15 bg-sera-navy/65 p-4 transition-all duration-200 hover:border-white/25 hover:bg-sera-navy/70"
                 >
                   <p className="text-xs uppercase tracking-[0.15em] text-sera-sand/70">{label}</p>
                   <p className="sera-metric mt-2 font-mono tracking-tight text-sera-ivory">{value}</p>

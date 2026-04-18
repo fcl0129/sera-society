@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MotionConfig } from "framer-motion";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -25,55 +26,57 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
+    <MotionConfig reducedMotion="user">
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
 
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
 
-          <Route path="/platform" element={<Platform />} />
-          <Route path="/invitations" element={<Invitations />} />
-          <Route path="/event-pages" element={<EventPages />} />
+            <Route path="/platform" element={<Platform />} />
+            <Route path="/invitations" element={<Invitations />} />
+            <Route path="/event-pages" element={<EventPages />} />
 
-          <Route path="/request-access" element={<RequestAccess />} />
+            <Route path="/request-access" element={<RequestAccess />} />
 
-          <Route path="/ops" element={<OpsHome />} />
-          <Route
-            path="/ops/host"
-            element={
-              <RoleRoute allow={["host_admin", "organizer", "admin"]}>
-                <HostAdminDashboard />
-              </RoleRoute>
-            }
-          />
-          <Route
-            path="/ops/bartender"
-            element={
-              <RoleRoute allow={["bartender", "host_admin", "organizer", "admin"]}>
-                <BartenderPanel />
-              </RoleRoute>
-            }
-          />
-          <Route
-            path="/ops/guest"
-            element={
-              <RoleRoute allow={["guest", "host_admin", "bartender", "organizer", "admin"]}>
-                <GuestEventPage />
-              </RoleRoute>
-            }
-          />
+            <Route path="/ops" element={<OpsHome />} />
+            <Route
+              path="/ops/host"
+              element={
+                <RoleRoute allow={["host_admin", "organizer", "admin"]}>
+                  <HostAdminDashboard />
+                </RoleRoute>
+              }
+            />
+            <Route
+              path="/ops/bartender"
+              element={
+                <RoleRoute allow={["bartender", "host_admin", "organizer", "admin"]}>
+                  <BartenderPanel />
+                </RoleRoute>
+              }
+            />
+            <Route
+              path="/ops/guest"
+              element={
+                <RoleRoute allow={["guest", "host_admin", "bartender", "organizer", "admin"]}>
+                  <GuestEventPage />
+                </RoleRoute>
+              }
+            />
 
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/faq" element={<Faq />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/faq" element={<Faq />} />
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </MotionConfig>
   </QueryClientProvider>
 );
 

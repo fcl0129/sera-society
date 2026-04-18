@@ -51,7 +51,7 @@ export default function OperationsShowcase() {
           {ops.map((op, i) => (
             <motion.article
               key={op.title}
-              className="rounded-2xl border border-white/15 bg-white/5 p-6 transition-colors duration-200 hover:border-white/25 hover:bg-white/[0.07]"
+              className="rounded-2xl border border-white/20 bg-white/10 p-5 sm:p-6 transition-colors duration-200 hover:border-white/30 hover:bg-white/[0.12]"
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               whileHover={{ y: -2 }}
@@ -60,8 +60,8 @@ export default function OperationsShowcase() {
             >
               <div className="mb-4 flex items-center justify-between gap-3">
                 <op.icon className="h-5 w-5 text-sera-oxblood-soft" strokeWidth={1.7} />
-                <span className="inline-flex items-center gap-1 rounded-full border border-white/20 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.15em] text-sera-sand/85">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-200/85" />
+                <span className="inline-flex items-center gap-1 rounded-full border border-white/25 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.15em] text-sera-sand/90">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-200/85 motion-reduce:animate-none" />
                   {op.state}
                 </span>
               </div>

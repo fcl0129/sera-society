@@ -43,7 +43,7 @@ export default function ExperienceSection() {
           {stages.map((stage, i) => (
             <motion.article
               key={stage.step}
-              className="rounded-2xl border border-white/35 bg-white/45 p-6 backdrop-blur-md"
+              className="rounded-2xl border border-white/45 bg-white/60 p-5 sm:p-6 backdrop-blur-sm"
               initial={{ opacity: 0, y: 14 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

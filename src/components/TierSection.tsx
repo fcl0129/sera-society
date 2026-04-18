@@ -111,7 +111,7 @@ function TierCard({ tier }: { tier: Tier }) {
   return (
     <div
       className={cx(
-        "group relative overflow-hidden rounded-2xl p-8 md:p-9",
+        "group relative overflow-hidden rounded-2xl p-6 sm:p-8 md:p-9",
         "bg-sera-charcoal/85",
         "border transition-all duration-300 ease-out",
         isHighlight
@@ -166,7 +166,7 @@ function TierCard({ tier }: { tier: Tier }) {
         </Button>
 
         <details className="group/details mt-6">
-          <summary className="cursor-pointer list-none select-none inline-flex items-center gap-2 sera-body text-sera-mist/70 hover:text-sera-ivory transition text-sm">
+          <summary className="cursor-pointer list-none select-none inline-flex items-center gap-2 rounded-sm sera-body text-sera-mist/70 transition text-sm hover:text-sera-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sera-ivory focus-visible:ring-offset-2 focus-visible:ring-offset-sera-charcoal">
             <span className="underline underline-offset-4 decoration-sera-mist/25 group-hover/details:decoration-sera-mist/50">
               Read more
             </span>

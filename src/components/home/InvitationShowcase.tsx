@@ -44,7 +44,7 @@ export default function InvitationShowcase() {
           {invitationExamples.map((item, i) => (
             <motion.article
               key={item.id}
-              className="group overflow-hidden rounded-2xl border border-sera-mist/20 bg-sera-navy/70 shadow-[0_28px_70px_-44px_rgba(6,10,18,0.95)] transition-all duration-300 hover:border-sera-mist/35 hover:-translate-y-0.5"
+              className="group overflow-hidden rounded-2xl border border-sera-mist/25 bg-sera-navy/75 shadow-[0_24px_56px_-40px_rgba(6,10,18,0.95)] transition-all duration-300 hover:border-sera-mist/40"
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -53,7 +53,7 @@ export default function InvitationShowcase() {
               <div className="relative">
                 <img src={item.src} alt={item.label} className="aspect-[3/4] w-full object-cover" loading="lazy" />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-sera-charcoal/90 via-sera-charcoal/15 to-transparent" />
-                <span className="absolute left-4 top-4 inline-flex items-center border border-sera-mist/30 bg-sera-charcoal/70 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.16em] text-sera-mist/90 backdrop-blur-sm">
+                <span className="absolute left-4 top-4 inline-flex items-center border border-sera-mist/35 bg-sera-charcoal/80 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.16em] text-sera-mist/95">
                   {item.outputType}
                 </span>
               </div>

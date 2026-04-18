@@ -7,7 +7,7 @@ export default function CtaSection() {
     <section className="sera-section px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl">
         <motion.div
-          className="rounded-3xl border border-white/40 bg-white/45 px-6 py-14 text-center backdrop-blur-md sm:px-10"
+          className="rounded-3xl border border-white/50 bg-white/65 px-5 py-12 text-center backdrop-blur-sm sm:px-10 sm:py-14"
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -22,10 +22,10 @@ export default function CtaSection() {
             and event format.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button variant="sera" size="xl" asChild>
+            <Button variant="sera" size="xl" className="w-full sm:w-auto" asChild>
               <Link to="/request-access">Request Access</Link>
             </Button>
-            <Button variant="sera-outline" size="xl" asChild>
+            <Button variant="sera-outline" size="xl" className="w-full sm:w-auto" asChild>
               <Link to="/login">Organizer Login</Link>
             </Button>
           </div>
