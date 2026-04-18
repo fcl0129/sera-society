@@ -111,58 +111,63 @@ function TierCard({ tier }: { tier: Tier }) {
   return (
     <div
       className={cx(
-        "group relative rounded-2xl p-8 md:p-9",
-        "bg-white/45 backdrop-blur-md",
+        "group relative overflow-hidden rounded-2xl p-8 md:p-9",
+        "bg-sera-charcoal/85",
         "border transition-all duration-300 ease-out",
         isHighlight
-          ? "border-sera-oxblood/40 shadow-[0_20px_60px_-30px_hsl(var(--sera-navy)/0.35)]"
-          : "border-white/40",
-        "hover:border-sera-navy/30 hover:-translate-y-0.5 hover:shadow-[0_24px_70px_-32px_hsl(var(--sera-navy)/0.30)]",
+          ? "border-sera-oxblood/55 shadow-[0_24px_70px_-36px_rgba(6,10,18,0.95)]"
+          : "border-sera-mist/20 shadow-[0_22px_64px_-40px_rgba(6,10,18,0.95)]",
+        "hover:border-sera-mist/35 hover:-translate-y-0.5 hover:shadow-[0_28px_80px_-38px_rgba(6,10,18,0.95)]",
         isDim && "opacity-85 hover:opacity-100"
       )}
     >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(140%_85%_at_50%_0%,rgba(228,211,193,0.13),transparent_56%)]"
+      />
+
       {/* Subtle hairline accent on highlight tier */}
       {isHighlight && (
         <div
           aria-hidden="true"
-          className="absolute left-0 top-0 h-full w-px bg-gradient-to-b from-transparent via-sera-oxblood/60 to-transparent"
+          className="absolute left-0 top-0 h-full w-px bg-gradient-to-b from-transparent via-sera-oxblood/80 to-transparent"
         />
       )}
 
-      <div className="relative">
+      <div className="relative z-10">
         <div className="flex items-start justify-between gap-4 mb-6">
           <div>
-            <p className="sera-label text-sera-oxblood mb-3">{tier.label}</p>
-            <h3 className="sera-subheading text-sera-navy text-2xl md:text-[28px] leading-tight tracking-wide">
+            <p className="sera-label text-sera-mist/70 mb-3">{tier.label}</p>
+            <h3 className="sera-subheading text-sera-ivory text-2xl md:text-[28px] leading-tight tracking-wide">
               {tier.title}
             </h3>
           </div>
 
           {tier.badge ? (
-            <span className="shrink-0 inline-flex items-center px-3 py-1 text-[10px] tracking-[0.14em] uppercase border border-sera-navy/20 bg-sera-navy text-sera-ivory">
+            <span className="shrink-0 inline-flex items-center px-3 py-1 text-[10px] tracking-[0.14em] uppercase border border-sera-oxblood/45 bg-sera-oxblood/20 text-sera-sand">
               {tier.badge}
             </span>
           ) : null}
         </div>
 
         <div className="space-y-2 mb-8">
-          <p className="font-serif italic text-sera-navy text-lg md:text-xl leading-snug">
+          <p className="font-serif italic text-sera-mist text-lg md:text-xl leading-snug">
             {tier.copyHeadline}
           </p>
-          <p className="sera-body text-sera-warm-grey text-sm leading-relaxed">
+          <p className="sera-body text-sera-mist/75 text-sm leading-relaxed">
             {tier.copySub}
           </p>
         </div>
 
-        <div className="h-px w-10 bg-sera-navy/15 mb-6" />
+        <div className="h-px w-10 bg-sera-mist/25 mb-6" />
 
         <Button variant="sera" size="lg" asChild>
           <Link to={tier.href}>{tier.cta}</Link>
         </Button>
 
         <details className="group/details mt-6">
-          <summary className="cursor-pointer list-none select-none inline-flex items-center gap-2 sera-body text-sera-navy/70 hover:text-sera-navy transition text-sm">
-            <span className="underline underline-offset-4 decoration-sera-navy/20 group-hover/details:decoration-sera-navy/50">
+          <summary className="cursor-pointer list-none select-none inline-flex items-center gap-2 sera-body text-sera-mist/70 hover:text-sera-ivory transition text-sm">
+            <span className="underline underline-offset-4 decoration-sera-mist/25 group-hover/details:decoration-sera-mist/50">
               Read more
             </span>
             <span
@@ -177,8 +182,8 @@ function TierCard({ tier }: { tier: Tier }) {
             <ul className="space-y-2.5">
               {tier.bullets.map((item) => (
                 <li key={item} className="flex gap-3">
-                  <span className="mt-[8px] h-1 w-1 rounded-full bg-sera-oxblood/70 shrink-0" />
-                  <p className="sera-body text-sera-warm-grey text-sm leading-relaxed">
+                  <span className="mt-[8px] h-1 w-1 rounded-full bg-sera-oxblood/80 shrink-0" />
+                  <p className="sera-body text-sera-mist/80 text-sm leading-relaxed">
                     {item}
                   </p>
                 </li>
@@ -187,12 +192,12 @@ function TierCard({ tier }: { tier: Tier }) {
 
             {tier.notIncluded?.length ? (
               <div className="mt-6">
-                <p className="sera-label text-sera-stone mb-3">Not included</p>
+                <p className="sera-label text-sera-mist/65 mb-3">Not included</p>
                 <div className="flex flex-wrap gap-2">
                   {tier.notIncluded.map((x) => (
                     <span
                       key={x}
-                      className="text-[11px] px-2.5 py-1 border border-sera-sand/80 bg-sera-beige/40 text-sera-warm-grey"
+                      className="text-[11px] px-2.5 py-1 border border-sera-mist/30 bg-sera-navy/55 text-sera-mist/75"
                     >
                       {x}
                     </span>
@@ -213,7 +218,7 @@ export default function TierSection() {
       <div className="mx-auto w-full max-w-6xl">
         <div className="text-center max-w-2xl mx-auto mb-14 md:mb-16">
           <p className="sera-label text-sera-oxblood mb-4">Plans</p>
-          <h2 className="sera-heading text-sera-navy text-3xl md:text-5xl">
+          <h2 className="sera-heading text-sera-ivory text-3xl md:text-5xl">
             Choose the plan that matches your event operation
           </h2>
         </div>
