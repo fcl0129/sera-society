@@ -111,13 +111,13 @@ function TierCard({ tier }: { tier: Tier }) {
   return (
     <div
       className={cx(
-        "group relative p-8 md:p-9",
-        "bg-sera-ivory/70 backdrop-blur-sm",
+        "group relative rounded-2xl p-8 md:p-9",
+        "bg-white/45 backdrop-blur-md",
         "border transition-all duration-300 ease-out",
         isHighlight
           ? "border-sera-oxblood/40 shadow-[0_20px_60px_-30px_hsl(var(--sera-navy)/0.35)]"
-          : "border-sera-sand/70",
-        "hover:border-sera-navy/30 hover:-translate-y-0.5 hover:shadow-[0_24px_70px_-32px_hsl(var(--sera-navy)/0.45)]",
+          : "border-white/40",
+        "hover:border-sera-navy/30 hover:-translate-y-0.5 hover:shadow-[0_24px_70px_-32px_hsl(var(--sera-navy)/0.30)]",
         isDim && "opacity-85 hover:opacity-100"
       )}
     >
@@ -209,14 +209,12 @@ function TierCard({ tier }: { tier: Tier }) {
 
 export default function TierSection() {
   return (
-    <section className="relative py-24 md:py-32">
-      <div className="mx-auto w-full max-w-6xl px-6">
+    <section className="sera-section px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-6xl">
         <div className="text-center max-w-2xl mx-auto mb-14 md:mb-16">
-          <p className="sera-label text-sera-oxblood mb-4">Plans built for your growth curve</p>
+          <p className="sera-label text-sera-oxblood mb-4">Plans</p>
           <h2 className="sera-heading text-sera-navy text-3xl md:text-5xl">
-            Four plans,
-            <br />
-            <span className="italic">one editorial backbone</span>
+            Choose the plan that matches your event operation
           </h2>
         </div>
 
