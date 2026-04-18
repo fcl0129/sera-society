@@ -25,8 +25,13 @@ import NotFound from "./pages/NotFound";
 import RsvpPage from "./pages/Rsvp";
 
 import ProtectedRoute from "./components/ProtectedRoute";
+import RoleRoute from "./components/RoleRoute";
 import AdminAccessRequests from "./pages/AdminAccessRequests";
 import MasterRoute from "./components/MasterRoute";
+import OpsHome from "./pages/ops/OpsHome";
+import HostAdminDashboard from "./pages/ops/HostAdminDashboard";
+import BartenderPanel from "./pages/ops/BartenderPanel";
+import GuestEventPage from "./pages/ops/GuestEventPage";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +81,38 @@ const App = () => (
           />
 
           <Route path="/request-access" element={<RequestAccess />} />
+
+          <Route
+            path="/ops"
+            element={<OpsHome />}
+          />
+
+          <Route
+            path="/ops/host"
+            element={
+              <RoleRoute allow={["host_admin"]}>
+                <HostAdminDashboard />
+              </RoleRoute>
+            }
+          />
+
+          <Route
+            path="/ops/bartender"
+            element={
+              <RoleRoute allow={["bartender"]}>
+                <BartenderPanel />
+              </RoleRoute>
+            }
+          />
+
+          <Route
+            path="/ops/guest"
+            element={
+              <RoleRoute allow={["guest"]}>
+                <GuestEventPage />
+              </RoleRoute>
+            }
+          />
 
           <Route
             path="/master/access-requests"
