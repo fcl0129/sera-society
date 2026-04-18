@@ -357,22 +357,35 @@ DO $$ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_schema='public' AND table_name='redemptions' AND column_name='event_id'
   ) THEN
-    CREATE POLICY "Redemptions organizer and staff read"
-      ON public.redemptions FOR SELECT
-      TO authenticated
-      USING (
-        EXISTS (SELECT 1 FROM public.events e WHERE e.id = redemptions.event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(), 'host_admin')))
-        OR EXISTS (SELECT 1 FROM public.staff_assignments sa WHERE sa.event_id = redemptions.event_id AND sa.user_id = auth.uid())
-        OR EXISTS (
-          SELECT 1
-          FROM public.tickets t
-          WHERE t.id = redemptions.ticket_id
-            AND (
-              (EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='tickets' AND column_name='owner_user_id') AND t.owner_user_id = auth.uid())
-              OR (EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='tickets' AND column_name='guest_id') AND t.guest_id = auth.uid())
-            )
-        )
-      );
+    IF EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema='public' AND table_name='redemptions' AND column_name='ticket_id'
+    ) THEN
+      CREATE POLICY "Redemptions organizer and staff read"
+        ON public.redemptions FOR SELECT
+        TO authenticated
+        USING (
+          EXISTS (SELECT 1 FROM public.events e WHERE e.id = redemptions.event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(), 'host_admin')))
+          OR EXISTS (SELECT 1 FROM public.staff_assignments sa WHERE sa.event_id = redemptions.event_id AND sa.user_id = auth.uid())
+          OR EXISTS (
+            SELECT 1
+            FROM public.tickets t
+            WHERE t.id = redemptions.ticket_id
+              AND (
+                (EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='tickets' AND column_name='owner_user_id') AND t.owner_user_id = auth.uid())
+                OR (EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='tickets' AND column_name='guest_id') AND t.guest_id = auth.uid())
+              )
+          )
+        );
+    ELSE
+      CREATE POLICY "Redemptions organizer and staff read"
+        ON public.redemptions FOR SELECT
+        TO authenticated
+        USING (
+          EXISTS (SELECT 1 FROM public.events e WHERE e.id = redemptions.event_id AND (e.organizer_id = auth.uid() OR public.has_role(auth.uid(), 'host_admin')))
+          OR EXISTS (SELECT 1 FROM public.staff_assignments sa WHERE sa.event_id = redemptions.event_id AND sa.user_id = auth.uid())
+        );
+    END IF;
   END IF;
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
