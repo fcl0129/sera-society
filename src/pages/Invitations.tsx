@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 import GuestFlowFrame from "@/components/guest/GuestFlowFrame";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, CalendarClock3, MapPin, Ticket } from "lucide-react";
+import { ArrowRight, CalendarClock, MapPin, Ticket } from "lucide-react";
 
 const checklist = [
   "Who this invite is for",
@@ -40,7 +40,7 @@ export default function Invitations() {
               <p className="rounded-2xl bg-sera-surface-light p-3">You're on the list for Saturday, July 12 · Doors at 7:00 PM.</p>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="rounded-2xl border border-sera-sand/60 p-3">
-                  <p className="mb-1 flex items-center gap-2 text-xs text-sera-warm-grey"><CalendarClock3 className="h-3.5 w-3.5" />Arrival window</p>
+                  <p className="mb-1 flex items-center gap-2 text-xs text-sera-warm-grey"><CalendarClock className="h-3.5 w-3.5" />Arrival window</p>
                   <p>7:00 PM — 8:30 PM</p>
                 </div>
                 <div className="rounded-2xl border border-sera-sand/60 p-3">
