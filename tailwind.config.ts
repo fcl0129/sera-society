@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        serif: ["Space Grotesk", "Manrope", "Inter", "system-ui", "sans-serif"],
-        sans: ["Manrope", "Inter", "system-ui", "sans-serif"],
+        serif: ["Fraunces", "Iowan Old Style", "Times New Roman", "serif"],
+        sans: ["Inter", "Avenir Next", "Segoe UI", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"],
       },
       colors: {
@@ -62,6 +62,14 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        status: {
+          success: "hsl(var(--status-success))",
+          "success-soft": "hsl(var(--status-success-soft))",
+          warning: "hsl(var(--status-warning))",
+          "warning-soft": "hsl(var(--status-warning-soft))",
+          info: "hsl(var(--status-info))",
+          "info-soft": "hsl(var(--status-info-soft))",
+        },
         sera: {
           navy: "hsl(var(--sera-navy))",
           "deep-navy": "hsl(var(--sera-deep-navy))",
@@ -101,6 +109,7 @@ export default {
         16: "var(--space-16)",
       },
       boxShadow: {
+        xs: "var(--shadow-xs)",
         soft: "var(--shadow-soft)",
         elevated: "var(--shadow-elevated)",
         glass: "var(--shadow-glass)",
