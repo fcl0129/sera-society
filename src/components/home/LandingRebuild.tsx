@@ -66,26 +66,27 @@ export default function LandingRebuild() {
         <BackgroundPaperShader className="hidden md:block" intensity="balanced" />
         <BackgroundPaperShader className="md:hidden" />
 
-        <section className="relative px-4 pb-20 pt-28 sm:px-6 md:pt-36 lg:px-8">
-          <div className="mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
+        <section className="relative px-4 pb-20 pt-24 sm:px-6 md:pb-20 md:pt-32 lg:px-8 lg:pt-36">
+          <div className="mx-auto grid w-full max-w-6xl gap-12 lg:grid-cols-[1.03fr_0.97fr] lg:items-end lg:gap-14">
             <motion.div
               initial="hidden"
               animate="show"
               variants={sectionReveal}
               transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className="max-w-[39.5rem]"
             >
-              <h1 className="sera-heading max-w-2xl text-4xl leading-tight text-sera-navy sm:text-5xl lg:text-6xl">
+              <h1 className="sera-heading max-w-2xl text-4xl leading-[1.02] text-sera-navy sm:text-5xl lg:text-6xl">
                 Take hosting to the next level
               </h1>
-              <p className="sera-body mt-6 max-w-2xl text-base text-sera-ink/85 sm:text-lg">
+              <p className="sera-body mt-5 max-w-xl text-base text-sera-ink/85 sm:text-lg">
                 Sera is the system behind a seamless event — designed invitations, guest control, event
                 updates, and elegant night-of operations.
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-7 flex flex-col items-start gap-3.5 sm:mt-8 sm:flex-row sm:items-center">
                 <Button
                   variant="sera-ivory"
                   size="xl"
-                  className="transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_24px_-18px_rgba(11,19,36,0.45)]"
+                  className="min-w-[12rem] justify-center transition-[transform,box-shadow,background-color] duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_24px_-18px_rgba(11,19,36,0.45)] focus-visible:ring-sera-navy/30"
                   asChild
                 >
                   <Link to="/request-access">Request Access</Link>
@@ -93,7 +94,7 @@ export default function LandingRebuild() {
                 <Button
                   variant="sera-outline"
                   size="xl"
-                  className="border-sera-navy/30 text-sera-navy transition-[transform,box-shadow,color,background-color] duration-300 hover:-translate-y-0.5 hover:bg-sera-navy hover:text-sera-ivory hover:shadow-[0_14px_24px_-18px_rgba(11,19,36,0.4)]"
+                  className="min-w-[12rem] justify-center border-sera-navy/30 text-sera-navy transition-[transform,box-shadow,color,background-color,border-color] duration-300 hover:-translate-y-0.5 hover:border-sera-navy hover:bg-sera-navy hover:text-sera-ivory hover:shadow-[0_14px_24px_-18px_rgba(11,19,36,0.4)] focus-visible:ring-sera-navy/30"
                   asChild
                 >
                   <Link to="/platform">
@@ -104,15 +105,15 @@ export default function LandingRebuild() {
             </motion.div>
 
             <motion.div
-              className="relative min-h-[360px] sm:min-h-[390px]"
+              className="relative min-h-[340px] sm:min-h-[390px] lg:min-h-[420px]"
               initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               transition={{ duration: 0.65, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
             >
-              <div className="absolute inset-0 -z-10 rounded-[2rem] bg-[radial-gradient(circle_at_25%_15%,rgba(255,255,255,0.85)_0%,rgba(255,255,255,0.28)_42%,transparent_72%)]" />
+              <div className="absolute inset-x-4 bottom-8 top-2 -z-10 rounded-[2rem] bg-[radial-gradient(circle_at_25%_15%,rgba(255,255,255,0.85)_0%,rgba(255,255,255,0.28)_42%,transparent_72%)] sm:inset-x-3 sm:bottom-10 lg:inset-x-4 lg:bottom-12" />
 
               <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.3, ease: "easeOut" }}>
-                <Glass strength="light" className="rounded-3xl border border-white/85 bg-white/72 p-5 shadow-[0_28px_70px_-42px_rgba(11,19,36,0.58)] backdrop-blur-xl sm:p-6">
+                <Glass strength="light" className="relative z-20 mx-auto w-full max-w-[34rem] rounded-3xl border border-white/85 bg-white/72 p-5 shadow-[0_28px_70px_-42px_rgba(11,19,36,0.58)] backdrop-blur-xl sm:p-6 lg:ml-auto lg:mr-3">
                   <div className="flex items-center justify-between border-b border-sera-sand/70 pb-3">
                     <p className="sera-label text-sera-stone">Event control</p>
                     <span className="text-xs uppercase tracking-[0.12em] text-sera-stone">Live session</span>
@@ -134,24 +135,24 @@ export default function LandingRebuild() {
               </motion.div>
 
               <motion.div
-                className="absolute -bottom-4 left-4 right-auto max-w-[220px]"
+                className="absolute -bottom-2 left-0 z-30 max-w-[220px] sm:left-2 lg:-left-4"
                 initial={{ opacity: 0, y: 12, filter: "blur(8px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ duration: 0.45, delay: 0.25 }}
               >
-                <Glass strength="light" className="border-white/75 bg-white/70 p-3 backdrop-blur-md">
+                <Glass strength="light" className="border-white/75 bg-white/70 p-3.5 backdrop-blur-md">
                   <p className="text-[10px] uppercase tracking-[0.16em] text-sera-stone">Door throughput</p>
                   <p className="mt-2 font-mono text-sm text-sera-navy">26 guests/min</p>
                 </Glass>
               </motion.div>
 
               <motion.div
-                className="absolute -right-2 top-8 max-w-[190px]"
+                className="absolute right-0 top-8 z-30 hidden max-w-[198px] sm:block lg:-right-6 lg:top-10"
                 initial={{ opacity: 0, x: 12, filter: "blur(8px)" }}
                 animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
                 transition={{ duration: 0.45, delay: 0.3 }}
               >
-                <Glass strength="light" className="border-white/75 bg-white/68 p-3 backdrop-blur-md">
+                <Glass strength="light" className="border-white/75 bg-white/68 p-3.5 backdrop-blur-md">
                   <p className="text-[10px] uppercase tracking-[0.16em] text-sera-stone">Sync status</p>
                   <p className="mt-2 font-mono text-sm text-sera-navy">All stations online</p>
                 </Glass>
@@ -161,7 +162,7 @@ export default function LandingRebuild() {
         </section>
 
         <motion.section
-          className="relative px-4 py-20 sm:px-6 lg:px-8"
+          className="relative border-t border-sera-sand/55 px-4 py-16 sm:px-6 md:py-20 lg:px-8"
           initial={{ opacity: 0, y: 12, filter: "blur(6px)" }}
           whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           viewport={{ once: true, amount: 0.34 }}
