@@ -28,7 +28,7 @@ export default function Navbar() {
   }, [location.pathname]);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 md:px-6 md:pt-6">
+    <header className="fixed inset-x-0 top-0 z-50 px-4 pt-3 md:px-6 md:pt-5">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-sera-accent focus:px-3 focus:py-2 focus:text-sera-ink"
@@ -37,25 +37,20 @@ export default function Navbar() {
       </a>
 
       <Glass
-        strength="strong"
-        glow
-        className="mx-auto w-full max-w-7xl border-white/20 bg-sera-deep-navy/65 px-4 py-3 md:px-6 transition-colors duration-200 hover:border-white/30"
+        strength="medium"
+        className="mx-auto w-full max-w-7xl border-white/15 bg-sera-deep-navy/52 px-4 py-2.5 md:px-6 md:py-3 transition-colors duration-200 hover:border-white/20"
       >
-        <div className="flex items-center justify-between gap-4">
-          <Link to="/" className="flex min-w-0 flex-col leading-none">
-            <span className="truncate font-serif text-xl font-light tracking-[0.03em] text-sera-ivory md:text-2xl">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:gap-8">
+          <Link to="/" className="flex min-w-0 items-baseline gap-2.5 leading-none md:justify-self-start">
+            <span className="truncate font-serif text-[1.18rem] font-normal tracking-[0.02em] text-sera-ivory md:text-[1.32rem]">
               Sera Society
             </span>
-            <span className="mt-1 text-[10px] uppercase tracking-[0.18em] text-sera-sand/75">
-              Event Operations System
+            <span className="hidden text-[9px] uppercase tracking-[0.18em] text-sera-sand/65 lg:inline">
+              Event Operations
             </span>
           </Link>
 
-          <div className="hidden items-center gap-7 md:flex">
-            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/30 bg-emerald-300/10 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-emerald-200/95">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-200 motion-reduce:animate-none" />
-              Live
-            </span>
+          <nav className="hidden items-center justify-center gap-7 md:flex" aria-label="Primary">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.href;
 
@@ -64,25 +59,30 @@ export default function Navbar() {
                   key={link.href}
                   to={link.href}
                   aria-current={isActive ? "page" : undefined}
-                  className={`sera-label relative rounded-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sera-ivory focus-visible:ring-offset-2 focus-visible:ring-offset-sera-deep-navy after:absolute after:-bottom-1 after:left-0 after:h-px after:w-full after:origin-left after:bg-sera-ivory/70 after:transition-transform after:duration-200 ${
+                  className={`sera-label relative rounded-sm text-[0.66rem] tracking-[0.16em] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sera-ivory focus-visible:ring-offset-2 focus-visible:ring-offset-sera-deep-navy after:absolute after:-bottom-1 after:left-0 after:h-px after:w-full after:origin-left after:bg-sera-ivory/65 after:transition-transform after:duration-200 ${
                     isActive
                       ? "text-sera-ivory after:scale-x-100"
-                      : "text-sera-sand/80 hover:text-sera-ivory after:scale-x-0 hover:after:scale-x-100"
+                      : "text-sera-sand/75 hover:text-sera-ivory after:scale-x-0 hover:after:scale-x-100"
                   }`}
                 >
                   {link.label}
                 </Link>
               );
             })}
-          </div>
+          </nav>
 
-          <div className="hidden items-center gap-3 md:flex">
-            <Button variant="sera-outline" size="sm" className="transition-transform duration-200 hover:-translate-y-0.5" asChild>
-              <Link to="/login" className="border-sera-ivory/60 text-sera-ivory hover:bg-sera-ivory hover:text-sera-navy">
+          <div className="hidden items-center justify-end gap-2.5 md:flex">
+            <Button variant="ghost" size="sm" className="h-8 px-2.5 text-sera-sand/85 hover:bg-white/5 hover:text-sera-ivory" asChild>
+              <Link to="/login" className="sera-label text-[0.64rem] tracking-[0.14em]">
                 Log in
               </Link>
             </Button>
-            <Button variant="sera-accent" size="sm" className="transition-transform duration-200 hover:-translate-y-0.5" asChild>
+            <Button
+              variant="sera-accent"
+              size="sm"
+              className="h-8 rounded-full border border-white/10 bg-sera-oxblood/90 px-4 text-[0.72rem] tracking-[0.06em] text-sera-ivory shadow-none transition-colors duration-200 hover:bg-sera-oxblood-soft"
+              asChild
+            >
               <Link to="/request-access">Request Access</Link>
             </Button>
           </div>
@@ -90,7 +90,7 @@ export default function Navbar() {
           <button
             type="button"
             onClick={() => setOpen((prev) => !prev)}
-            className="rounded-sm text-sera-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sera-ivory focus-visible:ring-offset-2 focus-visible:ring-offset-sera-deep-navy md:hidden"
+            className="rounded-sm p-1 text-sera-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sera-ivory focus-visible:ring-offset-2 focus-visible:ring-offset-sera-deep-navy md:hidden"
             aria-label="Toggle menu"
             aria-expanded={open}
             aria-controls={mobileMenuId}
@@ -106,9 +106,9 @@ export default function Navbar() {
               initial={shouldReduceMotion ? false : mobileMenuAnimation}
               animate={{ opacity: 1, height: "auto" }}
               exit={mobileMenuAnimation}
-              className="mt-4 overflow-hidden border-t border-white/15"
+              className="mt-3 overflow-hidden border-t border-white/10"
             >
-              <div className="flex flex-col gap-3 pt-4">
+              <div className="flex flex-col gap-2.5 pt-3.5">
                 {navLinks.map((link) => {
                   const isActive = location.pathname === link.href;
 
@@ -118,25 +118,29 @@ export default function Navbar() {
                       to={link.href}
                       onClick={() => setOpen(false)}
                       aria-current={isActive ? "page" : undefined}
-                      className={`sera-label rounded-sm py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sera-ivory focus-visible:ring-offset-2 focus-visible:ring-offset-sera-deep-navy ${
-                        isActive ? "text-sera-ivory" : "text-sera-sand hover:text-sera-ivory"
+                      className={`sera-label rounded-sm py-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sera-ivory focus-visible:ring-offset-2 focus-visible:ring-offset-sera-deep-navy ${
+                        isActive ? "text-sera-ivory" : "text-sera-sand/85 hover:text-sera-ivory"
                       }`}
                     >
                       {link.label}
                     </Link>
                   );
                 })}
-                <div className="mt-2 flex flex-col gap-3 border-t border-white/10 pt-4">
-                  <Button variant="sera-outline" asChild>
+                <div className="mt-2 flex flex-col gap-2.5 border-t border-white/10 pt-3.5">
+                  <Button variant="ghost" className="justify-start px-0 text-sera-sand/85 hover:bg-transparent hover:text-sera-ivory" asChild>
                     <Link
                       to="/login"
                       onClick={() => setOpen(false)}
-                      className="border-sera-ivory/60 text-sera-ivory hover:bg-sera-ivory hover:text-sera-navy"
+                      className="sera-label"
                     >
                       Log in
                     </Link>
                   </Button>
-                  <Button variant="sera-accent" asChild>
+                  <Button
+                    variant="sera-accent"
+                    className="h-9 rounded-full border border-white/10 bg-sera-oxblood/90 text-[0.72rem] tracking-[0.06em] shadow-none hover:bg-sera-oxblood-soft"
+                    asChild
+                  >
                     <Link to="/request-access" onClick={() => setOpen(false)}>
                       Request Access
                     </Link>
