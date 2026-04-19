@@ -28,7 +28,7 @@ export default function Navbar() {
   }, [location.pathname]);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-4 pt-3 md:px-6 md:pt-5">
+    <header className="fixed inset-x-0 top-0 z-50 px-4 pt-3 md:px-6 md:pt-4">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-sera-accent focus:px-3 focus:py-2 focus:text-sera-ink"
@@ -38,7 +38,7 @@ export default function Navbar() {
 
       <Glass
         strength="medium"
-        className="mx-auto w-full max-w-7xl border-white/15 bg-sera-deep-navy/52 px-4 py-2.5 md:px-6 md:py-3 transition-colors duration-200 hover:border-white/20"
+        className="mx-auto w-full max-w-6xl border-white/15 bg-sera-deep-navy/52 px-4 py-2.5 md:px-5 md:py-3 transition-colors duration-200 hover:border-white/20"
       >
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:gap-8">
           <Link to="/" className="flex min-w-0 items-baseline gap-2.5 leading-none md:justify-self-start">
