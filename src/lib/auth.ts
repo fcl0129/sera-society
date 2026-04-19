@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-export type AppRole = "host_admin" | "organizer" | "admin" | "bartender" | "guest";
+export type AppRole = "admin" | "host_admin" | "organizer" | "bartender" | "guest";
 
 export type AuthState = {
   loading: boolean;
@@ -13,6 +13,7 @@ export type AuthState = {
 };
 
 const ADMIN_ALLOWLIST = ["admin@serasociety.com"];
+const VALID_ROLES: AppRole[] = ["admin", "host_admin", "organizer", "bartender", "guest"];
 
 const isAllowlistedAdmin = (email: string | null | undefined) =>
   !!email && ADMIN_ALLOWLIST.includes(email.toLowerCase());
@@ -24,6 +25,7 @@ export async function resolveUserRole(
   if (!userId) return "guest";
 
   const normalizedEmail = email?.trim().toLowerCase() ?? null;
+
   const { data: profile } = await (supabase as any)
     .from("profiles")
     .select("role")
@@ -31,24 +33,21 @@ export async function resolveUserRole(
     .maybeSingle();
 
   const profileRole = profile?.role as AppRole | undefined;
-  if (["host_admin", "organizer", "admin", "bartender", "guest"].includes(profileRole ?? "")) {
-    return profileRole as AppRole;
+
+  // If allowlisted admin, ensure profile is at admin level
+  if (isAllowlistedAdmin(normalizedEmail) && profileRole !== "admin" && profileRole !== "host_admin") {
+    await (supabase as any)
+      .from("profiles")
+      .update({ role: "admin" })
+      .eq("id", userId);
+    return "admin";
   }
 
-  if (!isAllowlistedAdmin(normalizedEmail)) {
-    return "guest";
+  if (profileRole && VALID_ROLES.includes(profileRole)) {
+    return profileRole;
   }
 
-  await (supabase as any).from("profiles").upsert(
-    {
-      id: userId,
-      email: normalizedEmail,
-      role: "host_admin",
-    },
-    { onConflict: "id" }
-  );
-
-  return "host_admin";
+  return "guest";
 }
 
 export function useAuthState(): AuthState {
@@ -71,27 +70,26 @@ export function useAuthState(): AuthState {
         return;
       }
 
-      // Fetch role from profiles table (created by trigger on signup)
       const { data: profile } = await (supabase as any)
         .from("profiles")
-        .select("role, full_name, email")
+        .select("full_name")
         .eq("id", currentSession.user.id)
         .maybeSingle();
 
+      const resolvedRole = await resolveUserRole(
+        currentSession.user.id,
+        currentSession.user.email
+      );
+
       if (!active) return;
-
-      const resolvedRole = await resolveUserRole(currentSession.user.id, currentSession.user.email);
-
       setRole(resolvedRole);
       setFullName(profile?.full_name ?? null);
       setLoading(false);
     };
 
-    // Set up listener BEFORE getSession to avoid missing initial event
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      // Defer Supabase calls to avoid deadlock inside the callback
       setTimeout(() => {
         void loadProfile(nextSession);
       }, 0);
@@ -120,7 +118,12 @@ export function useAuthState(): AuthState {
 }
 
 export function landingPathForRole(role: AppRole | null): string {
-  if (role === "host_admin" || role === "organizer" || role === "admin") return "/ops/host";
+  if (role === "admin" || role === "host_admin") return "/admin";
+  if (role === "organizer") return "/organizer";
   if (role === "bartender") return "/ops/bartender";
   return "/ops/guest";
+}
+
+export function isStaffRole(role: AppRole | null): boolean {
+  return role === "admin" || role === "host_admin" || role === "organizer";
 }

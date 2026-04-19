@@ -8,36 +8,67 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function RequestAccess() {
   const [submitted, setSubmitted] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [eventsDetails, setEventsDetails] = useState("");
+  const [organization, setOrganization] = useState("");
+  const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMsg(null);
 
-    // Send a branded email to the team. Until a CRM table exists, this is a
-    // direct invitation request via email.
+    const cleanName = name.trim();
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanOrg = organization.trim();
+    const cleanReason = reason.trim();
+
+    if (!cleanName || !cleanEmail) {
+      setErrorMsg("Please provide your name and email.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // 1. Persist the request to the database (RLS allows anon insert)
+    const { error: insertError } = await (supabase as any)
+      .from("access_requests")
+      .insert({
+        name: cleanName,
+        email: cleanEmail,
+        organization: cleanOrg || null,
+        reason: cleanReason || null,
+      });
+
+    if (insertError) {
+      setErrorMsg(`We couldn't save your request: ${insertError.message}`);
+      setIsSubmitting(false);
+      return;
+    }
+
+    // 2. Best-effort admin notification email (non-blocking failure)
     try {
-      const { supabase } = await import("@/integrations/supabase/client");
       await supabase.functions.invoke("send-sera-email", {
         body: {
           template: "invitation",
           to: "admin@serasociety.com",
           data: {
-            event_title: `Access request from ${name}`,
+            event_title: `New access request — ${cleanName}`,
             event_date: new Date().toLocaleString(),
-            venue: `${email} — ${eventsDetails || "no details"}`,
+            venue: `${cleanEmail}${cleanOrg ? ` · ${cleanOrg}` : ""}${
+              cleanReason ? ` — ${cleanReason}` : ""
+            }`,
             app_url: window.location.origin,
           },
         },
       });
     } catch {
-      // best-effort
+      // best-effort; the request is already saved
     }
 
     setSubmitted(true);
@@ -89,13 +120,22 @@ export default function RequestAccess() {
                 />
               </div>
               <div className="space-y-2">
+                <Label className="sera-label text-sera-navy text-[10px]">Company / Organization (optional)</Label>
+                <Input
+                  value={organization}
+                  onChange={(e) => setOrganization(e.target.value)}
+                  className="border-sera-sand bg-sera-ivory/50 rounded-none h-11 font-sans text-sm focus:border-sera-navy"
+                />
+              </div>
+              <div className="space-y-2">
                 <Label className="sera-label text-sera-navy text-[10px]">Tell us about your events</Label>
                 <Textarea
-                  value={eventsDetails}
-                  onChange={(e) => setEventsDetails(e.target.value)}
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
                   className="border-sera-sand bg-sera-ivory/50 rounded-none font-sans text-sm focus:border-sera-navy min-h-[120px]"
                 />
               </div>
+              {errorMsg && <p className="text-xs text-sera-oxblood">{errorMsg}</p>}
               <Button variant="sera" size="lg" className="w-full" type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Submitting…" : "Submit request"}
               </Button>
@@ -106,7 +146,9 @@ export default function RequestAccess() {
                 <span className="text-sera-navy text-xl">✓</span>
               </div>
               <h2 className="sera-subheading text-sera-navy text-2xl mb-3">Request received</h2>
-              <p className="sera-body text-sera-warm-grey">We&rsquo;ll review your request and be in touch.</p>
+              <p className="sera-body text-sera-warm-grey">
+                We&rsquo;ll review your request and email you when access is granted.
+              </p>
               <Button variant="sera-outline" size="lg" className="mt-8" asChild>
                 <Link to="/">Back to home</Link>
               </Button>
