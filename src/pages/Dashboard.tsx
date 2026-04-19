@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { StatusPill } from "@/components/organizer/OrganizerControl";
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -105,10 +106,14 @@ export default function Dashboard() {
 
   const statCards = useMemo(
     () => [
-      { label: "Active Events", value: String(stats.activeEvents) },
-      { label: "Total Guests", value: String(stats.totalGuests) },
-      { label: "Pending RSVPs", value: String(stats.pendingRsvps) },
-      { label: "Checked In", value: String(stats.checkedIn) },
+      { label: "Active Events", value: String(stats.activeEvents), tone: "info" as const },
+      { label: "Total Guests", value: String(stats.totalGuests), tone: "neutral" as const },
+      {
+        label: "Pending RSVPs",
+        value: String(stats.pendingRsvps),
+        tone: stats.pendingRsvps > 0 ? ("warning" as const) : ("success" as const),
+      },
+      { label: "Checked In", value: String(stats.checkedIn), tone: "success" as const },
     ],
     [stats],
   );
@@ -120,9 +125,9 @@ export default function Dashboard() {
         <div className="max-w-6xl mx-auto px-6">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <p className="sera-label text-sera-stone mb-2">Organizer Dashboard</p>
-            <h1 className="sera-heading text-sera-navy text-3xl md:text-5xl mb-3">Overview</h1>
+            <h1 className="sera-heading text-sera-navy text-3xl md:text-5xl mb-3">Operations overview</h1>
             <p className="sera-body text-sera-warm-grey text-base max-w-2xl">
-              Track upcoming events, guests, and check-ins at a glance.
+              Premium control view for what is scheduled, what needs attention, and what to run next.
             </p>
           </motion.div>
         </div>
@@ -139,7 +144,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between mb-8">
               <div>
                 <p className="sera-label text-sera-stone text-[9px] mb-1">Dashboard</p>
-                <h3 className="font-serif text-sera-navy text-lg font-light">Welcome back</h3>
+                <h3 className="font-serif text-sera-navy text-lg font-light">Control center</h3>
               </div>
               <div className="flex gap-3">
                 <Link
@@ -153,7 +158,9 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {statCards.map((stat) => (
                 <div key={stat.label} className="p-4 border border-sera-sand/60 bg-sera-ivory/70">
-                  <p className="text-sera-stone text-[9px] uppercase tracking-wider mb-1">{stat.label}</p>
+                  <div className="mb-2">
+                    <StatusPill label={stat.label} tone={stat.tone} />
+                  </div>
                   <p className="font-serif text-sera-navy text-2xl font-light">
                     {loading ? "…" : stat.value}
                   </p>

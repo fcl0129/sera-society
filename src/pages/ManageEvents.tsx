@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ControlSection, StatusPill } from "@/components/organizer/OrganizerControl";
 import { supabase } from "@/integrations/supabase/client";
 
 type RsvpStatus = "pending" | "yes" | "no" | "maybe";
@@ -897,23 +898,55 @@ export default function ManageEvents() {
     return map;
   }, [seatingAssignments]);
 
+  const attentionItems = useMemo(() => {
+    const items: { label: string; tone: "warning" | "success"; detail: string }[] = [];
+    if (selectedEvent && selectedEvent.status !== "published") {
+      items.push({ label: "Needs publish", tone: "warning", detail: "Event is still in draft mode." });
+    }
+    if (guestStats.pending > 0) {
+      items.push({ label: "RSVP pending", tone: "warning", detail: `${guestStats.pending} guests still pending.` });
+    }
+    if (selectedEvent && (!selectedEvent.enable_qr || !selectedEvent.enable_nfc)) {
+      items.push({
+        label: "Entry fallback",
+        tone: "warning",
+        detail: "Only one ticket mode is active. Confirm door setup.",
+      });
+    }
+    if (items.length === 0) {
+      items.push({ label: "All clear", tone: "success", detail: "No urgent actions right now." });
+    }
+    return items;
+  }, [guestStats.pending, selectedEvent]);
+
   return (
     <div className="min-h-screen">
       <Navbar />
-      <section className="pt-32 pb-20 sera-gradient-navy">
+      <section className="pt-32 pb-16 sera-gradient-navy">
         <div className="max-w-6xl mx-auto px-6">
           <p className="sera-label text-sera-stone mb-4">Organizer Dashboard</p>
-          <h1 className="sera-heading text-sera-ivory text-4xl md:text-5xl mb-3">Create & manage events</h1>
+          <h1 className="sera-heading text-sera-ivory text-4xl md:text-5xl mb-3">Organizer control system</h1>
           <p className="sera-body text-sera-sand text-lg max-w-2xl">
-            Nu med tier-funktioner för Essential, Social, Host och Occasions i samma arbetsyta.
+            Calm operations for event overview, guests, RSVP, invitations, tickets, and settings in one structured flow.
           </p>
+          <div className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-3">
+            {attentionItems.map((item) => (
+              <div key={item.label} className="rounded-xl border border-sera-sand/40 bg-sera-navy/40 p-4">
+                <StatusPill label={item.label} tone={item.tone} />
+                <p className="mt-2 text-sm text-sera-sand">{item.detail}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       <section className="py-16 sera-surface-light">
-        <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-10">
-          <div className="bg-sera-ivory/60 border border-sera-sand/60 p-6">
-            <h2 className="font-serif text-sera-navy text-2xl mb-5">New event</h2>
+        <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <ControlSection
+            eyebrow="Dashboard"
+            title="New event"
+            description="Create a new event with template defaults, then publish when operations are ready."
+          >
             <form onSubmit={handleCreateEvent} className="space-y-4">
               <div className="space-y-2">
                 <Label className="sera-label text-sera-navy text-[10px]">Quick start template</Label>
@@ -995,15 +1028,18 @@ export default function ManageEvents() {
                 {isSaving ? "Creating..." : "Create event"}
               </Button>
             </form>
-          </div>
+          </ControlSection>
 
-          <div className="bg-sera-ivory/50 border border-sera-sand/60 p-6">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="font-serif text-sera-navy text-2xl">Your events</h2>
+          <ControlSection
+            eyebrow="Event overview"
+            title="Your events"
+            description="Select an event to manage guests, invitations, tickets, and operations settings."
+            aside={
               <Link className="text-xs text-sera-oxblood underline underline-offset-4" to="/dashboard">
                 Back to dashboard
               </Link>
-            </div>
+            }
+          >
 
             {loading ? (
               <p className="sera-body text-sera-warm-grey text-sm">Loading events…</p>
@@ -1014,15 +1050,21 @@ export default function ManageEvents() {
                 {sortedEvents.map((event) => (
                   <div
                     key={event.id}
-                    className={`border p-4 ${selectedEventId === event.id ? "border-sera-oxblood bg-sera-ivory" : "border-sera-sand/50 bg-sera-ivory/80"}`}
+                    className={`rounded-xl border p-4 ${selectedEventId === event.id ? "border-sera-oxblood bg-sera-ivory shadow-sm" : "border-sera-sand/50 bg-sera-ivory/80"}`}
                   >
                     <button type="button" className="text-left w-full" onClick={() => setSelectedEventId(event.id)}>
-                      <p className="font-sans text-sm font-medium text-sera-navy">{event.title}</p>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="font-sans text-sm font-medium text-sera-navy">{event.title}</p>
+                        <StatusPill
+                          label={event.status}
+                          tone={event.status === "published" ? "success" : "warning"}
+                        />
+                      </div>
                       <p className="text-xs text-sera-warm-grey mt-1">
                         {new Date(event.starts_at).toLocaleString()} {event.venue ? `• ${event.venue}` : ""}
                       </p>
                       <p className="text-[10px] uppercase tracking-wider text-sera-stone mt-2">
-                        {event.status} · {event.tier}
+                        Tier · {event.tier}
                       </p>
                     </button>
                     <div className="flex gap-2 mt-3">
@@ -1045,20 +1087,16 @@ export default function ManageEvents() {
                 ))}
               </div>
             )}
-          </div>
+          </ControlSection>
         </div>
 
-        <div className="max-w-6xl mx-auto px-6 mt-10 space-y-10">
-          <div className="bg-sera-ivory/50 border border-sera-sand/60 p-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div>
-                <h3 className="font-serif text-sera-navy text-2xl">Tier controls</h3>
-                <p className="text-xs text-sera-warm-grey mt-1">
-                  Aktivera funktioner per event utifrån vad som utlovas i respektive tier.
-                </p>
-              </div>
-
-              {selectedEvent && (
+        <div className="max-w-6xl mx-auto px-6 mt-10 space-y-8">
+          <ControlSection
+            eyebrow="Settings"
+            title="Tier controls"
+            description="Control capabilities and RSVP automation for the selected event."
+            aside={
+              selectedEvent ? (
                 <select
                   className="border border-sera-sand bg-sera-ivory px-3 py-2 text-sm"
                   value={selectedEvent.tier}
@@ -1069,8 +1107,9 @@ export default function ManageEvents() {
                   <option value="host" disabled={tierOrder.indexOf(allowedTier) < tierOrder.indexOf("host")}>Host</option>
                   <option value="occasions" disabled={tierOrder.indexOf(allowedTier) < tierOrder.indexOf("occasions")}>Occasions</option>
                 </select>
-              )}
-            </div>
+              ) : null
+            }
+          >
             <p className="text-xs text-sera-stone mt-2">Din tilldelade max-tier: <span className="uppercase">{allowedTier}</span>.</p>
 
             {selectedEvent ? (
@@ -1114,19 +1153,20 @@ export default function ManageEvents() {
             ) : (
               <p className="sera-body text-sera-warm-grey text-sm mt-4">Välj ett event för att styra tier-funktionerna.</p>
             )}
-          </div>
+          </ControlSection>
 
-          <div className="bg-sera-ivory/50 border border-sera-sand/60 p-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
-              <h3 className="font-serif text-sera-navy text-2xl">
-                Guests & RSVP {selectedEvent ? `for ${selectedEvent.title}` : ""}
-              </h3>
-              {selectedEvent && (
+          <ControlSection
+            eyebrow="Guest list"
+            title={`Guests & RSVP ${selectedEvent ? `for ${selectedEvent.title}` : ""}`}
+            description="Track attendance and update guest status from one operational list."
+            aside={
+              selectedEvent ? (
                 <div className="text-xs text-sera-warm-grey">
                   Pending: {guestStats.pending} · Yes: {guestStats.yes} · Checked-in: {guestStats.checkedIn}
                 </div>
-              )}
-            </div>
+              ) : null
+            }
+          >
 
             {!selectedEvent ? (
               <p className="sera-body text-sera-warm-grey text-sm">Välj ett event ovan för att hantera gäster.</p>
@@ -1235,11 +1275,10 @@ export default function ManageEvents() {
                 )}
               </>
             )}
-          </div>
+          </ControlSection>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-sera-ivory/50 border border-sera-sand/60 p-6">
-              <h3 className="font-serif text-sera-navy text-2xl mb-4">Host messaging (Social)</h3>
+            <ControlSection eyebrow="Invitations" title="Host messaging (Social)" description="Queue clear update messages before and during event flow." className="h-full">
               <form onSubmit={handleSendHostMessage} className="space-y-3">
                 <Input value={messageText} onChange={(e) => setMessageText(e.target.value)} placeholder="Message to guests" />
                 <Button type="submit" variant="outline" className="w-full">Save host message</Button>
@@ -1253,10 +1292,9 @@ export default function ManageEvents() {
                 ))}
                 {messages.length === 0 && <p className="text-sm text-sera-warm-grey">Inga host-meddelanden ännu.</p>}
               </div>
-            </div>
+            </ControlSection>
 
-            <div className="bg-sera-ivory/50 border border-sera-sand/60 p-6">
-              <h3 className="font-serif text-sera-navy text-2xl mb-4">Staff roles (Host)</h3>
+            <ControlSection eyebrow="Settings" title="Staff roles (Host)" description="Grant team access with role-based permissions." className="h-full">
               <form onSubmit={handleAddStaffRole} className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <Input value={staffEmail} type="email" required placeholder="staff@email.com" onChange={(e) => setStaffEmail(e.target.value)} />
                 <select className="border border-sera-sand bg-sera-ivory px-2 text-sm" value={staffRole} onChange={(e) => setStaffRole(e.target.value)}>
@@ -1277,12 +1315,11 @@ export default function ManageEvents() {
                 ))}
                 {staffRoles.length === 0 && <p className="text-sm text-sera-warm-grey">Inga staff-roller ännu.</p>}
               </div>
-            </div>
+            </ControlSection>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-sera-ivory/50 border border-sera-sand/60 p-6">
-              <h3 className="font-serif text-sera-navy text-2xl mb-4">Seating system (Occasions)</h3>
+            <ControlSection eyebrow="Event overview" title="Seating system (Occasions)" className="h-full">
               <form onSubmit={handleCreateSeatingTable} className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
                 <Input value={tableLabel} onChange={(e) => setTableLabel(e.target.value)} placeholder="Table A" required />
                 <Input value={tableSeats} type="number" min={1} onChange={(e) => setTableSeats(e.target.value)} required />
@@ -1318,10 +1355,9 @@ export default function ManageEvents() {
                   </div>
                 ))}
               </div>
-            </div>
+            </ControlSection>
 
-            <div className="bg-sera-ivory/50 border border-sera-sand/60 p-6">
-              <h3 className="font-serif text-sera-navy text-2xl mb-4">Timeline + checklist (Occasions)</h3>
+            <ControlSection eyebrow="Event overview" title="Timeline + checklist (Occasions)" className="h-full">
               <form onSubmit={handleCreateTimelineItem} className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
                 <Input value={timelineTitle} onChange={(e) => setTimelineTitle(e.target.value)} placeholder="Soundcheck" required />
                 <select
@@ -1352,16 +1388,20 @@ export default function ManageEvents() {
                 ))}
                 {timelineItems.length === 0 && <p className="text-sm text-sera-warm-grey">Inga items ännu.</p>}
               </div>
-            </div>
+            </ControlSection>
           </div>
 
-          <div className="bg-sera-ivory/50 border border-sera-sand/60 p-6">
+          <ControlSection
+            eyebrow="Dashboard"
+            title="Evening Wrapped + post-event recap"
+            description="Generate a compact operations recap after the event closes."
+            aside={<Button type="button" variant="sera" onClick={handleCreateWrappedSummary}>Generate Evening Wrapped</Button>}
+          >
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
               <div>
-                <h3 className="font-serif text-sera-navy text-2xl">Evening Wrapped + post-event recap</h3>
-                <p className="text-sm text-sera-warm-grey">Skapa summering med attendance, drink usage och delningsbar recap-data.</p>
+                <StatusPill label="Post-event" tone="info" />
+                <p className="text-sm text-sera-warm-grey mt-2">Skapa summering med attendance, drink usage och delningsbar recap-data.</p>
               </div>
-              <Button type="button" variant="sera" onClick={handleCreateWrappedSummary}>Generate Evening Wrapped</Button>
             </div>
 
             <div className="mt-4 space-y-2">
@@ -1373,7 +1413,7 @@ export default function ManageEvents() {
               ))}
               {wrappedSummaries.length === 0 && <p className="text-sm text-sera-warm-grey">Ingen wrapped-summary ännu.</p>}
             </div>
-          </div>
+          </ControlSection>
         </div>
       </section>
       <Footer />
