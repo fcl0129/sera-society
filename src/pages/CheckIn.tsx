@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import PageHero from "@/components/marketing/PageHero";
 
 interface EventRow {
   id: string;
@@ -213,15 +214,13 @@ export default function CheckIn() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <section className="pt-32 pb-20 sera-gradient-navy">
-        <div className="max-w-5xl mx-auto px-6">
-          <p className="sera-label text-sera-stone mb-4">Check-In Console</p>
-          <h1 className="sera-heading text-sera-ivory text-4xl md:text-5xl mb-3">Live guest check-in</h1>
-          <p className="sera-body text-sera-sand text-lg max-w-2xl">
-            Välj event och checka in gäster i realtid.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Check-In Console"
+        align="left"
+        width="narrow"
+        title="Live guest check-in"
+        description="Välj event och checka in gäster i realtid."
+      />
 
       <section className="py-16 sera-surface-light">
         <div className="max-w-5xl mx-auto px-6">

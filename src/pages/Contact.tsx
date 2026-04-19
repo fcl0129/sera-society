@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
+import PageHero from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -26,20 +27,17 @@ export default function Contact() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <section className="pt-32 pb-20 sera-gradient-navy">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <p className="sera-label text-sera-stone mb-4">Contact</p>
-            <h1 className="sera-heading text-sera-ivory text-4xl md:text-6xl mb-6">
-              Get in
-              <br /><span className="italic">touch</span>
-            </h1>
-            <p className="sera-body text-sera-sand text-lg max-w-xl mx-auto">
-              Whether you have a question, want to explore a partnership, or need support — we'd love to hear from you.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Contact"
+        title={
+          <>
+            Get in
+            <br />
+            <span className="italic">touch</span>
+          </>
+        }
+        description="Whether you have a question, want to explore a partnership, or need support — we'd love to hear from you."
+      />
 
       <section className="py-20 sera-surface-light">
         <div className="max-w-lg mx-auto px-6">

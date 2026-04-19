@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PageHero from "@/components/marketing/PageHero";
 import { motion } from "framer-motion";
 import { CalendarDays, Palette, Users, Globe, Ticket, ShieldCheck, Smartphone, ScanLine } from "lucide-react";
 
@@ -18,36 +19,33 @@ export default function Platform() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <section className="pt-32 pb-20 sera-gradient-navy">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <p className="sera-label text-sera-stone mb-4">Platform</p>
-            <h1 className="sera-heading text-sera-ivory text-4xl md:text-6xl mb-6">
-              The complete event
-              <br /><span className="italic">platform</span>
-            </h1>
-            <p className="sera-body text-sera-sand text-lg max-w-2xl mx-auto">
-              From invitation design to night-of operations, Sera covers the full event lifecycle in one premium platform.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Platform"
+        title={
+          <>
+            The complete event
+            <br />
+            <span className="italic">platform</span>
+          </>
+        }
+        description="From invitation design to night-of operations, Sera covers the full event lifecycle in one premium platform."
+      />
 
-      <section className="py-20 sera-surface-light">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <section className="sera-surface-light py-20">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             {features.map((f, i) => (
               <motion.div
                 key={f.title}
-                className="p-8 border border-sera-sand/60 hover:border-sera-navy/20 bg-sera-ivory/50 transition-colors"
+                className="bg-sera-ivory/50 p-8 transition-colors border border-sera-sand/60 hover:border-sera-navy/20"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.06 }}
               >
-                <f.icon className="w-6 h-6 text-sera-oxblood mb-4" strokeWidth={1.5} />
-                <h3 className="sera-subheading text-sera-navy text-xl mb-2">{f.title}</h3>
-                <p className="sera-body text-sera-warm-grey text-sm">{f.desc}</p>
+                <f.icon className="mb-4 h-6 w-6 text-sera-oxblood" strokeWidth={1.5} />
+                <h3 className="sera-subheading mb-2 text-xl text-sera-navy">{f.title}</h3>
+                <p className="sera-body text-sm text-sera-warm-grey">{f.desc}</p>
               </motion.div>
             ))}
           </div>
