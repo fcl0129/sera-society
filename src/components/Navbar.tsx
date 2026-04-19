@@ -37,7 +37,7 @@ export default function Navbar() {
       </a>
 
       <Glass
-        strength="medium"
+        strength="default"
         className="mx-auto w-full max-w-6xl border-white/15 bg-sera-deep-navy/52 px-4 py-2.5 md:px-5 md:py-3 transition-colors duration-200 hover:border-white/20"
       >
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:gap-8">

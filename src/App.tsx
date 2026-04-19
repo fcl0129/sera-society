@@ -16,6 +16,9 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Faq from "./pages/Faq";
 import NotFound from "./pages/NotFound";
+import AdminAccessRequests from "./pages/AdminAccessRequests";
+import CheckIn from "./pages/CheckIn";
+import ManageEvents from "./pages/ManageEvents";
 
 import RoleRoute from "./components/RoleRoute";
 import OpsHome from "./pages/ops/OpsHome";
@@ -34,25 +37,66 @@ const App = () => (
 
         <BrowserRouter>
           <Routes>
+            {/* Public marketing */}
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
-
             <Route path="/platform" element={<Platform />} />
             <Route path="/invitations" element={<Invitations />} />
             <Route path="/event-pages" element={<EventPages />} />
             <Route path="/rsvp/:token" element={<Rsvp />} />
-
             <Route path="/request-access" element={<RequestAccess />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/faq" element={<Faq />} />
 
+            {/* Authenticated app */}
             <Route path="/ops" element={<OpsHome />} />
+
+            {/* Admin */}
             <Route
-              path="/ops/host"
+              path="/admin"
               element={
-                <RoleRoute allow={["host_admin", "organizer", "admin"]}>
+                <RoleRoute allow={["admin", "host_admin"]}>
                   <HostAdminDashboard />
                 </RoleRoute>
               }
             />
+            <Route
+              path="/admin/access-requests"
+              element={
+                <RoleRoute allow={["admin", "host_admin"]}>
+                  <AdminAccessRequests />
+                </RoleRoute>
+              }
+            />
+
+            {/* Organizer */}
+            <Route
+              path="/organizer"
+              element={
+                <RoleRoute allow={["organizer", "admin", "host_admin"]}>
+                  <HostAdminDashboard />
+                </RoleRoute>
+              }
+            />
+            <Route
+              path="/manage-events"
+              element={
+                <RoleRoute allow={["organizer", "admin", "host_admin"]}>
+                  <ManageEvents />
+                </RoleRoute>
+              }
+            />
+            <Route
+              path="/check-in"
+              element={
+                <RoleRoute allow={["organizer", "admin", "host_admin", "bartender"]}>
+                  <CheckIn />
+                </RoleRoute>
+              }
+            />
+
+            {/* Bartender */}
             <Route
               path="/ops/bartender"
               element={
@@ -61,6 +105,8 @@ const App = () => (
                 </RoleRoute>
               }
             />
+
+            {/* Guest */}
             <Route
               path="/ops/guest"
               element={
@@ -70,9 +116,15 @@ const App = () => (
               }
             />
 
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/faq" element={<Faq />} />
+            {/* Legacy redirect */}
+            <Route
+              path="/ops/host"
+              element={
+                <RoleRoute allow={["host_admin", "organizer", "admin"]}>
+                  <HostAdminDashboard />
+                </RoleRoute>
+              }
+            />
 
             <Route path="*" element={<NotFound />} />
           </Routes>

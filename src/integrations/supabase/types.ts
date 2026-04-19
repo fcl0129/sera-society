@@ -14,6 +14,99 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          email: string
+          id: string
+          name: string
+          organization: string | null
+          reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          organization?: string | null
+          reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          organization?: string | null
+          reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checkins: {
+        Row: {
+          checked_in_by: string | null
+          created_at: string
+          event_id: string
+          guest_id: string
+          id: string
+        }
+        Insert: {
+          checked_in_by?: string | null
+          created_at?: string
+          event_id: string
+          guest_id: string
+          id?: string
+        }
+        Update: {
+          checked_in_by?: string | null
+          created_at?: string
+          event_id?: string
+          guest_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkins_checked_in_by_fkey"
+            columns: ["checked_in_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkins_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkins_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "event_guests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       drink_tickets: {
         Row: {
           created_at: string
@@ -163,28 +256,34 @@ export type Database = {
         Row: {
           created_at: string
           event_id: string
-          guest_id: string
+          full_name: string | null
+          guest_id: string | null
           id: string
           invited_email: string
           notes: string | null
+          rsvp_status: string
           tier: string | null
         }
         Insert: {
           created_at?: string
           event_id: string
-          guest_id: string
+          full_name?: string | null
+          guest_id?: string | null
           id?: string
           invited_email: string
           notes?: string | null
+          rsvp_status?: string
           tier?: string | null
         }
         Update: {
           created_at?: string
           event_id?: string
-          guest_id?: string
+          full_name?: string | null
+          guest_id?: string | null
           id?: string
           invited_email?: string
           notes?: string | null
+          rsvp_status?: string
           tier?: string | null
         }
         Relationships: [
@@ -204,39 +303,105 @@ export type Database = {
           },
         ]
       }
+      event_messages: {
+        Row: {
+          body: string
+          channel: string
+          created_at: string
+          created_by: string | null
+          event_id: string
+          id: string
+        }
+        Insert: {
+          body: string
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          event_id: string
+          id?: string
+        }
+        Update: {
+          body?: string
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          event_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_messages_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_messages_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
+          capacity: number | null
+          contact_host_email: string | null
           created_at: string
           description: string | null
+          enable_nfc: boolean
+          enable_qr: boolean
           ends_at: string | null
           id: string
           organizer_id: string
+          reminder_days: number[] | null
+          rsvp_cutoff_at: string | null
           starts_at: string
           status: string
+          test_mode: boolean
+          tier: string
           title: string
           updated_at: string
           venue: string | null
         }
         Insert: {
+          capacity?: number | null
+          contact_host_email?: string | null
           created_at?: string
           description?: string | null
+          enable_nfc?: boolean
+          enable_qr?: boolean
           ends_at?: string | null
           id?: string
           organizer_id: string
+          reminder_days?: number[] | null
+          rsvp_cutoff_at?: string | null
           starts_at: string
           status?: string
+          test_mode?: boolean
+          tier?: string
           title: string
           updated_at?: string
           venue?: string | null
         }
         Update: {
+          capacity?: number | null
+          contact_host_email?: string | null
           created_at?: string
           description?: string | null
+          enable_nfc?: boolean
+          enable_qr?: boolean
           ends_at?: string | null
           id?: string
           organizer_id?: string
+          reminder_days?: number[] | null
+          rsvp_cutoff_at?: string | null
           starts_at?: string
           status?: string
+          test_mode?: boolean
+          tier?: string
           title?: string
           updated_at?: string
           venue?: string | null
@@ -312,6 +477,116 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      seating_assignments: {
+        Row: {
+          created_at: string
+          event_id: string
+          guest_id: string
+          id: string
+          seating_table_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          guest_id: string
+          id?: string
+          seating_table_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          guest_id?: string
+          id?: string
+          seating_table_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seating_assignments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seating_assignments_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "event_guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seating_assignments_seating_table_id_fkey"
+            columns: ["seating_table_id"]
+            isOneToOne: false
+            referencedRelation: "seating_tables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seating_tables: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          label: string
+          seat_count: number
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          label: string
+          seat_count?: number
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          label?: string
+          seat_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seating_tables_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_roles: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          role: string
+          staff_email: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          role?: string
+          staff_email?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          role?: string
+          staff_email?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_roles_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       suppressed_emails: {
         Row: {
@@ -399,6 +674,115 @@ export type Database = {
           },
         ]
       }
+      timeline_items: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          kind: string
+          starts_at: string | null
+          status: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          kind?: string
+          starts_at?: string | null
+          status?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          kind?: string
+          starts_at?: string | null
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timeline_items_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_tier_access: {
+        Row: {
+          assigned_by: string | null
+          created_at: string
+          email: string | null
+          id: string
+          max_tier: string
+          user_id: string | null
+        }
+        Insert: {
+          assigned_by?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          max_tier?: string
+          user_id?: string | null
+        }
+        Update: {
+          assigned_by?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          max_tier?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_tier_access_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_tier_access_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wrapped_summaries: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          summary: Json
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          summary?: Json
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          summary?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wrapped_summaries_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -446,7 +830,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "guest" | "bartender" | "host_admin"
+      app_role: "guest" | "bartender" | "host_admin" | "organizer" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -574,7 +958,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["guest", "bartender", "host_admin"],
+      app_role: ["guest", "bartender", "host_admin", "organizer", "admin"],
     },
   },
 } as const

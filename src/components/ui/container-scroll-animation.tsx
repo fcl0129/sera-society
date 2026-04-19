@@ -23,7 +23,7 @@ export function ContainerScrollAnimation({
   const containerRef = React.useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset,
+    offset: offset as any,
   });
 
   const y = useTransform(scrollYProgress, [0, 1], [48, -48]);
