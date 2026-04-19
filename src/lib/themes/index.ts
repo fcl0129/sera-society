@@ -26,3 +26,6 @@ export function eventThemeCssVars(theme: EventTheme): CSSProperties {
     "--event-button-text": theme.colors.buttonText,
   } as CSSProperties;
 }
+
+
+export { eventThemes } from "@/lib/themes/themes";
