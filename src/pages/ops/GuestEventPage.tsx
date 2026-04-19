@@ -157,7 +157,7 @@ export default function GuestEventPage() {
                 {tickets.map((ticket) => (
                   <article key={ticket.id} className={cn("flex items-center justify-between gap-3 rounded-2xl border p-3", theme.cardStyle)}>
                     <div>
-                      <p className="font-medium capitalize text-[var(--event-text-primary)]">{ticket.ticket_type.replaceAll("_", " ")}</p>
+                      <p className="font-medium capitalize text-[var(--event-text-primary)]">{ticket.ticket_type.replace(/_/g, " ")}</p>
                       <p className="text-xs text-[var(--event-text-secondary)]">{ticket.redeemed_count}/{ticket.redemption_limit} redeemed</p>
                     </div>
                     <div className="flex items-center gap-2">
