@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import PageHero from "@/components/marketing/PageHero";
 
 const faqCategories = [
   {
@@ -91,11 +92,16 @@ const faqCategories = [
 
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
+  const answerId = `faq-${q.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+
   return (
     <div className="border-b border-sera-sand/40">
       <button
+        type="button"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between py-5 text-left group"
+        className="group flex w-full items-center justify-between py-5 text-left"
+        aria-expanded={open}
+        aria-controls={answerId}
       >
         <span className="sera-body text-sera-navy text-sm font-medium pr-4">{q}</span>
         <ChevronDown
@@ -106,6 +112,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
       <AnimatePresence initial={false}>
         {open && (
           <motion.div
+            id={answerId}
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -124,20 +131,17 @@ export default function Faq() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <section className="pt-32 pb-20 sera-gradient-navy">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <p className="sera-label text-sera-stone mb-4">FAQ</p>
-            <h1 className="sera-heading text-sera-ivory text-4xl md:text-6xl mb-6">
-              Frequently asked
-              <br /><span className="italic">questions</span>
-            </h1>
-            <p className="sera-body text-sera-sand text-lg max-w-xl mx-auto">
-              Everything you need to know about Sera and how it works.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="FAQ"
+        title={
+          <>
+            Frequently asked
+            <br />
+            <span className="italic">questions</span>
+          </>
+        }
+        description="Everything you need to know about Sera and how it works."
+      />
 
       <section className="py-20 sera-surface-light">
         <div className="max-w-3xl mx-auto px-6">
