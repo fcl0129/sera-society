@@ -5,27 +5,27 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 select-none",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md sera-button transition-[background-color,color,border-color,box-shadow,transform] duration-base ease-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 rounded-md text-sm",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-md text-sm",
-        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md text-sm",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-md text-sm",
-        ghost: "hover:bg-accent hover:text-accent-foreground rounded-md text-sm",
-        link: "text-primary underline-offset-4 hover:underline text-sm",
-        sera: "bg-sera-navy text-sera-ivory hover:bg-sera-deep-navy active:bg-sera-ink rounded-none sera-button shadow-sm hover:shadow-md active:shadow-none active:translate-y-[0.5px]",
-        "sera-outline": "border-[1.5px] border-sera-navy text-sera-navy hover:bg-sera-navy hover:text-sera-ivory active:bg-sera-deep-navy rounded-none sera-button",
-        "sera-accent": "bg-sera-oxblood text-sera-ivory hover:bg-sera-oxblood-soft active:bg-sera-oxblood rounded-none sera-button shadow-sm hover:shadow-md active:shadow-none active:translate-y-[0.5px]",
-        "sera-ivory": "bg-sera-ivory text-sera-navy hover:bg-sera-beige active:bg-sera-sand rounded-none sera-button shadow-sm hover:shadow-md active:shadow-none active:translate-y-[0.5px]",
-        "sera-ghost": "text-sera-navy hover:bg-sera-navy/5 active:bg-sera-navy/10 rounded-none sera-button",
+        default: "bg-primary text-primary-foreground shadow-xs hover:-translate-y-px hover:shadow-soft",
+        destructive: "bg-destructive text-destructive-foreground shadow-xs hover:-translate-y-px hover:shadow-soft",
+        outline: "border border-input bg-background text-foreground hover:bg-secondary",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "text-foreground hover:bg-secondary",
+        link: "text-primary underline-offset-4 hover:underline",
+        sera: "bg-sera-navy text-sera-ivory shadow-xs hover:-translate-y-px hover:bg-sera-deep-navy hover:shadow-soft",
+        "sera-outline": "border border-sera-navy/65 bg-transparent text-sera-navy hover:bg-sera-navy hover:text-sera-ivory",
+        "sera-accent": "bg-sera-oxblood text-sera-ivory shadow-xs hover:-translate-y-px hover:bg-sera-oxblood-soft hover:shadow-soft",
+        "sera-ivory": "bg-sera-ivory text-sera-navy shadow-xs hover:-translate-y-px hover:bg-sera-beige hover:shadow-soft",
+        "sera-ghost": "bg-transparent text-sera-navy hover:bg-sera-navy/10",
       },
       size: {
         default: "h-10 px-5 py-2",
         sm: "h-9 px-4",
-        lg: "h-12 px-8",
-        xl: "h-14 px-10 text-[12px]",
+        lg: "h-12 px-7",
+        xl: "h-14 px-9 text-[0.9rem]",
         icon: "h-10 w-10",
       },
     },
