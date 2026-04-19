@@ -1,90 +1,85 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { motion } from "framer-motion";
+import GuestFlowFrame from "@/components/guest/GuestFlowFrame";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import TeamShowcase from "@/components/ui/team-showcase";
-import { GripVertical } from "lucide-react";
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { ArrowRight, CalendarClock, MapPin, Ticket } from "lucide-react";
+
+const checklist = [
+  "Who this invite is for",
+  "Date + arrival window",
+  "Venue + one-tap map",
+  "RSVP deadline",
+  "Dress guidance",
+  "Ticket + entry notes",
+];
 
 export default function Invitations() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-sera-surface-light">
       <Navbar />
-      <section className="pt-32 pb-20 sera-gradient-navy">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <p className="sera-label text-sera-stone mb-4">Invitations</p>
-            <h1 className="sera-heading text-sera-ivory text-4xl md:text-6xl mb-6">
-              Design invitations
-              <br /><span className="italic">worth opening</span>
-            </h1>
-            <p className="sera-body text-sera-sand text-lg max-w-2xl mx-auto">
-              Create digital invitations and graphic flyers with full editorial control. Templates, typography, layouts — everything your event deserves.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      <section className="py-20 sera-surface-light">
-        <div className="max-w-6xl mx-auto px-6">
-          <motion.div
-            className="mb-16"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <TeamShowcase />
-          </motion.div>
-
-          <motion.div
-            className="mb-16 border border-sera-sand/60 bg-sera-ivory/60 p-6 md:p-8"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.08 }}
-          >
-            <div className="mb-5">
-              <p className="sera-label text-sera-oxblood text-[9px] mb-2">Edit Invitation</p>
-              <h3 className="font-serif text-sera-navy text-2xl font-light mb-2">Resizable split layout</h3>
-              <p className="sera-body text-sera-warm-grey text-sm max-w-2xl">
-                Add a horizontal splitter and drag the handle to rebalance your invitation composition in real time.
-              </p>
+      <GuestFlowFrame
+        eyebrow="Guest Invitations"
+        title={
+          <>
+            Every guest sees
+            <br />
+            <span className="italic text-sera-oxblood">exactly what matters</span>
+          </>
+        }
+        description="A clean invite built for real-world events: fast to read on mobile, easy to act on, impossible to miss the next step."
+      >
+        <div className="grid gap-6 lg:grid-cols-[1.2fr_.8fr]">
+          <article className="rounded-3xl border border-sera-sand/60 bg-sera-ivory p-5 shadow-sm md:p-7">
+            <div className="flex items-center justify-between border-b border-sera-sand/60 pb-4">
+              <p className="font-serif text-xl text-sera-navy">Sera Society Night</p>
+              <span className="rounded-full bg-sera-navy px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-sera-ivory">Invite</span>
             </div>
 
-            <div className="h-52 rounded-lg border border-sera-sand/70 bg-sera-ivory overflow-hidden">
-              <ResizablePanelGroup direction="horizontal">
-                <ResizablePanel defaultSize={48.2} minSize={20}>
-                  <div className="flex h-full items-center justify-center p-3 text-sm text-sera-navy">Left</div>
-                </ResizablePanel>
-                <ResizableHandle className="w-px bg-sera-sand/70">
-                  <span className="absolute top-1/2 start-1/2 -translate-x-1/2 -translate-y-1/2 block w-4 h-6 rounded-md border border-sera-sand/70 bg-sera-ivory text-sera-warm-grey">
-                    <GripVertical className="w-3 h-3 mx-auto mt-1.5" />
-                  </span>
-                </ResizableHandle>
-                <ResizablePanel defaultSize={30} minSize={15}>
-                  <div className="flex h-full items-center justify-center p-3 text-sm text-sera-navy">Center</div>
-                </ResizablePanel>
-                <ResizableHandle className="w-px bg-sera-sand/70">
-                  <span className="absolute top-1/2 start-1/2 -translate-x-1/2 -translate-y-1/2 block w-4 h-6 rounded-md border border-sera-sand/70 bg-sera-ivory text-sera-warm-grey">
-                    <GripVertical className="w-3 h-3 mx-auto mt-1.5" />
-                  </span>
-                </ResizableHandle>
-                <ResizablePanel defaultSize={21.8} minSize={15}>
-                  <div className="flex h-full items-center justify-center p-3 text-sm text-sera-navy">Right</div>
-                </ResizablePanel>
-              </ResizablePanelGroup>
+            <div className="space-y-4 py-5 text-sm text-sera-navy">
+              <p className="rounded-2xl bg-sera-surface-light p-3">You're on the list for Saturday, July 12 · Doors at 7:00 PM.</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-2xl border border-sera-sand/60 p-3">
+                  <p className="mb-1 flex items-center gap-2 text-xs text-sera-warm-grey"><CalendarClock className="h-3.5 w-3.5" />Arrival window</p>
+                  <p>7:00 PM — 8:30 PM</p>
+                </div>
+                <div className="rounded-2xl border border-sera-sand/60 p-3">
+                  <p className="mb-1 flex items-center gap-2 text-xs text-sera-warm-grey"><MapPin className="h-3.5 w-3.5" />Venue</p>
+                  <p>The Wythe Hotel, Brooklyn</p>
+                </div>
+              </div>
+              <p className="rounded-2xl border border-sera-sand/60 p-3 text-sera-warm-grey">Dress code: Cocktail · Please RSVP by July 8.</p>
             </div>
-          </motion.div>
 
-          <div className="text-center">
-            <Button variant="sera" size="lg" asChild>
-              <Link to="/login">Start Designing</Link>
+            <div className="flex flex-col gap-3 border-t border-sera-sand/60 pt-4 sm:flex-row">
+              <Button variant="sera" asChild className="sm:flex-1">
+                <Link to="/rsvp/demo-token">RSVP now</Link>
+              </Button>
+              <Button variant="sera-outline" asChild className="sm:flex-1">
+                <Link to="/event-pages">View event page</Link>
+              </Button>
+            </div>
+          </article>
+
+          <aside className="space-y-4 rounded-3xl border border-sera-sand/50 bg-white/60 p-5 md:p-6">
+            <p className="sera-label text-sera-warm-grey">Fast comprehension checklist</p>
+            <ul className="space-y-2">
+              {checklist.map((item) => (
+                <li key={item} className="flex items-center gap-2 text-sm text-sera-navy">
+                  <Ticket className="h-3.5 w-3.5 text-sera-oxblood" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Button variant="link" asChild className="h-auto p-0 text-sera-navy">
+              <Link to="/platform" className="inline-flex items-center gap-2">
+                Explore guest flow architecture
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </Button>
-          </div>
+          </aside>
         </div>
-      </section>
+      </GuestFlowFrame>
       <Footer />
     </div>
   );

@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import Platform from "./pages/Platform";
 import Invitations from "./pages/Invitations";
 import EventPages from "./pages/EventPages";
+import Rsvp from "./pages/Rsvp";
 import RequestAccess from "./pages/RequestAccess";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -39,6 +40,7 @@ const App = () => (
             <Route path="/platform" element={<Platform />} />
             <Route path="/invitations" element={<Invitations />} />
             <Route path="/event-pages" element={<EventPages />} />
+            <Route path="/rsvp/:token" element={<Rsvp />} />
 
             <Route path="/request-access" element={<RequestAccess />} />
 
