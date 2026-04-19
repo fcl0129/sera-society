@@ -1,8 +1,9 @@
 import { Clock3, GlassWater, Ticket } from "lucide-react";
 import { EventPageTheme } from "@/lib/event-page-theme";
+import { EventInfoSection } from "@/lib/event-page-examples";
 import { cn } from "@/lib/utils";
 
-const sections = [
+const defaultSections: EventInfoSection[] = [
   {
     title: "Event details",
     icon: Ticket,
@@ -22,9 +23,10 @@ const sections = [
 
 type InfoGridProps = {
   theme: EventPageTheme;
+  sections?: EventInfoSection[];
 };
 
-export function InfoGrid({ theme }: InfoGridProps) {
+export function InfoGrid({ theme, sections = defaultSections }: InfoGridProps) {
   return (
     <section className="grid gap-4 md:grid-cols-3">
       {sections.map((section) => {
