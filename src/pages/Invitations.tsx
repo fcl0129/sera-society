@@ -56,7 +56,7 @@ export default function Invitations() {
                 <Link to="/rsvp/demo-token">RSVP now</Link>
               </Button>
               <Button variant="sera-outline" asChild className="sm:flex-1">
-                <Link to="/event-pages?event=light-garden">View event page</Link>
+                <Link to="/event-pages?event=garden-editorial">View event page</Link>
               </Button>
             </div>
           </article>

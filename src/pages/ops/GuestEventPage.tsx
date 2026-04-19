@@ -176,7 +176,7 @@ export default function GuestEventPage() {
 }
 
 function ThemePicker({ currentTheme }: { currentTheme: string | null }) {
-  const activeTheme = currentTheme && currentTheme in eventPageThemes ? currentTheme : "light-garden";
+  const activeTheme = currentTheme && currentTheme in eventPageThemes ? currentTheme : "garden-editorial";
 
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--event-accent)]/40 bg-[var(--event-background)]/35 p-2">

@@ -1,0 +1,148 @@
+import { EventTheme } from "@/types/theme";
+
+export const eventThemes: EventTheme[] = [
+  {
+    id: "garden-editorial",
+    name: "Garden Editorial",
+    category: "soft-light",
+    backgroundOverlay:
+      "radial-gradient(circle at 12% 10%, rgba(255,255,255,0.86), rgba(255,255,255,0) 44%), radial-gradient(circle at 83% 15%, rgba(211, 188, 166, 0.34), rgba(211, 188, 166, 0) 48%), linear-gradient(166deg, rgba(248, 242, 233, 0.95), rgba(231, 217, 200, 0.88))",
+    colors: {
+      background: "#efe6d8",
+      surface: "rgba(255, 251, 245, 0.68)",
+      surfaceBorder: "rgba(167, 133, 98, 0.36)",
+      textPrimary: "#32251a",
+      textSecondary: "#685140",
+      accent: "#916746",
+      buttonBg: "#916746",
+      buttonText: "#fff8ef",
+    },
+    typography: {
+      heading: "font-serif",
+      body: "font-sans",
+      label: "font-sans",
+    },
+    surfaceStyle: "glass-light",
+    buttonStyle: "soft",
+  },
+  {
+    id: "candlelight-supper",
+    name: "Candlelight Supper",
+    category: "dark-luxury",
+    backgroundOverlay:
+      "radial-gradient(circle at 18% 11%, rgba(241, 185, 111, 0.22), rgba(241, 185, 111, 0) 35%), radial-gradient(circle at 76% 20%, rgba(255, 223, 170, 0.15), rgba(255, 223, 170, 0) 34%), linear-gradient(164deg, rgba(13, 8, 6, 0.96), rgba(40, 24, 17, 0.88))",
+    colors: {
+      background: "#100a07",
+      surface: "rgba(32, 22, 17, 0.72)",
+      surfaceBorder: "rgba(201, 151, 93, 0.38)",
+      textPrimary: "#f6ead9",
+      textSecondary: "#cfb08d",
+      accent: "#d9aa67",
+      buttonBg: "#d9aa67",
+      buttonText: "#1a120d",
+    },
+    typography: {
+      heading: "font-serif",
+      body: "font-sans",
+      label: "font-sans",
+    },
+    surfaceStyle: "glass-dark",
+    buttonStyle: "solid",
+  },
+  {
+    id: "gala-noir",
+    name: "Gala Noir",
+    category: "dark-luxury",
+    backgroundOverlay:
+      "radial-gradient(circle at 14% 8%, rgba(255, 226, 178, 0.15), rgba(255, 226, 178, 0) 34%), linear-gradient(162deg, rgba(7, 7, 10, 0.97), rgba(25, 22, 28, 0.9))",
+    colors: {
+      background: "#09090b",
+      surface: "rgba(21, 20, 24, 0.78)",
+      surfaceBorder: "rgba(214, 186, 146, 0.45)",
+      textPrimary: "#f8efe3",
+      textSecondary: "#d3b891",
+      accent: "#e4c28e",
+      buttonBg: "#e4c28e",
+      buttonText: "#171217",
+    },
+    typography: {
+      heading: "font-serif",
+      body: "font-sans",
+      label: "font-sans",
+    },
+    surfaceStyle: "glass-dark",
+    buttonStyle: "outline",
+  },
+  {
+    id: "riviera-sunset",
+    name: "Riviera Sunset",
+    category: "soft-light",
+    backgroundOverlay:
+      "radial-gradient(circle at 15% 10%, rgba(255, 241, 218, 0.62), rgba(255, 241, 218, 0) 44%), radial-gradient(circle at 84% 24%, rgba(233, 165, 127, 0.3), rgba(233, 165, 127, 0) 45%), linear-gradient(172deg, rgba(246, 216, 185, 0.9), rgba(229, 172, 137, 0.78) 55%, rgba(208, 147, 130, 0.8))",
+    colors: {
+      background: "#f4d8b8",
+      surface: "rgba(255, 243, 229, 0.7)",
+      surfaceBorder: "rgba(186, 126, 94, 0.38)",
+      textPrimary: "#352219",
+      textSecondary: "#704c3f",
+      accent: "#be6745",
+      buttonBg: "#be6745",
+      buttonText: "#fff5ec",
+    },
+    typography: {
+      heading: "font-serif",
+      body: "font-sans",
+      label: "font-sans",
+    },
+    surfaceStyle: "paper",
+    buttonStyle: "soft",
+  },
+  {
+    id: "modern-monograph",
+    name: "Modern Monograph",
+    category: "creative",
+    backgroundOverlay:
+      "radial-gradient(circle at 24% 20%, rgba(0,0,0,0.09), rgba(0,0,0,0) 44%), linear-gradient(154deg, rgba(247, 245, 238, 0.94), rgba(233, 229, 220, 0.9))",
+    colors: {
+      background: "#f2efe8",
+      surface: "rgba(238, 234, 226, 0.88)",
+      surfaceBorder: "rgba(52, 50, 47, 0.28)",
+      textPrimary: "#171515",
+      textSecondary: "#474341",
+      accent: "#5638a3",
+      buttonBg: "#171515",
+      buttonText: "#f7f3ea",
+    },
+    typography: {
+      heading: "font-serif",
+      body: "font-sans",
+      label: "font-sans",
+    },
+    surfaceStyle: "matte",
+    buttonStyle: "solid",
+  },
+  {
+    id: "after-dark",
+    name: "After Dark",
+    category: "creative",
+    backgroundOverlay:
+      "radial-gradient(circle at 20% 16%, rgba(164, 80, 134, 0.18), rgba(164, 80, 134, 0) 42%), radial-gradient(circle at 78% 18%, rgba(126, 45, 75, 0.16), rgba(126, 45, 75, 0) 32%), linear-gradient(158deg, rgba(12, 10, 24, 0.97), rgba(36, 16, 35, 0.9))",
+    colors: {
+      background: "#0d0b1a",
+      surface: "rgba(29, 18, 38, 0.76)",
+      surfaceBorder: "rgba(149, 90, 128, 0.38)",
+      textPrimary: "#f8eef8",
+      textSecondary: "#c9a4bd",
+      accent: "#cb4e82",
+      buttonBg: "#cb4e82",
+      buttonText: "#fff2fb",
+    },
+    typography: {
+      heading: "font-serif",
+      body: "font-sans",
+      label: "font-sans",
+    },
+    surfaceStyle: "glass-dark",
+    buttonStyle: "outline",
+  },
+];
