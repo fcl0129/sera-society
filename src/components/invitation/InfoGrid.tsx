@@ -1,5 +1,5 @@
 import { Clock3, GlassWater, Ticket } from "lucide-react";
-import { EventPageTheme } from "@/lib/event-page-theme";
+import { EventTheme } from "@/types/theme";
 import { EventInfoSection } from "@/lib/event-page-examples";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +22,7 @@ const defaultSections: EventInfoSection[] = [
 ];
 
 type InfoGridProps = {
-  theme: EventPageTheme;
+  theme: EventTheme;
   sections?: EventInfoSection[];
 };
 
@@ -33,8 +33,15 @@ export function InfoGrid({ theme, sections = defaultSections }: InfoGridProps) {
         const Icon = section.icon;
 
         return (
-          <article key={section.title} className={cn("rounded-[1.75rem] border p-5 backdrop-blur-sm", theme.cardStyle)}>
-            <p className="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-[var(--event-text-secondary)]">
+          <article
+            key={section.title}
+            className="rounded-[1.75rem] border p-5"
+            style={{
+              background: "var(--event-surface)",
+              borderColor: "var(--event-surface-border)",
+            }}
+          >
+            <p className={cn("mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-[var(--event-text-secondary)]", theme.typography.label)}>
               <Icon className="h-4 w-4" />
               {section.title}
             </p>
