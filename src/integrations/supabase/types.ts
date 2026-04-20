@@ -261,7 +261,13 @@ export type Database = {
           id: string
           invited_email: string
           notes: string | null
+          phone_number: string | null
+          plus_one_allowed: boolean
+          plus_one_count: number
+          rsvp_message: string | null
+          rsvp_responded_at: string | null
           rsvp_status: string
+          rsvp_token: string
           tier: string | null
         }
         Insert: {
@@ -272,7 +278,13 @@ export type Database = {
           id?: string
           invited_email: string
           notes?: string | null
+          phone_number?: string | null
+          plus_one_allowed?: boolean
+          plus_one_count?: number
+          rsvp_message?: string | null
+          rsvp_responded_at?: string | null
           rsvp_status?: string
+          rsvp_token?: string
           tier?: string | null
         }
         Update: {
@@ -283,7 +295,13 @@ export type Database = {
           id?: string
           invited_email?: string
           notes?: string | null
+          phone_number?: string | null
+          plus_one_allowed?: boolean
+          plus_one_count?: number
+          rsvp_message?: string | null
+          rsvp_responded_at?: string | null
           rsvp_status?: string
+          rsvp_token?: string
           tier?: string | null
         }
         Relationships: [
@@ -800,6 +818,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_rsvp_by_token: { Args: { _token: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -826,6 +845,17 @@ export type Database = {
       }
       redeem_ticket: {
         Args: { _method: string; _station_label?: string; _token: string }
+        Returns: Json
+      }
+      submit_rsvp: {
+        Args: {
+          _full_name?: string
+          _message?: string
+          _phone_number?: string
+          _plus_one_count?: number
+          _status: string
+          _token: string
+        }
         Returns: Json
       }
     }

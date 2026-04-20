@@ -1,4 +1,4 @@
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { LogOut, Plus, Calendar, Users, Ticket, ScanLine, Trash2, Mail } from "lucide-react";
+import { LogOut, Plus, Calendar, Users, Ticket, ScanLine, Trash2, Mail, Link2, Pencil, Check, X, Clock } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 const fmt = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
@@ -30,7 +31,13 @@ type GuestRow = {
   id: string;
   invited_email: string;
   full_name: string | null;
+  phone_number: string | null;
   rsvp_status: string;
+  plus_one_allowed: boolean;
+  plus_one_count: number;
+  rsvp_message: string | null;
+  rsvp_responded_at: string | null;
+  rsvp_token: string;
   guest_id: string | null;
 };
 
@@ -60,7 +67,11 @@ export default function HostAdminDashboard() {
   // Guest form state
   const [guestEmail, setGuestEmail] = useState("");
   const [guestName, setGuestName] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
+  const [guestPlusOne, setGuestPlusOne] = useState(false);
   const [addingGuest, setAddingGuest] = useState(false);
+  const [editingGuestId, setEditingGuestId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<Partial<GuestRow>>({});
 
   const eventsQuery = useQuery({
     queryKey: ["org-events"],
@@ -84,7 +95,7 @@ export default function HostAdminDashboard() {
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from("event_guests")
-        .select("id,invited_email,full_name,rsvp_status,guest_id")
+        .select("id,invited_email,full_name,phone_number,rsvp_status,plus_one_allowed,plus_one_count,rsvp_message,rsvp_responded_at,rsvp_token,guest_id")
         .eq("event_id", currentEventId)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -110,7 +121,8 @@ export default function HostAdminDashboard() {
     const tickets = ticketsQuery.data ?? [];
     return {
       totalGuests: guests.length,
-      yesRsvp: guests.filter((g) => g.rsvp_status === "yes").length,
+      accepted: guests.filter((g) => g.rsvp_status === "accepted").length,
+      declined: guests.filter((g) => g.rsvp_status === "declined").length,
       pending: guests.filter((g) => g.rsvp_status === "pending").length,
       ticketsTotal: tickets.length,
       ticketsRedeemed: tickets.filter((t) => t.status === "redeemed").length,
@@ -186,26 +198,86 @@ export default function HostAdminDashboard() {
     e.preventDefault();
     if (!currentEventId || !guestEmail.trim()) return;
     setAddingGuest(true);
+    const email = guestEmail.trim().toLowerCase();
     const { error } = await (supabase as any)
       .from("event_guests")
       .insert({
         event_id: currentEventId,
-        invited_email: guestEmail.trim().toLowerCase(),
+        invited_email: email,
         full_name: guestName.trim() || null,
+        phone_number: guestPhone.trim() || null,
+        plus_one_allowed: guestPlusOne,
       });
     if (!error) {
-      setGuestEmail(""); setGuestName("");
+      setGuestEmail(""); setGuestName(""); setGuestPhone(""); setGuestPlusOne(false);
       await qc.invalidateQueries({ queryKey: ["org-guests", currentEventId] });
+      toast({ title: "Guest added", description: email });
     } else {
-      window.alert(`Could not add guest: ${error.message}`);
+      const msg = error.code === "23505"
+        ? "This email is already on the guest list for this event."
+        : error.message;
+      toast({ title: "Could not add guest", description: msg, variant: "destructive" });
     }
     setAddingGuest(false);
   };
 
   const handleRemoveGuest = async (guestRowId: string) => {
+    if (!window.confirm("Remove this guest?")) return;
     await (supabase as any).from("event_guests").delete().eq("id", guestRowId);
     await qc.invalidateQueries({ queryKey: ["org-guests", currentEventId] });
   };
+
+  const handleOverrideStatus = async (g: GuestRow, newStatus: "pending" | "accepted" | "declined") => {
+    const { error } = await (supabase as any)
+      .from("event_guests")
+      .update({
+        rsvp_status: newStatus,
+        rsvp_responded_at: newStatus === "pending" ? null : new Date().toISOString(),
+      })
+      .eq("id", g.id);
+    if (error) toast({ title: "Update failed", description: error.message, variant: "destructive" });
+    else await qc.invalidateQueries({ queryKey: ["org-guests", currentEventId] });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingGuestId) return;
+    const { error } = await (supabase as any)
+      .from("event_guests")
+      .update({
+        full_name: editForm.full_name ?? null,
+        invited_email: (editForm.invited_email ?? "").trim().toLowerCase(),
+        phone_number: editForm.phone_number ?? null,
+        plus_one_allowed: editForm.plus_one_allowed ?? false,
+      })
+      .eq("id", editingGuestId);
+    if (error) {
+      toast({ title: "Save failed", description: error.message, variant: "destructive" });
+    } else {
+      setEditingGuestId(null);
+      setEditForm({});
+      await qc.invalidateQueries({ queryKey: ["org-guests", currentEventId] });
+    }
+  };
+
+  const copyRsvpLink = (token: string) => {
+    const url = `${window.location.origin}/rsvp/${encodeURIComponent(token)}`;
+    navigator.clipboard.writeText(url);
+    toast({ title: "RSVP link copied", description: url });
+  };
+
+  // Realtime subscription for live RSVP updates
+  useEffect(() => {
+    if (!currentEventId) return;
+    const channel = supabase
+      .channel(`event-guests-${currentEventId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "event_guests", filter: `event_id=eq.${currentEventId}` },
+        () => qc.invalidateQueries({ queryKey: ["org-guests", currentEventId] }),
+      )
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [currentEventId, qc]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -331,11 +403,12 @@ export default function HostAdminDashboard() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-6">
                   <Stat icon={<Users className="w-4 h-4" />} label="Guests" value={String(stats.totalGuests)} />
-                  <Stat icon={<Mail className="w-4 h-4" />} label="RSVP yes" value={String(stats.yesRsvp)} />
+                  <Stat icon={<Check className="w-4 h-4" />} label="Accepted" value={String(stats.accepted)} />
+                  <Stat icon={<X className="w-4 h-4" />} label="Declined" value={String(stats.declined)} />
+                  <Stat icon={<Clock className="w-4 h-4" />} label="Pending" value={String(stats.pending)} />
                   <Stat icon={<Ticket className="w-4 h-4" />} label="Tickets" value={`${stats.ticketsRedeemed}/${stats.ticketsTotal}`} />
-                  <Stat icon={<ScanLine className="w-4 h-4" />} label="Pending RSVP" value={String(stats.pending)} />
                 </div>
               </Card>
 
@@ -344,7 +417,7 @@ export default function HostAdminDashboard() {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-serif text-xl text-sera-navy">Guests & RSVPs</h3>
                 </div>
-                <form onSubmit={handleAddGuest} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-2 mb-4">
+                <form onSubmit={handleAddGuest} className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
                   <Input
                     type="email"
                     placeholder="guest@email.com"
@@ -353,34 +426,137 @@ export default function HostAdminDashboard() {
                     required
                   />
                   <Input
-                    placeholder="Name (optional)"
+                    placeholder="Full name (optional)"
                     value={guestName}
                     onChange={(e) => setGuestName(e.target.value)}
                   />
-                  <Button type="submit" variant="sera" size="sm" disabled={addingGuest}>
+                  <Input
+                    placeholder="Phone (optional)"
+                    value={guestPhone}
+                    onChange={(e) => setGuestPhone(e.target.value)}
+                  />
+                  <label className="flex items-center gap-2 px-3 border border-sera-sand/60 bg-white text-sm">
+                    <input
+                      type="checkbox"
+                      checked={guestPlusOne}
+                      onChange={(e) => setGuestPlusOne(e.target.checked)}
+                    />
+                    Allow plus-ones
+                  </label>
+                  <Button type="submit" variant="sera" size="sm" disabled={addingGuest} className="md:col-span-2">
                     {addingGuest ? "Adding…" : "Add guest"}
                   </Button>
                 </form>
 
-                <div className="space-y-1 max-h-80 overflow-auto">
-                  {(guestsQuery.data ?? []).map((g) => (
-                    <div key={g.id} className="flex items-center justify-between border border-sera-sand/40 px-3 py-2 text-sm">
-                      <div>
-                        <p className="font-medium">{g.full_name ?? g.invited_email}</p>
-                        {g.full_name && <p className="text-xs text-sera-warm-grey">{g.invited_email}</p>}
+                <div className="space-y-2 max-h-[28rem] overflow-auto mt-4">
+                  {(guestsQuery.data ?? []).map((g) => {
+                    const isEditing = editingGuestId === g.id;
+                    return (
+                      <div key={g.id} className="border border-sera-sand/40 px-3 py-3 text-sm bg-white">
+                        {isEditing ? (
+                          <div className="space-y-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              <Input
+                                placeholder="Full name"
+                                value={editForm.full_name ?? ""}
+                                onChange={(e) => setEditForm((f) => ({ ...f, full_name: e.target.value }))}
+                              />
+                              <Input
+                                type="email"
+                                placeholder="Email"
+                                value={editForm.invited_email ?? ""}
+                                onChange={(e) => setEditForm((f) => ({ ...f, invited_email: e.target.value }))}
+                              />
+                              <Input
+                                placeholder="Phone"
+                                value={editForm.phone_number ?? ""}
+                                onChange={(e) => setEditForm((f) => ({ ...f, phone_number: e.target.value }))}
+                              />
+                              <label className="flex items-center gap-2 text-xs">
+                                <input
+                                  type="checkbox"
+                                  checked={editForm.plus_one_allowed ?? false}
+                                  onChange={(e) => setEditForm((f) => ({ ...f, plus_one_allowed: e.target.checked }))}
+                                />
+                                Plus-one allowed
+                              </label>
+                            </div>
+                            <div className="flex gap-2 justify-end">
+                              <Button size="sm" variant="ghost" onClick={() => { setEditingGuestId(null); setEditForm({}); }}>
+                                Cancel
+                              </Button>
+                              <Button size="sm" variant="sera" onClick={handleSaveEdit}>
+                                Save
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="font-medium truncate">{g.full_name ?? g.invited_email}</p>
+                              {g.full_name && <p className="text-xs text-sera-warm-grey truncate">{g.invited_email}</p>}
+                              <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-sera-warm-grey">
+                                {g.phone_number && <span>{g.phone_number}</span>}
+                                {g.plus_one_allowed && (
+                                  <span>+1 allowed{g.plus_one_count ? ` · ${g.plus_one_count} confirmed` : ""}</span>
+                                )}
+                                {g.rsvp_responded_at && (
+                                  <span>· responded {new Date(g.rsvp_responded_at).toLocaleDateString()}</span>
+                                )}
+                              </div>
+                              {g.rsvp_message && (
+                                <p className="text-xs text-sera-stone mt-1 italic">"{g.rsvp_message}"</p>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <select
+                                value={g.rsvp_status}
+                                onChange={(e) => handleOverrideStatus(g, e.target.value as any)}
+                                className="text-[11px] border border-sera-sand/60 px-2 py-1 bg-white uppercase tracking-wider"
+                                aria-label="Override RSVP status"
+                              >
+                                <option value="pending">pending</option>
+                                <option value="accepted">accepted</option>
+                                <option value="declined">declined</option>
+                              </select>
+                              <button
+                                onClick={() => copyRsvpLink(g.rsvp_token)}
+                                className="p-1.5 text-sera-warm-grey hover:text-sera-navy"
+                                aria-label="Copy RSVP link"
+                                title="Copy RSVP link"
+                              >
+                                <Link2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditingGuestId(g.id);
+                                  setEditForm({
+                                    full_name: g.full_name,
+                                    invited_email: g.invited_email,
+                                    phone_number: g.phone_number,
+                                    plus_one_allowed: g.plus_one_allowed,
+                                  });
+                                }}
+                                className="p-1.5 text-sera-warm-grey hover:text-sera-navy"
+                                aria-label="Edit guest"
+                                title="Edit"
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleRemoveGuest(g.id)}
+                                className="p-1.5 text-sera-warm-grey hover:text-sera-oxblood"
+                                aria-label="Remove guest"
+                                title="Remove"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-[10px] uppercase">{g.rsvp_status}</Badge>
-                        <button
-                          onClick={() => handleRemoveGuest(g.id)}
-                          className="text-sera-warm-grey hover:text-sera-oxblood"
-                          aria-label="Remove guest"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   {(guestsQuery.data ?? []).length === 0 && (
                     <p className="text-sm text-sera-warm-grey">No guests yet.</p>
                   )}
