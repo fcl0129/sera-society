@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@500;600&family=Inter:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -7,33 +7,33 @@
 @layer base {
   :root {
     /* Color system */
-    --background: 36 24% 97%;
-    --foreground: 222 22% 16%;
-    --text-primary: 222 22% 16%;
-    --text-secondary: 220 12% 40%;
-    --bg-elevated: 36 26% 99%;
+    --background: 33 30% 94%;
+    --foreground: 27 14% 15%;
+    --text-primary: 27 14% 15%;
+    --text-secondary: 24 10% 35%;
+    --bg-elevated: 36 28% 97%;
 
-    --card: 40 20% 99%;
-    --card-foreground: 222 22% 16%;
-    --popover: 40 22% 99%;
-    --popover-foreground: 222 22% 16%;
+    --card: 36 28% 96%;
+    --card-foreground: 27 14% 15%;
+    --popover: 36 26% 97%;
+    --popover-foreground: 27 14% 15%;
 
-    --primary: 218 40% 18%;
-    --primary-foreground: 40 24% 97%;
-    --secondary: 30 18% 92%;
-    --secondary-foreground: 220 18% 23%;
-    --muted: 30 18% 93%;
-    --muted-foreground: 220 12% 40%;
-    --accent: 24 34% 86%;
-    --accent-soft: 30 30% 93%;
-    --accent-foreground: 222 22% 16%;
+    --primary: 27 14% 15%;
+    --primary-foreground: 33 30% 94%;
+    --secondary: 19 31% 88%;
+    --secondary-foreground: 27 14% 15%;
+    --muted: 29 23% 91%;
+    --muted-foreground: 24 10% 35%;
+    --accent: 145 20% 79%;
+    --accent-soft: 17 34% 93%;
+    --accent-foreground: 27 14% 15%;
 
     --destructive: 3 62% 42%;
     --destructive-foreground: 35 25% 96%;
 
-    --border: 24 14% 84%;
-    --input: 30 16% 88%;
-    --ring: 218 44% 26%;
+    --border: 28 20% 80%;
+    --input: 28 22% 86%;
+    --ring: 145 12% 40%;
 
     /* Status tokens */
     --status-success: 155 38% 34%;
@@ -100,6 +100,13 @@
     --sera-surface-light: 40 23% 99%;
     --sera-surface-warm: 33 30% 96%;
     --sera-surface-cool: 220 19% 95%;
+    --sera-ivory-paper: 33 30% 94%;
+    --sera-soft-blush: 15 27% 88%;
+    --sera-matcha-mist: 144 24% 79%;
+    --sera-deep-moss: 139 9% 40%;
+    --sera-ink-brown: 27 14% 15%;
+    --sera-porcelain-rose: 15 35% 92%;
+    --sera-warm-stone: 32 18% 80%;
 
     /* shadcn sidebar */
     --sidebar-background: 40 23% 99%;
@@ -112,10 +119,10 @@
     --sidebar-ring: 218 44% 26%;
 
     /* Typography */
-    --font-display: "Fraunces", "Iowan Old Style", "Times New Roman", serif;
+    --font-display: "Cormorant Garamond", "Iowan Old Style", "Times New Roman", serif;
     --font-sans: "Inter", "Avenir Next", "Segoe UI", system-ui, sans-serif;
     --font-mono: "JetBrains Mono", "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
-    --font-accent-serif: "Fraunces", "Iowan Old Style", Georgia, serif;
+    --font-accent-serif: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
   }
 
   .dark {
@@ -194,8 +201,8 @@
   h6 {
     font-family: var(--font-display);
     color: hsl(var(--text-primary));
-    letter-spacing: -0.025em;
-    line-height: 1.06;
+    letter-spacing: -0.018em;
+    line-height: 1.04;
   }
 }
 
@@ -203,35 +210,34 @@
   .sera-heading {
     font-family: var(--font-display);
     font-weight: 500;
-    letter-spacing: -0.035em;
-    line-height: 0.98;
+    letter-spacing: -0.028em;
+    line-height: 0.94;
     text-wrap: balance;
-    font-size: clamp(2rem, 5vw, 5.2rem);
+    font-size: clamp(2.4rem, 6.8vw, 6.8rem);
   }
 
   .sera-subheading {
     font-family: var(--font-display);
     font-weight: 500;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.016em;
     line-height: 1.08;
     text-wrap: balance;
-    font-size: clamp(1.375rem, 2.4vw, 2.6rem);
+    font-size: clamp(1.6rem, 3vw, 3.5rem);
   }
 
   .sera-body {
     font-family: var(--font-sans);
     font-weight: 400;
-    line-height: 1.62;
-    letter-spacing: -0.008em;
-    font-size: clamp(1rem, 1.1vw, 1.08rem);
+    line-height: 1.68;
+    letter-spacing: -0.003em;
+    font-size: clamp(1rem, 1.2vw, 1.125rem);
   }
 
   .sera-label {
     font-family: var(--font-sans);
-    font-weight: 600;
-    font-size: 0.68rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    font-weight: 500;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
     line-height: 1.2;
   }
 
