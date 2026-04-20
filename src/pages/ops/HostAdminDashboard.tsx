@@ -91,7 +91,7 @@ export default function HostAdminDashboard() {
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from("event_guests")
-        .select("id,invited_email,full_name,rsvp_status,guest_id")
+        .select("id,invited_email,full_name,phone_number,rsvp_status,plus_one_allowed,plus_one_count,rsvp_message,rsvp_responded_at,rsvp_token,guest_id")
         .eq("event_id", currentEventId)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -117,7 +117,8 @@ export default function HostAdminDashboard() {
     const tickets = ticketsQuery.data ?? [];
     return {
       totalGuests: guests.length,
-      yesRsvp: guests.filter((g) => g.rsvp_status === "yes").length,
+      accepted: guests.filter((g) => g.rsvp_status === "accepted").length,
+      declined: guests.filter((g) => g.rsvp_status === "declined").length,
       pending: guests.filter((g) => g.rsvp_status === "pending").length,
       ticketsTotal: tickets.length,
       ticketsRedeemed: tickets.filter((t) => t.status === "redeemed").length,
