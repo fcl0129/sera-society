@@ -67,7 +67,11 @@ export default function HostAdminDashboard() {
   // Guest form state
   const [guestEmail, setGuestEmail] = useState("");
   const [guestName, setGuestName] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
+  const [guestPlusOne, setGuestPlusOne] = useState(false);
   const [addingGuest, setAddingGuest] = useState(false);
+  const [editingGuestId, setEditingGuestId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<Partial<GuestRow>>({});
 
   const eventsQuery = useQuery({
     queryKey: ["org-events"],
@@ -194,26 +198,86 @@ export default function HostAdminDashboard() {
     e.preventDefault();
     if (!currentEventId || !guestEmail.trim()) return;
     setAddingGuest(true);
+    const email = guestEmail.trim().toLowerCase();
     const { error } = await (supabase as any)
       .from("event_guests")
       .insert({
         event_id: currentEventId,
-        invited_email: guestEmail.trim().toLowerCase(),
+        invited_email: email,
         full_name: guestName.trim() || null,
+        phone_number: guestPhone.trim() || null,
+        plus_one_allowed: guestPlusOne,
       });
     if (!error) {
-      setGuestEmail(""); setGuestName("");
+      setGuestEmail(""); setGuestName(""); setGuestPhone(""); setGuestPlusOne(false);
       await qc.invalidateQueries({ queryKey: ["org-guests", currentEventId] });
+      toast({ title: "Guest added", description: email });
     } else {
-      window.alert(`Could not add guest: ${error.message}`);
+      const msg = error.code === "23505"
+        ? "This email is already on the guest list for this event."
+        : error.message;
+      toast({ title: "Could not add guest", description: msg, variant: "destructive" });
     }
     setAddingGuest(false);
   };
 
   const handleRemoveGuest = async (guestRowId: string) => {
+    if (!window.confirm("Remove this guest?")) return;
     await (supabase as any).from("event_guests").delete().eq("id", guestRowId);
     await qc.invalidateQueries({ queryKey: ["org-guests", currentEventId] });
   };
+
+  const handleOverrideStatus = async (g: GuestRow, newStatus: "pending" | "accepted" | "declined") => {
+    const { error } = await (supabase as any)
+      .from("event_guests")
+      .update({
+        rsvp_status: newStatus,
+        rsvp_responded_at: newStatus === "pending" ? null : new Date().toISOString(),
+      })
+      .eq("id", g.id);
+    if (error) toast({ title: "Update failed", description: error.message, variant: "destructive" });
+    else await qc.invalidateQueries({ queryKey: ["org-guests", currentEventId] });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingGuestId) return;
+    const { error } = await (supabase as any)
+      .from("event_guests")
+      .update({
+        full_name: editForm.full_name ?? null,
+        invited_email: (editForm.invited_email ?? "").trim().toLowerCase(),
+        phone_number: editForm.phone_number ?? null,
+        plus_one_allowed: editForm.plus_one_allowed ?? false,
+      })
+      .eq("id", editingGuestId);
+    if (error) {
+      toast({ title: "Save failed", description: error.message, variant: "destructive" });
+    } else {
+      setEditingGuestId(null);
+      setEditForm({});
+      await qc.invalidateQueries({ queryKey: ["org-guests", currentEventId] });
+    }
+  };
+
+  const copyRsvpLink = (token: string) => {
+    const url = `${window.location.origin}/rsvp/${encodeURIComponent(token)}`;
+    navigator.clipboard.writeText(url);
+    toast({ title: "RSVP link copied", description: url });
+  };
+
+  // Realtime subscription for live RSVP updates
+  useEffect(() => {
+    if (!currentEventId) return;
+    const channel = supabase
+      .channel(`event-guests-${currentEventId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "event_guests", filter: `event_id=eq.${currentEventId}` },
+        () => qc.invalidateQueries({ queryKey: ["org-guests", currentEventId] }),
+      )
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [currentEventId, qc]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
