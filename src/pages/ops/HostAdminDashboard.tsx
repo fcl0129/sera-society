@@ -403,11 +403,12 @@ export default function HostAdminDashboard() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-6">
                   <Stat icon={<Users className="w-4 h-4" />} label="Guests" value={String(stats.totalGuests)} />
-                  <Stat icon={<Mail className="w-4 h-4" />} label="RSVP yes" value={String(stats.yesRsvp)} />
+                  <Stat icon={<Check className="w-4 h-4" />} label="Accepted" value={String(stats.accepted)} />
+                  <Stat icon={<X className="w-4 h-4" />} label="Declined" value={String(stats.declined)} />
+                  <Stat icon={<Clock className="w-4 h-4" />} label="Pending" value={String(stats.pending)} />
                   <Stat icon={<Ticket className="w-4 h-4" />} label="Tickets" value={`${stats.ticketsRedeemed}/${stats.ticketsTotal}`} />
-                  <Stat icon={<ScanLine className="w-4 h-4" />} label="Pending RSVP" value={String(stats.pending)} />
                 </div>
               </Card>
 
@@ -416,7 +417,7 @@ export default function HostAdminDashboard() {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-serif text-xl text-sera-navy">Guests & RSVPs</h3>
                 </div>
-                <form onSubmit={handleAddGuest} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-2 mb-4">
+                <form onSubmit={handleAddGuest} className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
                   <Input
                     type="email"
                     placeholder="guest@email.com"
@@ -425,34 +426,137 @@ export default function HostAdminDashboard() {
                     required
                   />
                   <Input
-                    placeholder="Name (optional)"
+                    placeholder="Full name (optional)"
                     value={guestName}
                     onChange={(e) => setGuestName(e.target.value)}
                   />
-                  <Button type="submit" variant="sera" size="sm" disabled={addingGuest}>
+                  <Input
+                    placeholder="Phone (optional)"
+                    value={guestPhone}
+                    onChange={(e) => setGuestPhone(e.target.value)}
+                  />
+                  <label className="flex items-center gap-2 px-3 border border-sera-sand/60 bg-white text-sm">
+                    <input
+                      type="checkbox"
+                      checked={guestPlusOne}
+                      onChange={(e) => setGuestPlusOne(e.target.checked)}
+                    />
+                    Allow plus-ones
+                  </label>
+                  <Button type="submit" variant="sera" size="sm" disabled={addingGuest} className="md:col-span-2">
                     {addingGuest ? "Adding…" : "Add guest"}
                   </Button>
                 </form>
 
-                <div className="space-y-1 max-h-80 overflow-auto">
-                  {(guestsQuery.data ?? []).map((g) => (
-                    <div key={g.id} className="flex items-center justify-between border border-sera-sand/40 px-3 py-2 text-sm">
-                      <div>
-                        <p className="font-medium">{g.full_name ?? g.invited_email}</p>
-                        {g.full_name && <p className="text-xs text-sera-warm-grey">{g.invited_email}</p>}
+                <div className="space-y-2 max-h-[28rem] overflow-auto mt-4">
+                  {(guestsQuery.data ?? []).map((g) => {
+                    const isEditing = editingGuestId === g.id;
+                    return (
+                      <div key={g.id} className="border border-sera-sand/40 px-3 py-3 text-sm bg-white">
+                        {isEditing ? (
+                          <div className="space-y-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              <Input
+                                placeholder="Full name"
+                                value={editForm.full_name ?? ""}
+                                onChange={(e) => setEditForm((f) => ({ ...f, full_name: e.target.value }))}
+                              />
+                              <Input
+                                type="email"
+                                placeholder="Email"
+                                value={editForm.invited_email ?? ""}
+                                onChange={(e) => setEditForm((f) => ({ ...f, invited_email: e.target.value }))}
+                              />
+                              <Input
+                                placeholder="Phone"
+                                value={editForm.phone_number ?? ""}
+                                onChange={(e) => setEditForm((f) => ({ ...f, phone_number: e.target.value }))}
+                              />
+                              <label className="flex items-center gap-2 text-xs">
+                                <input
+                                  type="checkbox"
+                                  checked={editForm.plus_one_allowed ?? false}
+                                  onChange={(e) => setEditForm((f) => ({ ...f, plus_one_allowed: e.target.checked }))}
+                                />
+                                Plus-one allowed
+                              </label>
+                            </div>
+                            <div className="flex gap-2 justify-end">
+                              <Button size="sm" variant="ghost" onClick={() => { setEditingGuestId(null); setEditForm({}); }}>
+                                Cancel
+                              </Button>
+                              <Button size="sm" variant="sera" onClick={handleSaveEdit}>
+                                Save
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="font-medium truncate">{g.full_name ?? g.invited_email}</p>
+                              {g.full_name && <p className="text-xs text-sera-warm-grey truncate">{g.invited_email}</p>}
+                              <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-sera-warm-grey">
+                                {g.phone_number && <span>{g.phone_number}</span>}
+                                {g.plus_one_allowed && (
+                                  <span>+1 allowed{g.plus_one_count ? ` · ${g.plus_one_count} confirmed` : ""}</span>
+                                )}
+                                {g.rsvp_responded_at && (
+                                  <span>· responded {new Date(g.rsvp_responded_at).toLocaleDateString()}</span>
+                                )}
+                              </div>
+                              {g.rsvp_message && (
+                                <p className="text-xs text-sera-stone mt-1 italic">"{g.rsvp_message}"</p>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <select
+                                value={g.rsvp_status}
+                                onChange={(e) => handleOverrideStatus(g, e.target.value as any)}
+                                className="text-[11px] border border-sera-sand/60 px-2 py-1 bg-white uppercase tracking-wider"
+                                aria-label="Override RSVP status"
+                              >
+                                <option value="pending">pending</option>
+                                <option value="accepted">accepted</option>
+                                <option value="declined">declined</option>
+                              </select>
+                              <button
+                                onClick={() => copyRsvpLink(g.rsvp_token)}
+                                className="p-1.5 text-sera-warm-grey hover:text-sera-navy"
+                                aria-label="Copy RSVP link"
+                                title="Copy RSVP link"
+                              >
+                                <Link2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditingGuestId(g.id);
+                                  setEditForm({
+                                    full_name: g.full_name,
+                                    invited_email: g.invited_email,
+                                    phone_number: g.phone_number,
+                                    plus_one_allowed: g.plus_one_allowed,
+                                  });
+                                }}
+                                className="p-1.5 text-sera-warm-grey hover:text-sera-navy"
+                                aria-label="Edit guest"
+                                title="Edit"
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleRemoveGuest(g.id)}
+                                className="p-1.5 text-sera-warm-grey hover:text-sera-oxblood"
+                                aria-label="Remove guest"
+                                title="Remove"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-[10px] uppercase">{g.rsvp_status}</Badge>
-                        <button
-                          onClick={() => handleRemoveGuest(g.id)}
-                          className="text-sera-warm-grey hover:text-sera-oxblood"
-                          aria-label="Remove guest"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   {(guestsQuery.data ?? []).length === 0 && (
                     <p className="text-sm text-sera-warm-grey">No guests yet.</p>
                   )}
