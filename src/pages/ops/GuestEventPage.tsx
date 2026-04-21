@@ -24,12 +24,9 @@ const fmt = new Intl.DateTimeFormat(undefined, {
 
 type TicketRow = {
   id: string;
-  code: string;
-  status: "active" | "redeemed" | "cancelled" | "expired";
-  ticket_type: string;
-  redemption_limit: number;
-  redeemed_count: number;
-  qr_payload: string;
+  token: string;
+  status: "active" | "redeemed" | "void";
+  redeemed_at: string | null;
   event_id: string;
 };
 
@@ -75,9 +72,9 @@ export default function GuestEventPage() {
       if (!user) return { event: null as EventRow | null, tickets: [] as TicketRow[] };
 
       const { data: tickets, error } = await (supabase as any)
-        .from("tickets")
-        .select("id, code, status, ticket_type, redemption_limit, redeemed_count, qr_payload, event_id")
-        .eq("owner_user_id", user.id)
+        .from("drink_tickets")
+        .select("id, token, status, redeemed_at, event_id")
+        .eq("guest_id", user.id)
         .order("created_at", { ascending: true });
       if (error) throw error;
 
@@ -86,11 +83,14 @@ export default function GuestEventPage() {
 
       const { data: event } = await (supabase as any)
         .from("events")
-        .select("id, title, venue, starts_at, slug, description")
+        .select("id, title, venue, starts_at, description")
         .eq("id", firstEventId)
         .maybeSingle();
 
-      return { event: (event ?? null) as EventRow | null, tickets: (tickets ?? []) as TicketRow[] };
+      return {
+        event: event ? ({ ...event, slug: null } as EventRow) : null,
+        tickets: (tickets ?? []) as TicketRow[],
+      };
     },
   });
 
