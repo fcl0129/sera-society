@@ -46,6 +46,7 @@ type TicketRow = {
   status: string;
   guest_id: string | null;
   redeemed_at: string | null;
+  token: string;
 };
 
 export default function HostAdminDashboard() {
@@ -109,7 +110,7 @@ export default function HostAdminDashboard() {
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from("drink_tickets")
-        .select("id,status,guest_id,redeemed_at")
+        .select("id,status,guest_id,redeemed_at,token")
         .eq("event_id", currentEventId);
       if (error) throw error;
       return (data ?? []) as TicketRow[];
@@ -652,12 +653,12 @@ export default function HostAdminDashboard() {
                                     <>
                                       <Badge variant="outline" className="text-[10px]">active</Badge>
                                       <button
-                                        onClick={() => copyTicketToken(activeTicket.id /* placeholder */)}
+                                        onClick={() => copyTicketToken(activeTicket.token)}
                                         className="text-sera-navy underline-offset-2 hover:underline"
                                         aria-label="Copy ticket token"
-                                        title="Tickets are issued; bartender will scan the guest's QR. Use Bulk Issue to create more."
+                                        title="Copy token to test in bartender manual entry"
                                       >
-                                        view token
+                                        copy token
                                       </button>
                                       <button
                                         onClick={() => voidTicket(activeTicket.id)}
