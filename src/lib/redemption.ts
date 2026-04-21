@@ -2,28 +2,24 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type RedemptionResponse = {
   ok: boolean;
-  code: "redeemed" | "already_redeemed" | "invalid" | "blocked" | "forbidden" | "unauthorized" | string;
+  code: "redeemed" | "already_redeemed" | "invalid" | "void" | "forbidden" | "unauthorized" | "invalid_method" | "rpc_error" | string;
   message?: string;
   ticket_id?: string;
   event_id?: string;
-  ticket_type?: string;
-  redeemed_count?: number;
-  redemption_limit?: number;
-  status?: string;
+  redeemed_at?: string;
 };
 
 export async function redeemTicket(input: {
-  code: string;
-  method: "qr" | "nfc";
-  redemptionPointId?: string;
-  metadata?: Record<string, unknown>;
+  /** Raw drink_tickets.token (from QR scan, NFC tap, or manual entry). */
+  token: string;
+  method: "qr" | "nfc" | "manual";
+  stationLabel?: string;
 }) {
   const { data, error } = await supabase.functions.invoke("redeem-ticket", {
     body: {
-      code: input.code,
+      token: input.token,
       method: input.method,
-      redemption_point_id: input.redemptionPointId,
-      metadata: input.metadata ?? {},
+      station_label: input.stationLabel,
     },
   });
 
