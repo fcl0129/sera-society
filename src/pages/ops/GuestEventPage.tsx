@@ -157,8 +157,14 @@ export default function GuestEventPage() {
                 {tickets.map((ticket) => (
                   <article key={ticket.id} className={cn("flex items-center justify-between gap-3 rounded-2xl border p-3", theme.cardStyle)}>
                     <div>
-                      <p className="font-medium capitalize text-[var(--event-text-primary)]">{ticket.ticket_type.replace(/_/g, " ")}</p>
-                      <p className="text-xs text-[var(--event-text-secondary)]">{ticket.redeemed_count}/{ticket.redemption_limit} redeemed</p>
+                      <p className="font-medium capitalize text-[var(--event-text-primary)]">Drink ticket</p>
+                      <p className="text-xs text-[var(--event-text-secondary)]">
+                        {ticket.status === "redeemed" && ticket.redeemed_at
+                          ? `Redeemed ${new Date(ticket.redeemed_at).toLocaleString()}`
+                          : ticket.status === "void"
+                          ? "Void"
+                          : "Ready to redeem"}
+                      </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <StatusChip status={ticket.status} />
@@ -273,10 +279,10 @@ function TicketDialog({
         </DialogHeader>
         <div className="flex justify-center py-1">
           <div className={cn("rounded-2xl border p-4", themeCard)}>
-            <QRCodeSVG value={ticket.qr_payload} size={220} level="H" />
+            <QRCodeSVG value={ticket.token} size={220} level="H" />
           </div>
         </div>
-        <p className={cn("rounded-xl border px-3 py-2 text-center text-xs text-[var(--event-text-secondary)]", themeCard)}>Ticket code: {ticket.code}</p>
+        <p className={cn("rounded-xl border px-3 py-2 text-center font-mono text-xs text-[var(--event-text-secondary)] break-all", themeCard)}>{ticket.token}</p>
         {nfcCapability.supported ? (
           <Button variant={nfcActive ? "sera-outline" : "sera"} className="w-full" onClick={() => setNfcActive((v) => !v)}>
             <Smartphone className="mr-2 h-4 w-4" />
