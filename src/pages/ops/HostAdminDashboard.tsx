@@ -277,10 +277,66 @@ export default function HostAdminDashboard() {
     toast({ title: "RSVP link copied", description: url });
   };
 
-  // Realtime subscription for live RSVP updates
+  // ---------- Drink ticket issuance ----------
+
+  const issueTicketForGuest = async (g: GuestRow) => {
+    if (!currentEventId) return;
+    if (!g.guest_id) {
+      toast({
+        title: "Guest hasn't signed in yet",
+        description: "Tickets can only be issued once the guest has logged in and a profile is linked.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const { error } = await (supabase as any)
+      .from("drink_tickets")
+      .insert({ event_id: currentEventId, guest_id: g.guest_id, status: "active" });
+    if (error) {
+      toast({ title: "Could not issue ticket", description: error.message, variant: "destructive" });
+    } else {
+      await qc.invalidateQueries({ queryKey: ["org-tickets", currentEventId] });
+      toast({ title: "Ticket issued", description: g.invited_email });
+    }
+  };
+
+  const voidTicket = async (ticketId: string) => {
+    if (!window.confirm("Void this ticket? It can no longer be redeemed.")) return;
+    const { error } = await (supabase as any)
+      .from("drink_tickets")
+      .update({ status: "void" })
+      .eq("id", ticketId);
+    if (error) toast({ title: "Update failed", description: error.message, variant: "destructive" });
+    else await qc.invalidateQueries({ queryKey: ["org-tickets", currentEventId] });
+  };
+
+  const issueTicketsToAllAccepted = async () => {
+    if (!currentEventId) return;
+    const accepted = (guestsQuery.data ?? []).filter(
+      (g) => g.rsvp_status === "accepted" && g.guest_id && !ticketsByGuest.has(g.guest_id)
+    );
+    if (accepted.length === 0) {
+      toast({ title: "Nothing to issue", description: "All accepted guests with linked accounts already have a ticket." });
+      return;
+    }
+    const rows = accepted.map((g) => ({ event_id: currentEventId, guest_id: g.guest_id, status: "active" }));
+    const { error } = await (supabase as any).from("drink_tickets").insert(rows);
+    if (error) toast({ title: "Bulk issue failed", description: error.message, variant: "destructive" });
+    else {
+      await qc.invalidateQueries({ queryKey: ["org-tickets", currentEventId] });
+      toast({ title: "Tickets issued", description: `${rows.length} new ticket(s)` });
+    }
+  };
+
+  const copyTicketToken = (token: string) => {
+    navigator.clipboard.writeText(token);
+    toast({ title: "Ticket token copied", description: "Paste into the bartender's manual entry to test." });
+  };
+
+  // Realtime subscriptions: keep guests + tickets fresh.
   useEffect(() => {
     if (!currentEventId) return;
-    const channel = supabase
+    const guestsChannel = supabase
       .channel(`event-guests-${currentEventId}`)
       .on(
         "postgres_changes",
@@ -288,7 +344,18 @@ export default function HostAdminDashboard() {
         () => qc.invalidateQueries({ queryKey: ["org-guests", currentEventId] }),
       )
       .subscribe();
-    return () => { void supabase.removeChannel(channel); };
+    const ticketsChannel = supabase
+      .channel(`drink-tickets-${currentEventId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "drink_tickets", filter: `event_id=eq.${currentEventId}` },
+        () => qc.invalidateQueries({ queryKey: ["org-tickets", currentEventId] }),
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(guestsChannel);
+      void supabase.removeChannel(ticketsChannel);
+    };
   }, [currentEventId, qc]);
 
   const handleSignOut = async () => {
