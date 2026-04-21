@@ -633,6 +633,54 @@ export default function HostAdminDashboard() {
                             </div>
                           </div>
                         )}
+                        {!isEditing && (() => {
+                          const guestTickets = g.guest_id ? ticketsByGuest.get(g.guest_id) ?? [] : [];
+                          const activeTicket = guestTickets.find((t) => t.status === "active");
+                          const redeemedCount = guestTickets.filter((t) => t.status === "redeemed").length;
+                          return (
+                            <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-sera-sand/30 pt-2 text-xs">
+                              <span className="sera-label text-sera-stone">Drink ticket</span>
+                              {!g.guest_id ? (
+                                <span className="text-sera-warm-grey italic">guest must sign in first</span>
+                              ) : guestTickets.length === 0 ? (
+                                <Button size="sm" variant="sera-outline" onClick={() => issueTicketForGuest(g)}>
+                                  <Ticket className="w-3 h-3 mr-1" /> Issue
+                                </Button>
+                              ) : (
+                                <>
+                                  {activeTicket ? (
+                                    <>
+                                      <Badge variant="outline" className="text-[10px]">active</Badge>
+                                      <button
+                                        onClick={() => copyTicketToken(activeTicket.id /* placeholder */)}
+                                        className="text-sera-navy underline-offset-2 hover:underline"
+                                        aria-label="Copy ticket token"
+                                        title="Tickets are issued; bartender will scan the guest's QR. Use Bulk Issue to create more."
+                                      >
+                                        view token
+                                      </button>
+                                      <button
+                                        onClick={() => voidTicket(activeTicket.id)}
+                                        className="p-1 text-sera-warm-grey hover:text-sera-oxblood"
+                                        aria-label="Void ticket"
+                                        title="Void"
+                                      >
+                                        <Ban className="w-3.5 h-3.5" />
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <Button size="sm" variant="sera-outline" onClick={() => issueTicketForGuest(g)}>
+                                      <Ticket className="w-3 h-3 mr-1" /> Issue another
+                                    </Button>
+                                  )}
+                                  {redeemedCount > 0 && (
+                                    <span className="text-sera-warm-grey">· {redeemedCount} redeemed</span>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
                     );
                   })}
