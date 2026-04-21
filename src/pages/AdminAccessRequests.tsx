@@ -130,7 +130,7 @@ export default function AdminAccessRequests() {
             <h1 className="sera-heading text-sera-navy text-3xl md:text-4xl">Access applications</h1>
           </div>
           <Button variant="sera-outline" asChild>
-            <Link to="/dashboard">Back</Link>
+            <Link to="/admin">Back</Link>
           </Button>
         </div>
 

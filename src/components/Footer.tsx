@@ -25,7 +25,7 @@ export default function Footer() {
                 <li><Link to="/platform" className={footerLinkClass}>Platform</Link></li>
                 <li><Link to="/invitations" className={footerLinkClass}>Invitations</Link></li>
                 <li><Link to="/event-pages" className={footerLinkClass}>Event Pages</Link></li>
-                <li><Link to="/check-in" className={footerLinkClass}>Check-In</Link></li>
+                <li><Link to="/login" className={footerLinkClass}>Sign in</Link></li>
               </ul>
             </div>
             <div>
