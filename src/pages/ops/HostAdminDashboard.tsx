@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { LogOut, Plus, Calendar, Users, Ticket, ScanLine, Trash2, Mail, Link2, Pencil, Check, X, Clock } from "lucide-react";
+import { LogOut, Plus, Calendar, Users, Ticket, ScanLine, Trash2, Mail, Link2, Pencil, Check, X, Clock, Ban } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 const fmt = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
@@ -128,6 +128,18 @@ export default function HostAdminDashboard() {
       ticketsRedeemed: tickets.filter((t) => t.status === "redeemed").length,
     };
   }, [guestsQuery.data, ticketsQuery.data]);
+
+  // Map guest_id (auth uid) → tickets for quick lookup in the guest table.
+  const ticketsByGuest = useMemo(() => {
+    const map = new Map<string, TicketRow[]>();
+    for (const t of ticketsQuery.data ?? []) {
+      if (!t.guest_id) continue;
+      const arr = map.get(t.guest_id) ?? [];
+      arr.push(t);
+      map.set(t.guest_id, arr);
+    }
+    return map;
+  }, [ticketsQuery.data]);
 
   const handleCreateEvent = async (e: FormEvent) => {
     e.preventDefault();
