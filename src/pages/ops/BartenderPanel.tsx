@@ -20,7 +20,7 @@ export default function BartenderPanel() {
 
   const nfcCap = useMemo(() => detectNfcCapability(), []);
 
-  const handleRedeem = async (code: string, method: "qr" | "nfc") => {
+  const handleRedeem = async (code: string, method: "qr" | "nfc" | "manual") => {
     if (!code || busy || scanLocked) return;
 
     setBusy(true);
@@ -28,12 +28,9 @@ export default function BartenderPanel() {
 
     try {
       const redemption = await redeemTicket({
-        code,
+        token: code,
         method,
-        metadata: {
-          source: "bartender_panel",
-          user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
-        },
+        stationLabel: "bartender_panel",
       });
       setResult(redemption);
       if (navigator.vibrate) navigator.vibrate(redemption.ok ? [80] : [40, 80, 40]);
@@ -47,7 +44,7 @@ export default function BartenderPanel() {
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (!manualCode.trim()) return;
-    await handleRedeem(manualCode.trim(), "qr");
+    await handleRedeem(manualCode.trim(), "manual");
     setManualCode("");
   };
 
@@ -118,8 +115,9 @@ export default function BartenderPanel() {
             {result?.ok && "Redeemed"}
             {!result?.ok && result?.code === "already_redeemed" && "Already used"}
             {!result?.ok && result?.code === "invalid" && "Invalid"}
-            {!result?.ok && result?.code === "blocked" && "Blocked"}
+            {!result?.ok && result?.code === "void" && "Void"}
             {!result?.ok && result?.code === "forbidden" && "Not authorized"}
+            {!result?.ok && result?.code === "unauthorized" && "Sign in required"}
           </p>
           <p className="text-sm opacity-90 mt-1">{result?.message ?? "Scan a QR code or enter a code manually."}</p>
 

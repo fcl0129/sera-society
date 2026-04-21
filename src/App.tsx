@@ -16,9 +16,9 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Faq from "./pages/Faq";
 import NotFound from "./pages/NotFound";
+import { Navigate } from "react-router-dom";
 import AdminAccessRequests from "./pages/AdminAccessRequests";
 import CheckIn from "./pages/CheckIn";
-import ManageEvents from "./pages/ManageEvents";
 
 import RoleRoute from "./components/RoleRoute";
 import OpsHome from "./pages/ops/OpsHome";
@@ -79,14 +79,10 @@ const App = () => (
                 </RoleRoute>
               }
             />
-            <Route
-              path="/manage-events"
-              element={
-                <RoleRoute allow={["organizer", "admin", "host_admin"]}>
-                  <ManageEvents />
-                </RoleRoute>
-              }
-            />
+            {/* Legacy organizer routes → unified /organizer dashboard */}
+            <Route path="/manage-events" element={<Navigate to="/organizer" replace />} />
+            <Route path="/dashboard" element={<Navigate to="/organizer" replace />} />
+            <Route path="/dashboard/*" element={<Navigate to="/organizer" replace />} />
             <Route
               path="/check-in"
               element={

@@ -7,13 +7,14 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-type Method = "qr" | "nfc";
+type Method = "qr" | "nfc" | "manual" | "device_emulation" | "nfc_tag";
 
 interface Body {
-  code: string;
+  /** The drink_tickets.token value (encoded base64 from QR/NFC/manual entry). */
+  token: string;
   method: Method;
-  redemption_point_id?: string;
-  metadata?: Record<string, unknown>;
+  /** Optional human label for the redemption station. */
+  station_label?: string;
 }
 
 Deno.serve(async (req) => {
@@ -36,18 +37,28 @@ Deno.serve(async (req) => {
     });
 
     const body = (await req.json()) as Body;
-    if (!body?.code || !body?.method) {
-      return new Response(JSON.stringify({ ok: false, code: "invalid_input", message: "code and method are required" }), {
+    if (!body?.token || !body?.method) {
+      return new Response(JSON.stringify({ ok: false, code: "invalid_input", message: "token and method are required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const { data, error } = await supabase.rpc("redeem_event_ticket", {
-      p_code: body.code.trim(),
-      p_method: body.method,
-      p_redemption_point_id: body.redemption_point_id ?? null,
-      p_payload: body.metadata ?? {},
+    // Map UI methods to allowed values for redeem_ticket RPC.
+    // Allowed: nfc_tag | qr | manual | device_emulation
+    const methodMap: Record<string, string> = {
+      qr: "qr",
+      nfc: "nfc_tag",
+      nfc_tag: "nfc_tag",
+      manual: "manual",
+      device_emulation: "device_emulation",
+    };
+    const method = methodMap[body.method] ?? "manual";
+
+    const { data, error } = await supabase.rpc("redeem_ticket", {
+      _token: body.token.trim(),
+      _method: method,
+      _station_label: body.station_label ?? null,
     });
 
     if (error) {

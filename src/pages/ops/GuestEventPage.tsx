@@ -242,7 +242,7 @@ function TicketDialog({
       stop = await startNfcRead(
         async (event) => {
           if (!event.payload?.trim()) return;
-          const result = await redeemTicket({ code: event.payload, method: "nfc", metadata: { source: "guest_nfc" } });
+          const result = await redeemTicket({ token: event.payload, method: "nfc", stationLabel: "guest_nfc" });
           if (result.ok) {
             toast.success("Ticket redeemed");
             setOpen(false);

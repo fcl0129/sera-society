@@ -9,7 +9,6 @@ const navLinks = [
   { label: "Platform", href: "/platform" },
   { label: "Invitations", href: "/invitations" },
   { label: "Event Pages", href: "/event-pages" },
-  { label: "Check-In", href: "/check-in" },
   { label: "About", href: "/about" },
 ];
 

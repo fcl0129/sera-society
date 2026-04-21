@@ -34,6 +34,19 @@ export async function resolveUserRole(
 
   const profileRole = profile?.role as AppRole | undefined;
 
+  // Safety net: if no profile row exists (e.g. user predates the
+  // handle_new_user trigger or was created via admin invite flow), create one.
+  if (!profile && normalizedEmail) {
+    const seedRole: AppRole = isAllowlistedAdmin(normalizedEmail) ? "admin" : "guest";
+    await (supabase as any)
+      .from("profiles")
+      .upsert(
+        { id: userId, email: normalizedEmail, role: seedRole },
+        { onConflict: "id" }
+      );
+    return seedRole;
+  }
+
   // If allowlisted admin, ensure profile is at admin level
   if (isAllowlistedAdmin(normalizedEmail) && profileRole !== "admin" && profileRole !== "host_admin") {
     await (supabase as any)
