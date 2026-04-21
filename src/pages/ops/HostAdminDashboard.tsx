@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { LogOut, Plus, Calendar, Users, Ticket, ScanLine, Trash2, Mail, Link2, Pencil, Check, X, Clock } from "lucide-react";
+import { LogOut, Plus, Calendar, Users, Ticket, ScanLine, Trash2, Mail, Link2, Pencil, Check, X, Clock, Ban } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 const fmt = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
@@ -46,6 +46,7 @@ type TicketRow = {
   status: string;
   guest_id: string | null;
   redeemed_at: string | null;
+  token: string;
 };
 
 export default function HostAdminDashboard() {
@@ -109,7 +110,7 @@ export default function HostAdminDashboard() {
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from("drink_tickets")
-        .select("id,status,guest_id,redeemed_at")
+        .select("id,status,guest_id,redeemed_at,token")
         .eq("event_id", currentEventId);
       if (error) throw error;
       return (data ?? []) as TicketRow[];
@@ -128,6 +129,18 @@ export default function HostAdminDashboard() {
       ticketsRedeemed: tickets.filter((t) => t.status === "redeemed").length,
     };
   }, [guestsQuery.data, ticketsQuery.data]);
+
+  // Map guest_id (auth uid) → tickets for quick lookup in the guest table.
+  const ticketsByGuest = useMemo(() => {
+    const map = new Map<string, TicketRow[]>();
+    for (const t of ticketsQuery.data ?? []) {
+      if (!t.guest_id) continue;
+      const arr = map.get(t.guest_id) ?? [];
+      arr.push(t);
+      map.set(t.guest_id, arr);
+    }
+    return map;
+  }, [ticketsQuery.data]);
 
   const handleCreateEvent = async (e: FormEvent) => {
     e.preventDefault();
@@ -265,10 +278,66 @@ export default function HostAdminDashboard() {
     toast({ title: "RSVP link copied", description: url });
   };
 
-  // Realtime subscription for live RSVP updates
+  // ---------- Drink ticket issuance ----------
+
+  const issueTicketForGuest = async (g: GuestRow) => {
+    if (!currentEventId) return;
+    if (!g.guest_id) {
+      toast({
+        title: "Guest hasn't signed in yet",
+        description: "Tickets can only be issued once the guest has logged in and a profile is linked.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const { error } = await (supabase as any)
+      .from("drink_tickets")
+      .insert({ event_id: currentEventId, guest_id: g.guest_id, status: "active" });
+    if (error) {
+      toast({ title: "Could not issue ticket", description: error.message, variant: "destructive" });
+    } else {
+      await qc.invalidateQueries({ queryKey: ["org-tickets", currentEventId] });
+      toast({ title: "Ticket issued", description: g.invited_email });
+    }
+  };
+
+  const voidTicket = async (ticketId: string) => {
+    if (!window.confirm("Void this ticket? It can no longer be redeemed.")) return;
+    const { error } = await (supabase as any)
+      .from("drink_tickets")
+      .update({ status: "void" })
+      .eq("id", ticketId);
+    if (error) toast({ title: "Update failed", description: error.message, variant: "destructive" });
+    else await qc.invalidateQueries({ queryKey: ["org-tickets", currentEventId] });
+  };
+
+  const issueTicketsToAllAccepted = async () => {
+    if (!currentEventId) return;
+    const accepted = (guestsQuery.data ?? []).filter(
+      (g) => g.rsvp_status === "accepted" && g.guest_id && !ticketsByGuest.has(g.guest_id)
+    );
+    if (accepted.length === 0) {
+      toast({ title: "Nothing to issue", description: "All accepted guests with linked accounts already have a ticket." });
+      return;
+    }
+    const rows = accepted.map((g) => ({ event_id: currentEventId, guest_id: g.guest_id, status: "active" }));
+    const { error } = await (supabase as any).from("drink_tickets").insert(rows);
+    if (error) toast({ title: "Bulk issue failed", description: error.message, variant: "destructive" });
+    else {
+      await qc.invalidateQueries({ queryKey: ["org-tickets", currentEventId] });
+      toast({ title: "Tickets issued", description: `${rows.length} new ticket(s)` });
+    }
+  };
+
+  const copyTicketToken = (token: string) => {
+    navigator.clipboard.writeText(token);
+    toast({ title: "Ticket token copied", description: "Paste into the bartender's manual entry to test." });
+  };
+
+  // Realtime subscriptions: keep guests + tickets fresh.
   useEffect(() => {
     if (!currentEventId) return;
-    const channel = supabase
+    const guestsChannel = supabase
       .channel(`event-guests-${currentEventId}`)
       .on(
         "postgres_changes",
@@ -276,7 +345,18 @@ export default function HostAdminDashboard() {
         () => qc.invalidateQueries({ queryKey: ["org-guests", currentEventId] }),
       )
       .subscribe();
-    return () => { void supabase.removeChannel(channel); };
+    const ticketsChannel = supabase
+      .channel(`drink-tickets-${currentEventId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "drink_tickets", filter: `event_id=eq.${currentEventId}` },
+        () => qc.invalidateQueries({ queryKey: ["org-tickets", currentEventId] }),
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(guestsChannel);
+      void supabase.removeChannel(ticketsChannel);
+    };
   }, [currentEventId, qc]);
 
   const handleSignOut = async () => {
@@ -554,6 +634,54 @@ export default function HostAdminDashboard() {
                             </div>
                           </div>
                         )}
+                        {!isEditing && (() => {
+                          const guestTickets = g.guest_id ? ticketsByGuest.get(g.guest_id) ?? [] : [];
+                          const activeTicket = guestTickets.find((t) => t.status === "active");
+                          const redeemedCount = guestTickets.filter((t) => t.status === "redeemed").length;
+                          return (
+                            <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-sera-sand/30 pt-2 text-xs">
+                              <span className="sera-label text-sera-stone">Drink ticket</span>
+                              {!g.guest_id ? (
+                                <span className="text-sera-warm-grey italic">guest must sign in first</span>
+                              ) : guestTickets.length === 0 ? (
+                                <Button size="sm" variant="sera-outline" onClick={() => issueTicketForGuest(g)}>
+                                  <Ticket className="w-3 h-3 mr-1" /> Issue
+                                </Button>
+                              ) : (
+                                <>
+                                  {activeTicket ? (
+                                    <>
+                                      <Badge variant="outline" className="text-[10px]">active</Badge>
+                                      <button
+                                        onClick={() => copyTicketToken(activeTicket.token)}
+                                        className="text-sera-navy underline-offset-2 hover:underline"
+                                        aria-label="Copy ticket token"
+                                        title="Copy token to test in bartender manual entry"
+                                      >
+                                        copy token
+                                      </button>
+                                      <button
+                                        onClick={() => voidTicket(activeTicket.id)}
+                                        className="p-1 text-sera-warm-grey hover:text-sera-oxblood"
+                                        aria-label="Void ticket"
+                                        title="Void"
+                                      >
+                                        <Ban className="w-3.5 h-3.5" />
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <Button size="sm" variant="sera-outline" onClick={() => issueTicketForGuest(g)}>
+                                      <Ticket className="w-3 h-3 mr-1" /> Issue another
+                                    </Button>
+                                  )}
+                                  {redeemedCount > 0 && (
+                                    <span className="text-sera-warm-grey">· {redeemedCount} redeemed</span>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
                     );
                   })}
@@ -567,9 +695,9 @@ export default function HostAdminDashboard() {
               <div className="grid md:grid-cols-3 gap-4">
                 <EntryCard
                   icon={<Ticket className="w-5 h-5" />}
-                  title="Drink tickets"
-                  description={`${stats.ticketsRedeemed} of ${stats.ticketsTotal} redeemed`}
-                  onClick={() => navigate(`/check-in?event=${currentEvent.id}`)}
+                  title="Issue drink tickets"
+                  description={`${stats.ticketsRedeemed}/${stats.ticketsTotal} redeemed · click to bulk-issue to all accepted guests`}
+                  onClick={() => void issueTicketsToAllAccepted()}
                 />
                 <EntryCard
                   icon={<ScanLine className="w-5 h-5" />}
