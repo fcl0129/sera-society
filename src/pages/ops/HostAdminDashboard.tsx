@@ -569,7 +569,7 @@ export default function HostAdminDashboard() {
                   icon={<Ticket className="w-5 h-5" />}
                   title="Drink tickets"
                   description={`${stats.ticketsRedeemed} of ${stats.ticketsTotal} redeemed`}
-                  onClick={() => navigate(`/manage-events?event=${currentEvent.id}`)}
+                  onClick={() => navigate(`/check-in?event=${currentEvent.id}`)}
                 />
                 <EntryCard
                   icon={<ScanLine className="w-5 h-5" />}
