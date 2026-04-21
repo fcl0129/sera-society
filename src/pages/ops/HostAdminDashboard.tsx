@@ -695,9 +695,9 @@ export default function HostAdminDashboard() {
               <div className="grid md:grid-cols-3 gap-4">
                 <EntryCard
                   icon={<Ticket className="w-5 h-5" />}
-                  title="Drink tickets"
-                  description={`${stats.ticketsRedeemed} of ${stats.ticketsTotal} redeemed`}
-                  onClick={() => navigate(`/check-in?event=${currentEvent.id}`)}
+                  title="Issue drink tickets"
+                  description={`${stats.ticketsRedeemed}/${stats.ticketsTotal} redeemed · click to bulk-issue to all accepted guests`}
+                  onClick={() => void issueTicketsToAllAccepted()}
                 />
                 <EntryCard
                   icon={<ScanLine className="w-5 h-5" />}
