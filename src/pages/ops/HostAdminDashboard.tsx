@@ -662,6 +662,12 @@ export default function HostAdminDashboard() {
           )}
         </section>
       </main>
+
+      <CreateEventFlow
+        open={showCreate}
+        onClose={() => setShowCreate(false)}
+        onCreated={handleEventCreated}
+      />
     </div>
   );
 }
