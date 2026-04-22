@@ -716,7 +716,7 @@ export default function HostAdminDashboard() {
                     <p className="text-sm text-sera-warm-grey">No guests yet.</p>
                   )}
                 </div>
-              </Card>
+              </div>
 
               {/* Operations entry points */}
               <div className="grid md:grid-cols-3 gap-4">
