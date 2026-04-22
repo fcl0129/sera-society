@@ -9,6 +9,7 @@ import { redeemTicket, type RedemptionResponse } from "@/lib/redemption";
 import { LogOut, RefreshCcw, Smartphone, Ticket, ScanLine } from "lucide-react";
 import QrScanner from "@/components/ops/QrScanner";
 import { RedemptionReceipt, type ReceiptData, receiptStatusFromCode } from "@/components/ops/RedemptionReceipt";
+import { cn } from "@/lib/utils";
 
 export default function BartenderPanel() {
   const { fullName, email } = useAuthState();
