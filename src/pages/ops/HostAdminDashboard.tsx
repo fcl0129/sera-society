@@ -346,13 +346,13 @@ export default function HostAdminDashboard() {
         <aside className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="sera-label text-sera-warm-grey">Your events</h2>
-            <Button size="sm" variant="sera" className="rounded-full" onClick={() => setShowCreate((v) => !v)}>
-              <Plus className="w-4 h-4 mr-1" /> {showCreate ? "Close" : "New"}
+            <Button size="sm" variant="sera" className="rounded-full" onClick={() => setShowCreate(true)}>
+              <Plus className="w-4 h-4 mr-1" /> New
             </Button>
           </div>
 
           {eventsQuery.isLoading && <p className="text-sm text-sera-warm-grey">Loading…</p>}
-          {events.length === 0 && !eventsQuery.isLoading && !showCreate && (
+          {events.length === 0 && !eventsQuery.isLoading && (
             <div className="rounded-2xl border border-dashed border-sera-line bg-transparent p-6 text-center">
               <p className="font-serif text-base text-sera-ink">No events yet</p>
               <p className="mt-1 text-xs text-sera-warm-grey">Compose your first invitation to begin.</p>
