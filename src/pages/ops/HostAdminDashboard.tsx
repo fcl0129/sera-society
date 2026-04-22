@@ -351,41 +351,6 @@ export default function HostAdminDashboard() {
             </Button>
           </div>
 
-          {showCreate && (
-            <div className="rounded-2xl border border-sera-line bg-sera-ivory p-5 shadow-soft">
-              <p className="sera-label text-sera-warm-grey">Compose an evening</p>
-              <h3 className="mt-1 font-serif text-2xl text-sera-ink">New event</h3>
-              <p className="mt-1 text-xs text-sera-warm-grey">A quiet brief — only the essentials.</p>
-              <form onSubmit={handleCreateEvent} className="mt-4 space-y-3.5">
-                <FieldGroup label="Title">
-                  <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} required placeholder="An autumn supper" className="rounded-xl" />
-                </FieldGroup>
-                <FieldGroup label="Begins">
-                  <Input type="datetime-local" value={newStartsAt} onChange={(e) => setNewStartsAt(e.target.value)} required className="rounded-xl" />
-                </FieldGroup>
-                <FieldGroup label="Venue">
-                  <Input value={newVenue} onChange={(e) => setNewVenue(e.target.value)} placeholder="Address or location" className="rounded-xl" />
-                </FieldGroup>
-                <FieldGroup label="Capacity">
-                  <Input type="number" value={newCapacity} onChange={(e) => setNewCapacity(e.target.value)} placeholder="Optional" className="rounded-xl" />
-                </FieldGroup>
-                <FieldGroup label="Description">
-                  <Textarea
-                    value={newDescription}
-                    onChange={(e) => setNewDescription(e.target.value)}
-                    rows={3}
-                    placeholder="A few lines for your guests"
-                    className="rounded-xl"
-                  />
-                </FieldGroup>
-                {createError && <p className="text-xs text-destructive">{createError}</p>}
-                <Button type="submit" variant="sera" disabled={creating} className="w-full rounded-full">
-                  {creating ? "Creating…" : "Create event"}
-                </Button>
-              </form>
-            </div>
-          )}
-
           {eventsQuery.isLoading && <p className="text-sm text-sera-warm-grey">Loading…</p>}
           {events.length === 0 && !eventsQuery.isLoading && !showCreate && (
             <div className="rounded-2xl border border-dashed border-sera-line bg-transparent p-6 text-center">
