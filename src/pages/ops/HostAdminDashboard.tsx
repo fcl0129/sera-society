@@ -365,16 +365,18 @@ export default function HostAdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen sera-surface-light">
-      <header className="border-b border-sera-sand/60 bg-white">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-sera-paper">
+      <header className="border-b border-sera-line/70 bg-sera-cloud/80 backdrop-blur supports-[backdrop-filter]:bg-sera-cloud/60">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
           <div>
-            <p className="sera-label text-sera-stone">{role === "admin" || role === "host_admin" ? "Admin" : "Organizer"}</p>
-            <h1 className="font-serif text-xl text-sera-navy">{fullName ?? email ?? "Sera"}</h1>
+            <p className="sera-label text-sera-warm-grey">
+              Sera Society · {role === "admin" || role === "host_admin" ? "Studio" : "Studio"}
+            </p>
+            <h1 className="font-serif text-xl text-sera-ink">{fullName ?? email ?? "Welcome"}</h1>
           </div>
           <div className="flex items-center gap-2">
             {(role === "admin" || role === "host_admin") && (
-              <Button variant="sera-outline" size="sm" onClick={() => navigate("/admin")}>
+              <Button variant="sera-outline" size="sm" className="rounded-full" onClick={() => navigate("/admin")}>
                 Admin review
               </Button>
             )}
@@ -387,63 +389,78 @@ export default function HostAdminDashboard() {
 
       <main className="max-w-7xl mx-auto px-6 py-8 grid lg:grid-cols-[280px_1fr] gap-6">
         {/* Sidebar */}
-        <aside className="space-y-3">
+        <aside className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="sera-label text-sera-stone">Events</h2>
-            <Button size="sm" variant="sera" onClick={() => setShowCreate((v) => !v)}>
-              <Plus className="w-4 h-4 mr-1" /> New
+            <h2 className="sera-label text-sera-warm-grey">Your events</h2>
+            <Button size="sm" variant="sera" className="rounded-full" onClick={() => setShowCreate((v) => !v)}>
+              <Plus className="w-4 h-4 mr-1" /> {showCreate ? "Close" : "New"}
             </Button>
           </div>
 
           {showCreate && (
-            <Card className="p-4 space-y-3 bg-white">
-              <form onSubmit={handleCreateEvent} className="space-y-3">
-                <div>
-                  <Label className="text-[10px] uppercase tracking-wider">Title *</Label>
-                  <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} required />
-                </div>
-                <div>
-                  <Label className="text-[10px] uppercase tracking-wider">Starts at *</Label>
-                  <Input type="datetime-local" value={newStartsAt} onChange={(e) => setNewStartsAt(e.target.value)} required />
-                </div>
-                <div>
-                  <Label className="text-[10px] uppercase tracking-wider">Venue</Label>
-                  <Input value={newVenue} onChange={(e) => setNewVenue(e.target.value)} />
-                </div>
-                <div>
-                  <Label className="text-[10px] uppercase tracking-wider">Capacity</Label>
-                  <Input type="number" value={newCapacity} onChange={(e) => setNewCapacity(e.target.value)} />
-                </div>
-                <div>
-                  <Label className="text-[10px] uppercase tracking-wider">Description</Label>
-                  <Textarea value={newDescription} onChange={(e) => setNewDescription(e.target.value)} rows={2} />
-                </div>
-                {createError && <p className="text-xs text-sera-oxblood">{createError}</p>}
-                <Button type="submit" variant="sera" size="sm" disabled={creating} className="w-full">
+            <div className="rounded-2xl border border-sera-line bg-sera-ivory p-5 shadow-soft">
+              <p className="sera-label text-sera-warm-grey">Compose an evening</p>
+              <h3 className="mt-1 font-serif text-2xl text-sera-ink">New event</h3>
+              <p className="mt-1 text-xs text-sera-warm-grey">A quiet brief — only the essentials.</p>
+              <form onSubmit={handleCreateEvent} className="mt-4 space-y-3.5">
+                <FieldGroup label="Title">
+                  <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} required placeholder="An autumn supper" className="rounded-xl" />
+                </FieldGroup>
+                <FieldGroup label="Begins">
+                  <Input type="datetime-local" value={newStartsAt} onChange={(e) => setNewStartsAt(e.target.value)} required className="rounded-xl" />
+                </FieldGroup>
+                <FieldGroup label="Venue">
+                  <Input value={newVenue} onChange={(e) => setNewVenue(e.target.value)} placeholder="Address or location" className="rounded-xl" />
+                </FieldGroup>
+                <FieldGroup label="Capacity">
+                  <Input type="number" value={newCapacity} onChange={(e) => setNewCapacity(e.target.value)} placeholder="Optional" className="rounded-xl" />
+                </FieldGroup>
+                <FieldGroup label="Description">
+                  <Textarea
+                    value={newDescription}
+                    onChange={(e) => setNewDescription(e.target.value)}
+                    rows={3}
+                    placeholder="A few lines for your guests"
+                    className="rounded-xl"
+                  />
+                </FieldGroup>
+                {createError && <p className="text-xs text-destructive">{createError}</p>}
+                <Button type="submit" variant="sera" disabled={creating} className="w-full rounded-full">
                   {creating ? "Creating…" : "Create event"}
                 </Button>
               </form>
-            </Card>
+            </div>
           )}
 
           {eventsQuery.isLoading && <p className="text-sm text-sera-warm-grey">Loading…</p>}
-          {events.length === 0 && !eventsQuery.isLoading && (
-            <p className="text-sm text-sera-warm-grey">No events yet. Create your first event.</p>
+          {events.length === 0 && !eventsQuery.isLoading && !showCreate && (
+            <div className="rounded-2xl border border-dashed border-sera-line bg-transparent p-6 text-center">
+              <p className="font-serif text-base text-sera-ink">No events yet</p>
+              <p className="mt-1 text-xs text-sera-warm-grey">Compose your first invitation to begin.</p>
+            </div>
           )}
           <div className="space-y-2">
             {events.map((ev) => (
               <button
                 key={ev.id}
                 onClick={() => setActiveEventId(ev.id)}
-                className={`w-full text-left p-3 border transition-colors ${
+                className={`w-full rounded-2xl border p-4 text-left transition-all ${
                   ev.id === currentEventId
-                    ? "border-sera-navy bg-sera-navy/5"
-                    : "border-sera-sand/60 bg-white hover:border-sera-navy/40"
+                    ? "border-sera-ink bg-sera-ivory shadow-soft"
+                    : "border-sera-line bg-sera-cloud hover:border-sera-ink/30"
                 }`}
               >
-                <p className="font-serif text-sera-navy">{ev.title}</p>
-                <p className="text-xs text-sera-warm-grey mt-1">{fmt.format(new Date(ev.starts_at))}</p>
-                <Badge variant="outline" className="mt-2 text-[10px]">{ev.status}</Badge>
+                <p className="font-serif text-base text-sera-ink">{ev.title}</p>
+                <p className="mt-1 text-xs text-sera-warm-grey">{fmt.format(new Date(ev.starts_at))}</p>
+                <span
+                  className={`mt-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] ${
+                    ev.status === "published"
+                      ? "bg-status-success-soft text-status-success"
+                      : "bg-sera-line/50 text-sera-warm-grey"
+                  }`}
+                >
+                  {ev.status}
+                </span>
               </button>
             ))}
           </div>
