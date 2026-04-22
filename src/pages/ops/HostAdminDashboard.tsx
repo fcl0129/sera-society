@@ -365,16 +365,18 @@ export default function HostAdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen sera-surface-light">
-      <header className="border-b border-sera-sand/60 bg-white">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-sera-paper">
+      <header className="border-b border-sera-line/70 bg-sera-cloud/80 backdrop-blur supports-[backdrop-filter]:bg-sera-cloud/60">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
           <div>
-            <p className="sera-label text-sera-stone">{role === "admin" || role === "host_admin" ? "Admin" : "Organizer"}</p>
-            <h1 className="font-serif text-xl text-sera-navy">{fullName ?? email ?? "Sera"}</h1>
+            <p className="sera-label text-sera-warm-grey">
+              Sera Society · {role === "admin" || role === "host_admin" ? "Studio" : "Studio"}
+            </p>
+            <h1 className="font-serif text-xl text-sera-ink">{fullName ?? email ?? "Welcome"}</h1>
           </div>
           <div className="flex items-center gap-2">
             {(role === "admin" || role === "host_admin") && (
-              <Button variant="sera-outline" size="sm" onClick={() => navigate("/admin")}>
+              <Button variant="sera-outline" size="sm" className="rounded-full" onClick={() => navigate("/admin")}>
                 Admin review
               </Button>
             )}
@@ -387,63 +389,78 @@ export default function HostAdminDashboard() {
 
       <main className="max-w-7xl mx-auto px-6 py-8 grid lg:grid-cols-[280px_1fr] gap-6">
         {/* Sidebar */}
-        <aside className="space-y-3">
+        <aside className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="sera-label text-sera-stone">Events</h2>
-            <Button size="sm" variant="sera" onClick={() => setShowCreate((v) => !v)}>
-              <Plus className="w-4 h-4 mr-1" /> New
+            <h2 className="sera-label text-sera-warm-grey">Your events</h2>
+            <Button size="sm" variant="sera" className="rounded-full" onClick={() => setShowCreate((v) => !v)}>
+              <Plus className="w-4 h-4 mr-1" /> {showCreate ? "Close" : "New"}
             </Button>
           </div>
 
           {showCreate && (
-            <Card className="p-4 space-y-3 bg-white">
-              <form onSubmit={handleCreateEvent} className="space-y-3">
-                <div>
-                  <Label className="text-[10px] uppercase tracking-wider">Title *</Label>
-                  <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} required />
-                </div>
-                <div>
-                  <Label className="text-[10px] uppercase tracking-wider">Starts at *</Label>
-                  <Input type="datetime-local" value={newStartsAt} onChange={(e) => setNewStartsAt(e.target.value)} required />
-                </div>
-                <div>
-                  <Label className="text-[10px] uppercase tracking-wider">Venue</Label>
-                  <Input value={newVenue} onChange={(e) => setNewVenue(e.target.value)} />
-                </div>
-                <div>
-                  <Label className="text-[10px] uppercase tracking-wider">Capacity</Label>
-                  <Input type="number" value={newCapacity} onChange={(e) => setNewCapacity(e.target.value)} />
-                </div>
-                <div>
-                  <Label className="text-[10px] uppercase tracking-wider">Description</Label>
-                  <Textarea value={newDescription} onChange={(e) => setNewDescription(e.target.value)} rows={2} />
-                </div>
-                {createError && <p className="text-xs text-sera-oxblood">{createError}</p>}
-                <Button type="submit" variant="sera" size="sm" disabled={creating} className="w-full">
+            <div className="rounded-2xl border border-sera-line bg-sera-ivory p-5 shadow-soft">
+              <p className="sera-label text-sera-warm-grey">Compose an evening</p>
+              <h3 className="mt-1 font-serif text-2xl text-sera-ink">New event</h3>
+              <p className="mt-1 text-xs text-sera-warm-grey">A quiet brief — only the essentials.</p>
+              <form onSubmit={handleCreateEvent} className="mt-4 space-y-3.5">
+                <FieldGroup label="Title">
+                  <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} required placeholder="An autumn supper" className="rounded-xl" />
+                </FieldGroup>
+                <FieldGroup label="Begins">
+                  <Input type="datetime-local" value={newStartsAt} onChange={(e) => setNewStartsAt(e.target.value)} required className="rounded-xl" />
+                </FieldGroup>
+                <FieldGroup label="Venue">
+                  <Input value={newVenue} onChange={(e) => setNewVenue(e.target.value)} placeholder="Address or location" className="rounded-xl" />
+                </FieldGroup>
+                <FieldGroup label="Capacity">
+                  <Input type="number" value={newCapacity} onChange={(e) => setNewCapacity(e.target.value)} placeholder="Optional" className="rounded-xl" />
+                </FieldGroup>
+                <FieldGroup label="Description">
+                  <Textarea
+                    value={newDescription}
+                    onChange={(e) => setNewDescription(e.target.value)}
+                    rows={3}
+                    placeholder="A few lines for your guests"
+                    className="rounded-xl"
+                  />
+                </FieldGroup>
+                {createError && <p className="text-xs text-destructive">{createError}</p>}
+                <Button type="submit" variant="sera" disabled={creating} className="w-full rounded-full">
                   {creating ? "Creating…" : "Create event"}
                 </Button>
               </form>
-            </Card>
+            </div>
           )}
 
           {eventsQuery.isLoading && <p className="text-sm text-sera-warm-grey">Loading…</p>}
-          {events.length === 0 && !eventsQuery.isLoading && (
-            <p className="text-sm text-sera-warm-grey">No events yet. Create your first event.</p>
+          {events.length === 0 && !eventsQuery.isLoading && !showCreate && (
+            <div className="rounded-2xl border border-dashed border-sera-line bg-transparent p-6 text-center">
+              <p className="font-serif text-base text-sera-ink">No events yet</p>
+              <p className="mt-1 text-xs text-sera-warm-grey">Compose your first invitation to begin.</p>
+            </div>
           )}
           <div className="space-y-2">
             {events.map((ev) => (
               <button
                 key={ev.id}
                 onClick={() => setActiveEventId(ev.id)}
-                className={`w-full text-left p-3 border transition-colors ${
+                className={`w-full rounded-2xl border p-4 text-left transition-all ${
                   ev.id === currentEventId
-                    ? "border-sera-navy bg-sera-navy/5"
-                    : "border-sera-sand/60 bg-white hover:border-sera-navy/40"
+                    ? "border-sera-ink bg-sera-ivory shadow-soft"
+                    : "border-sera-line bg-sera-cloud hover:border-sera-ink/30"
                 }`}
               >
-                <p className="font-serif text-sera-navy">{ev.title}</p>
-                <p className="text-xs text-sera-warm-grey mt-1">{fmt.format(new Date(ev.starts_at))}</p>
-                <Badge variant="outline" className="mt-2 text-[10px]">{ev.status}</Badge>
+                <p className="font-serif text-base text-sera-ink">{ev.title}</p>
+                <p className="mt-1 text-xs text-sera-warm-grey">{fmt.format(new Date(ev.starts_at))}</p>
+                <span
+                  className={`mt-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] ${
+                    ev.status === "published"
+                      ? "bg-status-success-soft text-status-success"
+                      : "bg-sera-line/50 text-sera-warm-grey"
+                  }`}
+                >
+                  {ev.status}
+                </span>
               </button>
             ))}
           </div>
@@ -452,29 +469,29 @@ export default function HostAdminDashboard() {
         {/* Main panel */}
         <section className="space-y-6">
           {!currentEvent ? (
-            <Card className="p-10 text-center bg-white">
-              <Calendar className="w-10 h-10 mx-auto text-sera-warm-grey mb-3" />
-              <h3 className="font-serif text-2xl text-sera-navy">Select or create an event</h3>
-              <p className="text-sm text-sera-warm-grey mt-2">Your events will appear in the sidebar.</p>
-            </Card>
+            <div className="rounded-[28px] border border-dashed border-sera-line bg-sera-ivory p-12 text-center">
+              <Calendar className="mx-auto mb-4 h-8 w-8 text-sera-warm-grey" strokeWidth={1.5} />
+              <h3 className="font-serif text-3xl text-sera-ink">Begin with an event</h3>
+              <p className="mt-2 text-sm text-sera-warm-grey">Select one from the left, or compose a new evening.</p>
+            </div>
           ) : (
             <>
-              <Card className="p-6 bg-white">
+              <div className="rounded-[28px] border border-sera-line bg-sera-ivory p-6 shadow-soft md:p-8">
                 <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="sera-label text-sera-stone">{currentEvent.status}</p>
-                    <h2 className="font-serif text-3xl text-sera-navy mt-1">{currentEvent.title}</h2>
-                    <p className="text-sm text-sera-warm-grey mt-2">
+                  <div className="min-w-0">
+                    <p className="sera-label text-sera-warm-grey">{currentEvent.status}</p>
+                    <h2 className="mt-1 font-serif text-4xl leading-[1.04] text-sera-ink">{currentEvent.title}</h2>
+                    <p className="mt-3 text-sm text-sera-warm-grey">
                       {fmt.format(new Date(currentEvent.starts_at))}
                       {currentEvent.venue ? ` · ${currentEvent.venue}` : ""}
                       {currentEvent.capacity ? ` · cap ${currentEvent.capacity}` : ""}
                     </p>
                     {currentEvent.description && (
-                      <p className="text-sm text-sera-warm-grey mt-3">{currentEvent.description}</p>
+                      <p className="mt-4 max-w-2xl text-sm leading-relaxed text-sera-warm-grey">{currentEvent.description}</p>
                     )}
                   </div>
-                  <div className="flex flex-col gap-2">
-                    <Button variant="sera" size="sm" onClick={handlePublishToggle}>
+                  <div className="flex shrink-0 flex-col gap-2">
+                    <Button variant="sera" size="sm" className="rounded-full" onClick={handlePublishToggle}>
                       {currentEvent.status === "published" ? "Unpublish" : "Publish"}
                     </Button>
                     <Button variant="ghost" size="sm" onClick={handleDeleteEvent}>
@@ -483,56 +500,66 @@ export default function HostAdminDashboard() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-6">
+                <div className="mt-7 grid grid-cols-2 gap-2 md:grid-cols-5">
                   <Stat icon={<Users className="w-4 h-4" />} label="Guests" value={String(stats.totalGuests)} />
                   <Stat icon={<Check className="w-4 h-4" />} label="Accepted" value={String(stats.accepted)} />
                   <Stat icon={<X className="w-4 h-4" />} label="Declined" value={String(stats.declined)} />
                   <Stat icon={<Clock className="w-4 h-4" />} label="Pending" value={String(stats.pending)} />
                   <Stat icon={<Ticket className="w-4 h-4" />} label="Tickets" value={`${stats.ticketsRedeemed}/${stats.ticketsTotal}`} />
                 </div>
-              </Card>
+              </div>
 
               {/* Guest management */}
-              <Card className="p-6 bg-white">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-serif text-xl text-sera-navy">Guests & RSVPs</h3>
+              <div className="rounded-[28px] border border-sera-line bg-sera-ivory p-6 shadow-soft md:p-8">
+                <div className="mb-5 flex items-baseline justify-between">
+                  <div>
+                    <p className="sera-label text-sera-warm-grey">The list</p>
+                    <h3 className="mt-1 font-serif text-2xl text-sera-ink">Guests & RSVPs</h3>
+                  </div>
+                  <p className="text-xs text-sera-warm-grey">{stats.totalGuests} invited</p>
                 </div>
-                <form onSubmit={handleAddGuest} className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
-                  <Input
-                    type="email"
-                    placeholder="guest@email.com"
-                    value={guestEmail}
-                    onChange={(e) => setGuestEmail(e.target.value)}
-                    required
-                  />
-                  <Input
-                    placeholder="Full name (optional)"
-                    value={guestName}
-                    onChange={(e) => setGuestName(e.target.value)}
-                  />
-                  <Input
-                    placeholder="Phone (optional)"
-                    value={guestPhone}
-                    onChange={(e) => setGuestPhone(e.target.value)}
-                  />
-                  <label className="flex items-center gap-2 px-3 border border-sera-sand/60 bg-white text-sm">
-                    <input
-                      type="checkbox"
-                      checked={guestPlusOne}
-                      onChange={(e) => setGuestPlusOne(e.target.checked)}
+                <div className="rounded-2xl border border-sera-line bg-sera-cloud p-4">
+                  <p className="sera-label text-sera-warm-grey">Add a guest</p>
+                  <form onSubmit={handleAddGuest} className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
+                    <Input
+                      type="email"
+                      placeholder="guest@email.com"
+                      value={guestEmail}
+                      onChange={(e) => setGuestEmail(e.target.value)}
+                      required
+                      className="rounded-xl"
                     />
-                    Allow plus-ones
-                  </label>
-                  <Button type="submit" variant="sera" size="sm" disabled={addingGuest} className="md:col-span-2">
-                    {addingGuest ? "Adding…" : "Add guest"}
-                  </Button>
-                </form>
+                    <Input
+                      placeholder="Full name (optional)"
+                      value={guestName}
+                      onChange={(e) => setGuestName(e.target.value)}
+                      className="rounded-xl"
+                    />
+                    <Input
+                      placeholder="Phone (optional)"
+                      value={guestPhone}
+                      onChange={(e) => setGuestPhone(e.target.value)}
+                      className="rounded-xl"
+                    />
+                    <label className="flex items-center gap-2 rounded-xl border border-sera-line bg-sera-ivory px-3 text-sm text-sera-ink">
+                      <input
+                        type="checkbox"
+                        checked={guestPlusOne}
+                        onChange={(e) => setGuestPlusOne(e.target.checked)}
+                      />
+                      Allow plus-ones
+                    </label>
+                    <Button type="submit" variant="sera" size="sm" disabled={addingGuest} className="rounded-full md:col-span-2">
+                      {addingGuest ? "Adding…" : "Add guest"}
+                    </Button>
+                  </form>
+                </div>
 
-                <div className="space-y-2 max-h-[28rem] overflow-auto mt-4">
+                <div className="mt-5 max-h-[32rem] space-y-2 overflow-auto pr-1">
                   {(guestsQuery.data ?? []).map((g) => {
                     const isEditing = editingGuestId === g.id;
                     return (
-                      <div key={g.id} className="border border-sera-sand/40 px-3 py-3 text-sm bg-white">
+                      <div key={g.id} className="rounded-2xl border border-sera-line bg-sera-cloud px-4 py-3 text-sm transition-colors hover:border-sera-ink/20">
                         {isEditing ? (
                           <div className="space-y-2">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -689,7 +716,7 @@ export default function HostAdminDashboard() {
                     <p className="text-sm text-sera-warm-grey">No guests yet.</p>
                   )}
                 </div>
-              </Card>
+              </div>
 
               {/* Operations entry points */}
               <div className="grid md:grid-cols-3 gap-4">
@@ -722,12 +749,12 @@ export default function HostAdminDashboard() {
 
 function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="border border-sera-sand/40 p-3">
-      <div className="flex items-center gap-2 text-sera-warm-grey">
+    <div className="rounded-2xl border border-sera-line bg-sera-cloud px-4 py-3">
+      <div className="flex items-center gap-1.5 text-sera-warm-grey">
         {icon}
-        <p className="text-[10px] uppercase tracking-wider">{label}</p>
+        <p className="text-[10px] uppercase tracking-[0.18em]">{label}</p>
       </div>
-      <p className="font-serif text-2xl text-sera-navy mt-1">{value}</p>
+      <p className="mt-1 font-serif text-2xl text-sera-ink tabular-nums">{value}</p>
     </div>
   );
 }
@@ -738,10 +765,22 @@ function EntryCard({ icon, title, description, onClick }: {
   return (
     <button
       onClick={onClick}
-      className="text-left p-5 border border-sera-sand/60 bg-white hover:border-sera-navy/40 transition-colors"
+      className="group rounded-[24px] border border-sera-line bg-sera-ivory p-5 text-left transition-all hover:-translate-y-px hover:border-sera-ink/30 hover:shadow-soft"
     >
-      <div className="flex items-center gap-2 text-sera-navy mb-2">{icon}<span className="font-serif text-lg">{title}</span></div>
-      <p className="text-sm text-sera-warm-grey">{description}</p>
+      <div className="flex items-center gap-2 text-sera-ink">
+        {icon}
+        <span className="font-serif text-lg">{title}</span>
+      </div>
+      <p className="mt-2 text-sm text-sera-warm-grey">{description}</p>
     </button>
+  );
+}
+
+function FieldGroup({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-[10px] uppercase tracking-[0.18em] text-sera-warm-grey">{label}</Label>
+      {children}
+    </div>
   );
 }

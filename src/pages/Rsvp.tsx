@@ -2,11 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Minus, Plus, Check, X, Loader2 } from "lucide-react";
+import { Minus, Plus, Check, X, Loader2, CalendarClock, MapPin, Sparkles } from "lucide-react";
 
 type RsvpStatus = "pending" | "accepted" | "declined";
 
@@ -115,140 +114,236 @@ export default function RsvpPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-sera-surface-light">
-        <Loader2 className="w-6 h-6 animate-spin text-sera-warm-grey" />
+      <main className="min-h-screen flex items-center justify-center bg-sera-paper">
+        <Loader2 className="w-5 h-5 animate-spin text-sera-warm-grey" />
       </main>
     );
   }
 
   if (error && !guest) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-sera-surface-light px-4">
-        <Card className="max-w-md w-full p-8 text-center bg-white">
-          <h1 className="font-serif text-2xl text-sera-navy">RSVP unavailable</h1>
-          <p className="text-sm text-sera-warm-grey mt-2">{error}</p>
-        </Card>
+      <main className="min-h-screen flex items-center justify-center bg-sera-paper px-5">
+        <div className="max-w-md w-full rounded-[28px] border border-sera-line bg-sera-ivory p-10 text-center shadow-soft">
+          <p className="sera-label text-sera-warm-grey">Sera Society</p>
+          <h1 className="mt-2 font-serif text-3xl text-sera-ink">RSVP unavailable</h1>
+          <p className="mt-3 text-sm text-sera-warm-grey">{error}</p>
+        </div>
       </main>
     );
   }
 
-  return (
-    <main className="min-h-screen bg-sera-surface-light px-4 py-8 md:py-16">
-      <div className="mx-auto w-full max-w-xl space-y-4">
-        <p className="sera-label text-sera-warm-grey">You're invited</p>
-        <h1 className="font-serif text-4xl text-sera-navy">{event?.title}</h1>
-        <p className="text-sm text-sera-warm-grey">
-          {event?.starts_at && fmt.format(new Date(event.starts_at))}
-          {event?.venue ? ` · ${event.venue}` : ""}
-        </p>
-        {event?.description && <p className="text-sm text-sera-warm-grey">{event.description}</p>}
+  const guestName = guest?.full_name ?? guest?.invited_email?.split("@")[0] ?? "guest";
 
-        <Card className="rounded-3xl border-sera-sand/60 bg-sera-ivory">
-          <CardHeader>
-            <CardTitle className="font-serif text-2xl text-sera-navy">
-              {isLocked ? "Your response" : submitted ? "Thank you" : "Will you attend?"}
-            </CardTitle>
-            {guest && (
-              <p className="text-sm text-sera-warm-grey">
-                For {guest.full_name ?? guest.invited_email}
+  return (
+    <main className="min-h-screen bg-sera-paper">
+      {/* Cinematic invitation header */}
+      <section className="px-5 pt-14 pb-10 md:pt-24 md:pb-16">
+        <div className="mx-auto w-full max-w-xl text-center">
+          <p className="sera-label text-sera-warm-grey">Sera Society · Invitation</p>
+          <p className="mt-6 font-serif text-base italic text-sera-warm-grey">
+            For {guestName}
+          </p>
+          <h1 className="mt-3 font-serif text-5xl leading-[1.02] text-sera-ink md:text-6xl">
+            {event?.title}
+          </h1>
+
+          <div className="mx-auto my-7 h-px w-16 bg-sera-line" />
+
+          <div className="space-y-2 text-sm text-sera-ink">
+            {event?.starts_at && (
+              <p className="flex items-center justify-center gap-2 font-serif text-lg italic">
+                <CalendarClock className="h-4 w-4 text-sera-warm-grey" />
+                {fmt.format(new Date(event.starts_at))}
               </p>
             )}
-          </CardHeader>
-          <CardContent className="space-y-4">
+            {event?.venue && (
+              <p className="flex items-center justify-center gap-2 text-sera-warm-grey">
+                <MapPin className="h-4 w-4" />
+                {event.venue}
+              </p>
+            )}
+          </div>
+
+          {event?.description && (
+            <p className="mx-auto mt-6 max-w-md text-sm leading-relaxed text-sera-warm-grey">
+              {event.description}
+            </p>
+          )}
+        </div>
+      </section>
+
+      {/* Response surface */}
+      <section className="px-5 pb-20">
+        <div className="mx-auto w-full max-w-xl">
+          <div className="rounded-[28px] border border-sera-line bg-sera-ivory p-6 shadow-soft md:p-8">
             {isLocked ? (
-              <div className="rounded-2xl border border-sera-sand/60 bg-white p-4 space-y-2">
-                <p className="text-sm text-sera-warm-grey">Status</p>
-                <p className="font-serif text-2xl text-sera-navy capitalize">{status}</p>
-                {guest?.rsvp_responded_at && (
-                  <p className="text-xs text-sera-warm-grey">
-                    Responded {new Date(guest.rsvp_responded_at).toLocaleString()}
-                  </p>
-                )}
-                <p className="text-xs text-sera-warm-grey pt-2">
-                  To change your response, contact your host.
-                </p>
-              </div>
+              <ConfirmedState status={status} respondedAt={guest?.rsvp_responded_at ?? null} />
             ) : cutoffPassed ? (
-              <p className="text-sm text-sera-oxblood">The RSVP deadline has passed.</p>
+              <DeadlinePassedState />
+            ) : submitted && status !== "pending" ? (
+              <ConfirmedState status={status} respondedAt={guest?.rsvp_responded_at ?? null} subtle />
             ) : (
               <>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
+                <p className="sera-label text-sera-warm-grey">Your response</p>
+                <h2 className="mt-1 font-serif text-2xl text-sera-ink">Will you join us?</h2>
+
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  <button
                     type="button"
-                    variant={status === "accepted" ? "sera" : "sera-outline"}
                     onClick={() => setStatus("accepted")}
-                    className="h-14"
+                    className={`group relative flex h-16 items-center justify-center gap-2 rounded-2xl border text-sm font-medium transition-all ${
+                      status === "accepted"
+                        ? "border-sera-ink bg-sera-ink text-sera-ivory shadow-soft"
+                        : "border-sera-line bg-sera-ivory text-sera-ink hover:border-sera-ink/40"
+                    }`}
+                    aria-pressed={status === "accepted"}
                   >
-                    <Check className="w-4 h-4 mr-2" /> Accept
-                  </Button>
-                  <Button
+                    <Check className="h-4 w-4" />
+                    Accept with pleasure
+                  </button>
+                  <button
                     type="button"
-                    variant={status === "declined" ? "sera" : "sera-outline"}
                     onClick={() => setStatus("declined")}
-                    className="h-14"
+                    className={`group relative flex h-16 items-center justify-center gap-2 rounded-2xl border text-sm font-medium transition-all ${
+                      status === "declined"
+                        ? "border-sera-ink bg-sera-ink text-sera-ivory shadow-soft"
+                        : "border-sera-line bg-sera-ivory text-sera-ink hover:border-sera-ink/40"
+                    }`}
+                    aria-pressed={status === "declined"}
                   >
-                    <X className="w-4 h-4 mr-2" /> Decline
-                  </Button>
+                    <X className="h-4 w-4" />
+                    Regretfully decline
+                  </button>
                 </div>
 
-                <div className="space-y-3">
-                  <div>
-                    <Label className="text-[10px] uppercase tracking-wider text-sera-warm-grey">Your name</Label>
-                    <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full name" />
-                  </div>
-                  <div>
-                    <Label className="text-[10px] uppercase tracking-wider text-sera-warm-grey">Phone (optional)</Label>
-                    <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 555 555 5555" />
-                  </div>
+                <div className="mt-6 space-y-4">
+                  <Field label="Your name">
+                    <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full name" className="rounded-xl" />
+                  </Field>
+                  <Field label="Phone (optional)">
+                    <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 555 555 5555" className="rounded-xl" />
+                  </Field>
 
                   {status === "accepted" && guest?.plus_one_allowed && (
-                    <div className="rounded-2xl border border-sera-sand/60 bg-white p-4">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm text-sera-warm-grey">Additional guests</p>
-                        <div className="flex items-center gap-2">
-                          <Button variant="outline" size="icon" type="button"
-                            onClick={() => setPlusOnes((v) => Math.max(0, v - 1))}
-                            disabled={plusOnes <= 0}>
-                            <Minus className="h-4 w-4" />
-                          </Button>
-                          <span className="w-8 text-center text-lg text-sera-navy">{plusOnes}</span>
-                          <Button variant="outline" size="icon" type="button"
-                            onClick={() => setPlusOnes((v) => Math.min(5, v + 1))}
-                            disabled={plusOnes >= 5}>
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        </div>
+                    <div className="flex items-center justify-between rounded-2xl border border-sera-line bg-sera-cloud p-4">
+                      <div>
+                        <p className="font-serif text-base text-sera-ink">Bringing guests?</p>
+                        <p className="text-xs text-sera-warm-grey">Up to 5 additional</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setPlusOnes((v) => Math.max(0, v - 1))}
+                          disabled={plusOnes <= 0}
+                          className="flex h-9 w-9 items-center justify-center rounded-full border border-sera-line bg-sera-ivory text-sera-ink disabled:opacity-40"
+                        >
+                          <Minus className="h-4 w-4" />
+                        </button>
+                        <span className="w-6 text-center font-mono text-base text-sera-ink tabular-nums">{plusOnes}</span>
+                        <button
+                          type="button"
+                          onClick={() => setPlusOnes((v) => Math.min(5, v + 1))}
+                          disabled={plusOnes >= 5}
+                          className="flex h-9 w-9 items-center justify-center rounded-full border border-sera-line bg-sera-ivory text-sera-ink disabled:opacity-40"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
                   )}
 
-                  <div>
-                    <Label className="text-[10px] uppercase tracking-wider text-sera-warm-grey">Note for the host (optional)</Label>
+                  <Field label="Note for the host (optional)">
                     <Textarea
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Dietary requests, accessibility, or a short note"
+                      placeholder="Dietary requests, accessibility, or a short word"
                       maxLength={500}
                       rows={3}
+                      className="rounded-xl"
                     />
-                  </div>
+                  </Field>
                 </div>
 
                 <Button
                   variant="sera"
-                  className="w-full h-12"
+                  className="mt-6 h-12 w-full rounded-full"
                   onClick={() => void submit(status === "pending" ? "accepted" : status)}
                   disabled={submitting || status === "pending"}
                 >
-                  {submitting ? "Saving…" : submitted ? "Update response" : "Confirm RSVP"}
+                  {submitting ? "Sending…" : "Confirm RSVP"}
                 </Button>
-                {error && <p className="text-sm text-sera-oxblood">{error}</p>}
-                {submitted && <p className="text-sm text-sera-navy">Your response has been saved.</p>}
+                {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
               </>
             )}
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+
+          <p className="mt-5 text-center text-[10px] uppercase tracking-[0.22em] text-sera-warm-grey">
+            Hosted with Sera Society
+          </p>
+        </div>
+      </section>
     </main>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-[10px] uppercase tracking-[0.18em] text-sera-warm-grey">{label}</Label>
+      {children}
+    </div>
+  );
+}
+
+function ConfirmedState({
+  status,
+  respondedAt,
+  subtle,
+}: {
+  status: RsvpStatus;
+  respondedAt: string | null;
+  subtle?: boolean;
+}) {
+  const accepted = status === "accepted";
+  return (
+    <div className="text-center">
+      <div
+        className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full ${
+          accepted ? "bg-status-success-soft text-status-success" : "bg-sera-line/60 text-sera-warm-grey"
+        }`}
+      >
+        {accepted ? <Sparkles className="h-6 w-6" /> : <X className="h-6 w-6" />}
+      </div>
+      <h2 className="mt-4 font-serif text-3xl text-sera-ink">
+        {accepted ? "We'll be expecting you" : "Thank you for letting us know"}
+      </h2>
+      <p className="mt-2 text-sm text-sera-warm-grey">
+        {accepted
+          ? "Your seat is held. You'll receive details closer to the date."
+          : "Your regrets have been sent to the host."}
+      </p>
+      {respondedAt && (
+        <p className="mt-3 font-mono text-[11px] uppercase tracking-wider text-sera-warm-grey">
+          Responded {new Date(respondedAt).toLocaleString()}
+        </p>
+      )}
+      {!subtle && (
+        <p className="mt-5 text-xs text-sera-warm-grey">
+          To change your response, kindly contact your host.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function DeadlinePassedState() {
+  return (
+    <div className="text-center">
+      <p className="sera-label text-sera-warm-grey">Closed</p>
+      <h2 className="mt-2 font-serif text-2xl text-sera-ink">RSVPs are no longer open</h2>
+      <p className="mt-2 text-sm text-sera-warm-grey">
+        The deadline for this event has passed. Please reach out to your host directly.
+      </p>
+    </div>
   );
 }

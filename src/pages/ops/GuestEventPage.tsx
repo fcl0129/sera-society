@@ -11,8 +11,9 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { detectNfcCapability, startNfcRead } from "@/lib/nfc";
 import { redeemTicket } from "@/lib/redemption";
-import { CalendarClock, Clock3, LogOut, MapPin, ScanLine, Smartphone } from "lucide-react";
+import { CalendarClock, Clock3, LogOut, MapPin, ScanLine, Smartphone, Ticket as TicketIcon } from "lucide-react";
 import { toast } from "sonner";
+import { RedemptionReceipt, type ReceiptData, receiptStatusFromCode } from "@/components/ops/RedemptionReceipt";
 
 const fmt = new Intl.DateTimeFormat(undefined, {
   weekday: "long",
@@ -151,26 +152,24 @@ export default function GuestEventPage() {
               <InfoTile icon={<ScanLine className="h-4 w-4" />} title="Redemption" text="Use your ticket for drinks/items where enabled." cardStyle={theme.cardStyle} />
             </section>
 
-            <section className={cn("rounded-3xl border p-5", theme.cardStyle)}>
-              <p className="mb-3 text-xs uppercase tracking-[0.2em] text-[var(--event-text-secondary)]">Tickets</p>
-              <div className="space-y-2">
-                {tickets.map((ticket) => (
-                  <article key={ticket.id} className={cn("flex items-center justify-between gap-3 rounded-2xl border p-3", theme.cardStyle)}>
-                    <div>
-                      <p className="font-medium capitalize text-[var(--event-text-primary)]">Drink ticket</p>
-                      <p className="text-xs text-[var(--event-text-secondary)]">
-                        {ticket.status === "redeemed" && ticket.redeemed_at
-                          ? `Redeemed ${new Date(ticket.redeemed_at).toLocaleString()}`
-                          : ticket.status === "void"
-                          ? "Void"
-                          : "Ready to redeem"}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <StatusChip status={ticket.status} />
-                      <TicketDialog ticket={ticket} onRedeemed={() => refetch()} triggerLabel="Open" themeCard={theme.cardStyle} headingFont={theme.fontHeading} />
-                    </div>
-                  </article>
+            <section className="space-y-3">
+              <div className="flex items-baseline justify-between">
+                <p className="text-xs uppercase tracking-[0.22em] text-[var(--event-text-secondary)]">Your tickets</p>
+                <p className="text-xs text-[var(--event-text-secondary)]">{tickets.length} total</p>
+              </div>
+              <div className="space-y-3">
+                {tickets.map((ticket, idx) => (
+                  <WalletTicket
+                    key={ticket.id}
+                    ticket={ticket}
+                    eventTitle={event.title}
+                    eventDate={event.starts_at}
+                    venue={event.venue}
+                    index={idx + 1}
+                    onRedeemed={() => refetch()}
+                    themeCard={theme.cardStyle}
+                    headingFont={theme.fontHeading}
+                  />
                 ))}
               </div>
             </section>
@@ -239,6 +238,7 @@ function TicketDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [nfcActive, setNfcActive] = useState(false);
+  const [receipt, setReceipt] = useState<ReceiptData | null>(null);
   const nfcCapability = useMemo(() => detectNfcCapability(), []);
 
   useEffect(() => {
@@ -251,10 +251,23 @@ function TicketDialog({
           const result = await redeemTicket({ token: event.payload, method: "nfc", stationLabel: "guest_nfc" });
           if (result.ok) {
             toast.success("Ticket redeemed");
-            setOpen(false);
+            setReceipt({
+              status: "success",
+              token: ticket.token,
+              timestamp: result.redeemed_at ?? new Date().toISOString(),
+              stationLabel: "guest_nfc",
+              message: result.message,
+            });
             onRedeemed();
           } else {
             toast.error(result.message ?? "Redemption failed");
+            setReceipt({
+              status: receiptStatusFromCode(result.code, false),
+              token: ticket.token,
+              timestamp: new Date().toISOString(),
+              stationLabel: "guest_nfc",
+              message: result.message,
+            });
           }
           setNfcActive(false);
         },
@@ -266,35 +279,187 @@ function TicketDialog({
     })();
 
     return () => stop?.();
-  }, [open, nfcActive, onRedeemed]);
+  }, [open, nfcActive, onRedeemed, ticket.token]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) setReceipt(null);
+      }}
+    >
       <DialogTrigger asChild>
-        <Button variant="sera" size="sm" disabled={ticket.status !== "active"}>{triggerLabel}</Button>
+        <Button variant="sera" size="sm" disabled={ticket.status !== "active"} className="rounded-full">
+          <TicketIcon className="mr-1.5 h-3.5 w-3.5" />
+          {triggerLabel}
+        </Button>
       </DialogTrigger>
-      <DialogContent className={cn("sm:max-w-md", themeCard)}>
-        <DialogHeader>
-          <DialogTitle className={cn("text-2xl text-[var(--event-text-primary)]", headingFont)}>Present ticket</DialogTitle>
-        </DialogHeader>
-        <div className="flex justify-center py-1">
-          <div className={cn("rounded-2xl border p-4", themeCard)}>
-            <QRCodeSVG value={ticket.token} size={220} level="H" />
-          </div>
-        </div>
-        <p className={cn("rounded-xl border px-3 py-2 text-center font-mono text-xs text-[var(--event-text-secondary)] break-all", themeCard)}>{ticket.token}</p>
-        {nfcCapability.supported ? (
-          <Button variant={nfcActive ? "sera-outline" : "sera"} className="w-full" onClick={() => setNfcActive((v) => !v)}>
-            <Smartphone className="mr-2 h-4 w-4" />
-            {nfcActive ? "Listening for NFC tag…" : "Use NFC tap"}
-          </Button>
+      <DialogContent className={cn("sm:max-w-md rounded-[28px]", themeCard)}>
+        {receipt ? (
+          <RedemptionReceipt data={receipt} onDismiss={() => setOpen(false)} />
         ) : (
-          <p className="text-center text-xs text-[var(--event-text-secondary)]">
-            <ScanLine className="mr-1 inline h-3 w-3" />
-            NFC is unavailable on this browser/device. Please use QR.
-          </p>
+          <>
+            <DialogHeader className="space-y-1">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-[var(--event-text-secondary)]">
+                Present at the bar
+              </p>
+              <DialogTitle className={cn("text-3xl text-[var(--event-text-primary)]", headingFont)}>
+                Tap to redeem
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="flex justify-center pt-2">
+              <div className="relative rounded-3xl bg-white p-5 shadow-soft">
+                <QRCodeSVG value={ticket.token} size={220} level="H" />
+                <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-sera-ink/5" />
+              </div>
+            </div>
+
+            <p className="mx-auto mt-1 max-w-[260px] text-center text-xs text-[var(--event-text-secondary)]">
+              Brightness up. Hold the screen to the bartender's scanner.
+            </p>
+
+            <p className="mt-1 break-all rounded-xl border border-dashed border-[var(--event-text-secondary)]/40 bg-[var(--event-background)]/40 px-3 py-2 text-center font-mono text-[11px] text-[var(--event-text-secondary)]">
+              {ticket.token}
+            </p>
+
+            {nfcCapability.supported ? (
+              <Button
+                variant={nfcActive ? "sera-outline" : "sera"}
+                className="w-full rounded-full"
+                onClick={() => setNfcActive((v) => !v)}
+              >
+                <Smartphone className="mr-2 h-4 w-4" />
+                {nfcActive ? "Listening for tap…" : "Use NFC tap"}
+              </Button>
+            ) : (
+              <p className="text-center text-xs text-[var(--event-text-secondary)]">
+                <ScanLine className="mr-1 inline h-3 w-3" />
+                NFC unavailable on this device — use the QR code.
+              </p>
+            )}
+          </>
         )}
       </DialogContent>
     </Dialog>
+  );
+}
+
+function WalletTicket({
+  ticket,
+  eventTitle,
+  eventDate,
+  venue,
+  index,
+  onRedeemed,
+  themeCard,
+  headingFont,
+}: {
+  ticket: TicketRow;
+  eventTitle: string;
+  eventDate: string;
+  venue: string | null;
+  index: number;
+  onRedeemed: () => void;
+  themeCard: string;
+  headingFont: string;
+}) {
+  const isActive = ticket.status === "active";
+  const isUsed = ticket.status === "redeemed";
+  const isVoid = ticket.status === "void";
+
+  const dateLabel = new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+  }).format(new Date(eventDate));
+
+  return (
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-[24px] border transition-opacity",
+        themeCard,
+        !isActive && "opacity-75",
+      )}
+    >
+      {/* Perforation strip */}
+      <div className="pointer-events-none absolute left-0 right-0 top-1/2 -translate-y-1/2">
+        <div
+          className="mx-3 h-px"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, var(--event-text-secondary) 50%, transparent 50%)",
+            backgroundSize: "8px 1px",
+            opacity: 0.35,
+          }}
+        />
+      </div>
+      {/* Notches */}
+      <span className="absolute -left-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-[var(--event-background)]" aria-hidden />
+      <span className="absolute -right-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-[var(--event-background)]" aria-hidden />
+
+      <div className="grid grid-cols-[1fr_auto] items-center gap-4 p-5">
+        <div className="min-w-0">
+          <p className="text-[10px] uppercase tracking-[0.22em] text-[var(--event-text-secondary)]">
+            Drink ticket · #{String(index).padStart(2, "0")}
+          </p>
+          <p className={cn("mt-1 truncate text-lg text-[var(--event-text-primary)]", headingFont)}>{eventTitle}</p>
+          <p className="mt-1 text-xs text-[var(--event-text-secondary)]">
+            {dateLabel}
+            {venue ? ` · ${venue}` : ""}
+          </p>
+        </div>
+        <TicketStateBadge status={ticket.status} />
+      </div>
+
+      <div className="flex items-center justify-between gap-3 border-t border-dashed border-[var(--event-text-secondary)]/30 px-5 py-3">
+        <div className="min-w-0">
+          <p className="text-[10px] uppercase tracking-[0.22em] text-[var(--event-text-secondary)]">Status</p>
+          <p className="mt-0.5 text-xs text-[var(--event-text-primary)]">
+            {isUsed && ticket.redeemed_at
+              ? `Used ${new Date(ticket.redeemed_at).toLocaleString()}`
+              : isVoid
+              ? "Cancelled by host"
+              : "Tap to present"}
+          </p>
+        </div>
+        {isActive ? (
+          <TicketDialog
+            ticket={ticket}
+            onRedeemed={onRedeemed}
+            triggerLabel="Tap to redeem"
+            themeCard={themeCard}
+            headingFont={headingFont}
+          />
+        ) : (
+          <Button variant="sera-outline" size="sm" disabled>
+            {isUsed ? "Redeemed" : "Unavailable"}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TicketStateBadge({ status }: { status: TicketRow["status"] }) {
+  if (status === "active") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-status-success-soft px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-status-success">
+        <span className="h-1.5 w-1.5 rounded-full bg-status-success animate-pulse" />
+        Active
+      </span>
+    );
+  }
+  if (status === "redeemed") {
+    return (
+      <span className="inline-flex items-center rounded-full bg-sera-line/60 px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-sera-warm-grey">
+        Used
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center rounded-full bg-destructive/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-destructive">
+      Void
+    </span>
   );
 }
