@@ -152,26 +152,24 @@ export default function GuestEventPage() {
               <InfoTile icon={<ScanLine className="h-4 w-4" />} title="Redemption" text="Use your ticket for drinks/items where enabled." cardStyle={theme.cardStyle} />
             </section>
 
-            <section className={cn("rounded-3xl border p-5", theme.cardStyle)}>
-              <p className="mb-3 text-xs uppercase tracking-[0.2em] text-[var(--event-text-secondary)]">Tickets</p>
-              <div className="space-y-2">
-                {tickets.map((ticket) => (
-                  <article key={ticket.id} className={cn("flex items-center justify-between gap-3 rounded-2xl border p-3", theme.cardStyle)}>
-                    <div>
-                      <p className="font-medium capitalize text-[var(--event-text-primary)]">Drink ticket</p>
-                      <p className="text-xs text-[var(--event-text-secondary)]">
-                        {ticket.status === "redeemed" && ticket.redeemed_at
-                          ? `Redeemed ${new Date(ticket.redeemed_at).toLocaleString()}`
-                          : ticket.status === "void"
-                          ? "Void"
-                          : "Ready to redeem"}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <StatusChip status={ticket.status} />
-                      <TicketDialog ticket={ticket} onRedeemed={() => refetch()} triggerLabel="Open" themeCard={theme.cardStyle} headingFont={theme.fontHeading} />
-                    </div>
-                  </article>
+            <section className="space-y-3">
+              <div className="flex items-baseline justify-between">
+                <p className="text-xs uppercase tracking-[0.22em] text-[var(--event-text-secondary)]">Your tickets</p>
+                <p className="text-xs text-[var(--event-text-secondary)]">{tickets.length} total</p>
+              </div>
+              <div className="space-y-3">
+                {tickets.map((ticket, idx) => (
+                  <WalletTicket
+                    key={ticket.id}
+                    ticket={ticket}
+                    eventTitle={event.title}
+                    eventDate={event.starts_at}
+                    venue={event.venue}
+                    index={idx + 1}
+                    onRedeemed={() => refetch()}
+                    themeCard={theme.cardStyle}
+                    headingFont={theme.fontHeading}
+                  />
                 ))}
               </div>
             </section>
