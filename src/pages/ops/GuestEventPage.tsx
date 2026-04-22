@@ -238,6 +238,7 @@ function TicketDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [nfcActive, setNfcActive] = useState(false);
+  const [receipt, setReceipt] = useState<ReceiptData | null>(null);
   const nfcCapability = useMemo(() => detectNfcCapability(), []);
 
   useEffect(() => {
@@ -250,10 +251,23 @@ function TicketDialog({
           const result = await redeemTicket({ token: event.payload, method: "nfc", stationLabel: "guest_nfc" });
           if (result.ok) {
             toast.success("Ticket redeemed");
-            setOpen(false);
+            setReceipt({
+              status: "success",
+              token: ticket.token,
+              timestamp: result.redeemed_at ?? new Date().toISOString(),
+              stationLabel: "guest_nfc",
+              message: result.message,
+            });
             onRedeemed();
           } else {
             toast.error(result.message ?? "Redemption failed");
+            setReceipt({
+              status: receiptStatusFromCode(result.code, false),
+              token: ticket.token,
+              timestamp: new Date().toISOString(),
+              stationLabel: "guest_nfc",
+              message: result.message,
+            });
           }
           setNfcActive(false);
         },
@@ -265,33 +279,67 @@ function TicketDialog({
     })();
 
     return () => stop?.();
-  }, [open, nfcActive, onRedeemed]);
+  }, [open, nfcActive, onRedeemed, ticket.token]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) setReceipt(null);
+      }}
+    >
       <DialogTrigger asChild>
-        <Button variant="sera" size="sm" disabled={ticket.status !== "active"}>{triggerLabel}</Button>
+        <Button variant="sera" size="sm" disabled={ticket.status !== "active"} className="rounded-full">
+          <TicketIcon className="mr-1.5 h-3.5 w-3.5" />
+          {triggerLabel}
+        </Button>
       </DialogTrigger>
-      <DialogContent className={cn("sm:max-w-md", themeCard)}>
-        <DialogHeader>
-          <DialogTitle className={cn("text-2xl text-[var(--event-text-primary)]", headingFont)}>Present ticket</DialogTitle>
-        </DialogHeader>
-        <div className="flex justify-center py-1">
-          <div className={cn("rounded-2xl border p-4", themeCard)}>
-            <QRCodeSVG value={ticket.token} size={220} level="H" />
-          </div>
-        </div>
-        <p className={cn("rounded-xl border px-3 py-2 text-center font-mono text-xs text-[var(--event-text-secondary)] break-all", themeCard)}>{ticket.token}</p>
-        {nfcCapability.supported ? (
-          <Button variant={nfcActive ? "sera-outline" : "sera"} className="w-full" onClick={() => setNfcActive((v) => !v)}>
-            <Smartphone className="mr-2 h-4 w-4" />
-            {nfcActive ? "Listening for NFC tag…" : "Use NFC tap"}
-          </Button>
+      <DialogContent className={cn("sm:max-w-md rounded-[28px]", themeCard)}>
+        {receipt ? (
+          <RedemptionReceipt data={receipt} onDismiss={() => setOpen(false)} />
         ) : (
-          <p className="text-center text-xs text-[var(--event-text-secondary)]">
-            <ScanLine className="mr-1 inline h-3 w-3" />
-            NFC is unavailable on this browser/device. Please use QR.
-          </p>
+          <>
+            <DialogHeader className="space-y-1">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-[var(--event-text-secondary)]">
+                Present at the bar
+              </p>
+              <DialogTitle className={cn("text-3xl text-[var(--event-text-primary)]", headingFont)}>
+                Tap to redeem
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="flex justify-center pt-2">
+              <div className="relative rounded-3xl bg-white p-5 shadow-soft">
+                <QRCodeSVG value={ticket.token} size={220} level="H" />
+                <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-sera-ink/5" />
+              </div>
+            </div>
+
+            <p className="mx-auto mt-1 max-w-[260px] text-center text-xs text-[var(--event-text-secondary)]">
+              Brightness up. Hold the screen to the bartender's scanner.
+            </p>
+
+            <p className="mt-1 break-all rounded-xl border border-dashed border-[var(--event-text-secondary)]/40 bg-[var(--event-background)]/40 px-3 py-2 text-center font-mono text-[11px] text-[var(--event-text-secondary)]">
+              {ticket.token}
+            </p>
+
+            {nfcCapability.supported ? (
+              <Button
+                variant={nfcActive ? "sera-outline" : "sera"}
+                className="w-full rounded-full"
+                onClick={() => setNfcActive((v) => !v)}
+              >
+                <Smartphone className="mr-2 h-4 w-4" />
+                {nfcActive ? "Listening for tap…" : "Use NFC tap"}
+              </Button>
+            ) : (
+              <p className="text-center text-xs text-[var(--event-text-secondary)]">
+                <ScanLine className="mr-1 inline h-3 w-3" />
+                NFC unavailable on this device — use the QR code.
+              </p>
+            )}
+          </>
         )}
       </DialogContent>
     </Dialog>
