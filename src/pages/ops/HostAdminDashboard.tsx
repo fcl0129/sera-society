@@ -57,15 +57,6 @@ export default function HostAdminDashboard() {
   const [activeEventId, setActiveEventId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
 
-  // Create event form state
-  const [newTitle, setNewTitle] = useState("");
-  const [newVenue, setNewVenue] = useState("");
-  const [newStartsAt, setNewStartsAt] = useState("");
-  const [newCapacity, setNewCapacity] = useState("");
-  const [newDescription, setNewDescription] = useState("");
-  const [creating, setCreating] = useState(false);
-  const [createError, setCreateError] = useState<string | null>(null);
-
   // Guest form state
   const [guestEmail, setGuestEmail] = useState("");
   const [guestName, setGuestName] = useState("");
