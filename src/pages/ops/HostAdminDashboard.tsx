@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { LogOut, Plus, Calendar, Users, Ticket, ScanLine, Trash2, Mail, Link2, Pencil, Check, X, Clock, Ban } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { CreateEventFlow } from "@/components/organizer/CreateEventFlow";
 
 const fmt = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
@@ -55,15 +56,6 @@ export default function HostAdminDashboard() {
   const qc = useQueryClient();
   const [activeEventId, setActiveEventId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
-
-  // Create event form state
-  const [newTitle, setNewTitle] = useState("");
-  const [newVenue, setNewVenue] = useState("");
-  const [newStartsAt, setNewStartsAt] = useState("");
-  const [newCapacity, setNewCapacity] = useState("");
-  const [newDescription, setNewDescription] = useState("");
-  const [creating, setCreating] = useState(false);
-  const [createError, setCreateError] = useState<string | null>(null);
 
   // Guest form state
   const [guestEmail, setGuestEmail] = useState("");
@@ -142,49 +134,11 @@ export default function HostAdminDashboard() {
     return map;
   }, [ticketsQuery.data]);
 
-  const handleCreateEvent = async (e: FormEvent) => {
-    e.preventDefault();
-    setCreating(true);
-    setCreateError(null);
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      setCreateError("Session expired. Please sign in again.");
-      setCreating(false);
-      return;
-    }
-
-    if (!newTitle.trim() || !newStartsAt) {
-      setCreateError("Title and start time are required.");
-      setCreating(false);
-      return;
-    }
-
-    const { data, error } = await (supabase as any)
-      .from("events")
-      .insert({
-        organizer_id: user.id,
-        title: newTitle.trim(),
-        venue: newVenue.trim() || null,
-        starts_at: new Date(newStartsAt).toISOString(),
-        capacity: newCapacity ? Number(newCapacity) : null,
-        description: newDescription.trim() || null,
-        status: "draft",
-      })
-      .select("id")
-      .single();
-
-    if (error) {
-      setCreateError(error.message);
-      setCreating(false);
-      return;
-    }
-
-    setNewTitle(""); setNewVenue(""); setNewStartsAt(""); setNewCapacity(""); setNewDescription("");
+  const handleEventCreated = async (eventId: string) => {
     setShowCreate(false);
-    setActiveEventId(data?.id ?? null);
-    setCreating(false);
+    if (eventId) setActiveEventId(eventId);
     await qc.invalidateQueries({ queryKey: ["org-events"] });
+    toast({ title: "Event composed", description: "Add guests to begin sending invitations." });
   };
 
   const handlePublishToggle = async () => {
@@ -392,48 +346,13 @@ export default function HostAdminDashboard() {
         <aside className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="sera-label text-sera-warm-grey">Your events</h2>
-            <Button size="sm" variant="sera" className="rounded-full" onClick={() => setShowCreate((v) => !v)}>
-              <Plus className="w-4 h-4 mr-1" /> {showCreate ? "Close" : "New"}
+            <Button size="sm" variant="sera" className="rounded-full" onClick={() => setShowCreate(true)}>
+              <Plus className="w-4 h-4 mr-1" /> New
             </Button>
           </div>
 
-          {showCreate && (
-            <div className="rounded-2xl border border-sera-line bg-sera-ivory p-5 shadow-soft">
-              <p className="sera-label text-sera-warm-grey">Compose an evening</p>
-              <h3 className="mt-1 font-serif text-2xl text-sera-ink">New event</h3>
-              <p className="mt-1 text-xs text-sera-warm-grey">A quiet brief — only the essentials.</p>
-              <form onSubmit={handleCreateEvent} className="mt-4 space-y-3.5">
-                <FieldGroup label="Title">
-                  <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} required placeholder="An autumn supper" className="rounded-xl" />
-                </FieldGroup>
-                <FieldGroup label="Begins">
-                  <Input type="datetime-local" value={newStartsAt} onChange={(e) => setNewStartsAt(e.target.value)} required className="rounded-xl" />
-                </FieldGroup>
-                <FieldGroup label="Venue">
-                  <Input value={newVenue} onChange={(e) => setNewVenue(e.target.value)} placeholder="Address or location" className="rounded-xl" />
-                </FieldGroup>
-                <FieldGroup label="Capacity">
-                  <Input type="number" value={newCapacity} onChange={(e) => setNewCapacity(e.target.value)} placeholder="Optional" className="rounded-xl" />
-                </FieldGroup>
-                <FieldGroup label="Description">
-                  <Textarea
-                    value={newDescription}
-                    onChange={(e) => setNewDescription(e.target.value)}
-                    rows={3}
-                    placeholder="A few lines for your guests"
-                    className="rounded-xl"
-                  />
-                </FieldGroup>
-                {createError && <p className="text-xs text-destructive">{createError}</p>}
-                <Button type="submit" variant="sera" disabled={creating} className="w-full rounded-full">
-                  {creating ? "Creating…" : "Create event"}
-                </Button>
-              </form>
-            </div>
-          )}
-
           {eventsQuery.isLoading && <p className="text-sm text-sera-warm-grey">Loading…</p>}
-          {events.length === 0 && !eventsQuery.isLoading && !showCreate && (
+          {events.length === 0 && !eventsQuery.isLoading && (
             <div className="rounded-2xl border border-dashed border-sera-line bg-transparent p-6 text-center">
               <p className="font-serif text-base text-sera-ink">No events yet</p>
               <p className="mt-1 text-xs text-sera-warm-grey">Compose your first invitation to begin.</p>
@@ -743,6 +662,12 @@ export default function HostAdminDashboard() {
           )}
         </section>
       </main>
+
+      <CreateEventFlow
+        open={showCreate}
+        onClose={() => setShowCreate(false)}
+        onCreated={handleEventCreated}
+      />
     </div>
   );
 }
