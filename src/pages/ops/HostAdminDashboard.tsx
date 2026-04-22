@@ -134,49 +134,11 @@ export default function HostAdminDashboard() {
     return map;
   }, [ticketsQuery.data]);
 
-  const handleCreateEvent = async (e: FormEvent) => {
-    e.preventDefault();
-    setCreating(true);
-    setCreateError(null);
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      setCreateError("Session expired. Please sign in again.");
-      setCreating(false);
-      return;
-    }
-
-    if (!newTitle.trim() || !newStartsAt) {
-      setCreateError("Title and start time are required.");
-      setCreating(false);
-      return;
-    }
-
-    const { data, error } = await (supabase as any)
-      .from("events")
-      .insert({
-        organizer_id: user.id,
-        title: newTitle.trim(),
-        venue: newVenue.trim() || null,
-        starts_at: new Date(newStartsAt).toISOString(),
-        capacity: newCapacity ? Number(newCapacity) : null,
-        description: newDescription.trim() || null,
-        status: "draft",
-      })
-      .select("id")
-      .single();
-
-    if (error) {
-      setCreateError(error.message);
-      setCreating(false);
-      return;
-    }
-
-    setNewTitle(""); setNewVenue(""); setNewStartsAt(""); setNewCapacity(""); setNewDescription("");
+  const handleEventCreated = async (eventId: string) => {
     setShowCreate(false);
-    setActiveEventId(data?.id ?? null);
-    setCreating(false);
+    if (eventId) setActiveEventId(eventId);
     await qc.invalidateQueries({ queryKey: ["org-events"] });
+    toast({ title: "Event composed", description: "Add guests to begin sending invitations." });
   };
 
   const handlePublishToggle = async () => {
