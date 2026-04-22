@@ -275,6 +275,49 @@
     }
   }
 
+  .sera-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 0.72rem 1.35rem;
+    font-family: var(--font-sans);
+    font-size: 0.73rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    transition:
+      transform var(--motion-base) var(--ease-emphasized),
+      background-color var(--motion-base) var(--ease-standard),
+      border-color var(--motion-base) var(--ease-standard);
+  }
+
+  .sera-pill:hover {
+    transform: translateY(-1px);
+  }
+
+  .sera-pill--ink {
+    background: hsl(var(--sera-ink-brown));
+    color: hsl(var(--sera-ivory-paper));
+    border: 1px solid hsl(var(--sera-ink-brown));
+  }
+
+  .sera-pill--line {
+    border: 1px solid hsl(var(--sera-warm-stone));
+    color: hsl(var(--sera-ink-brown));
+    background: hsl(var(--sera-ivory-paper) / 0.66);
+  }
+
+  .landing-editorial h1,
+  .landing-editorial h2,
+  .landing-editorial h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.022em;
+  }
+
+  .landing-editorial p {
+    text-wrap: pretty;
+  }
 
   .sera-gradient-navy {
     background: linear-gradient(180deg, hsl(var(--sera-deep-navy)) 0%, hsl(var(--sera-navy)) 100%);

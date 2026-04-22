@@ -17,6 +17,7 @@ export default function Navbar() {
   const location = useLocation();
   const shouldReduceMotion = useReducedMotion();
   const mobileMenuId = useId();
+  const isLanding = location.pathname === "/";
 
   useEffect(() => {
     setOpen(false);
@@ -31,9 +32,15 @@ export default function Navbar() {
         Skip to main content
       </a>
 
-      <div className="mx-auto w-full max-w-6xl rounded-full border border-[hsl(var(--sera-warm-stone)/0.72)] bg-[hsl(var(--sera-ivory-paper)/0.88)] px-4 py-2.5 shadow-[0_10px_28px_-22px_rgba(42,36,33,0.48)] backdrop-blur-sm md:px-6">
+      <div
+        className={`mx-auto w-full max-w-6xl px-4 py-2.5 md:px-6 ${
+          isLanding
+            ? "border-b border-[hsl(var(--sera-warm-stone)/0.72)] bg-[hsl(var(--sera-ivory-paper)/0.62)]"
+            : "rounded-full border border-[hsl(var(--sera-warm-stone)/0.72)] bg-[hsl(var(--sera-ivory-paper)/0.88)] shadow-[0_10px_28px_-22px_rgba(42,36,33,0.48)] backdrop-blur-sm"
+        }`}
+      >
         <div className="grid grid-cols-[1fr_auto] items-center gap-4 md:grid-cols-[auto_1fr_auto] md:gap-8">
-          <Link to="/" className="text-[1.22rem] tracking-[0.01em] text-[hsl(var(--sera-ink-brown))] md:text-[1.35rem]">
+          <Link to="/" className={`text-[1.22rem] tracking-[0.01em] text-[hsl(var(--sera-ink-brown))] md:text-[1.35rem] ${isLanding ? "font-display" : ""}`}>
             Sera Society
           </Link>
 
