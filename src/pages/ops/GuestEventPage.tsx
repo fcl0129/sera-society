@@ -297,3 +297,121 @@ function TicketDialog({
     </Dialog>
   );
 }
+
+function WalletTicket({
+  ticket,
+  eventTitle,
+  eventDate,
+  venue,
+  index,
+  onRedeemed,
+  themeCard,
+  headingFont,
+}: {
+  ticket: TicketRow;
+  eventTitle: string;
+  eventDate: string;
+  venue: string | null;
+  index: number;
+  onRedeemed: () => void;
+  themeCard: string;
+  headingFont: string;
+}) {
+  const isActive = ticket.status === "active";
+  const isUsed = ticket.status === "redeemed";
+  const isVoid = ticket.status === "void";
+
+  const dateLabel = new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+  }).format(new Date(eventDate));
+
+  return (
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-[24px] border transition-opacity",
+        themeCard,
+        !isActive && "opacity-75",
+      )}
+    >
+      {/* Perforation strip */}
+      <div className="pointer-events-none absolute left-0 right-0 top-1/2 -translate-y-1/2">
+        <div
+          className="mx-3 h-px"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, var(--event-text-secondary) 50%, transparent 50%)",
+            backgroundSize: "8px 1px",
+            opacity: 0.35,
+          }}
+        />
+      </div>
+      {/* Notches */}
+      <span className="absolute -left-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-[var(--event-background)]" aria-hidden />
+      <span className="absolute -right-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-[var(--event-background)]" aria-hidden />
+
+      <div className="grid grid-cols-[1fr_auto] items-center gap-4 p-5">
+        <div className="min-w-0">
+          <p className="text-[10px] uppercase tracking-[0.22em] text-[var(--event-text-secondary)]">
+            Drink ticket · #{String(index).padStart(2, "0")}
+          </p>
+          <p className={cn("mt-1 truncate text-lg text-[var(--event-text-primary)]", headingFont)}>{eventTitle}</p>
+          <p className="mt-1 text-xs text-[var(--event-text-secondary)]">
+            {dateLabel}
+            {venue ? ` · ${venue}` : ""}
+          </p>
+        </div>
+        <TicketStateBadge status={ticket.status} />
+      </div>
+
+      <div className="flex items-center justify-between gap-3 border-t border-dashed border-[var(--event-text-secondary)]/30 px-5 py-3">
+        <div className="min-w-0">
+          <p className="text-[10px] uppercase tracking-[0.22em] text-[var(--event-text-secondary)]">Status</p>
+          <p className="mt-0.5 text-xs text-[var(--event-text-primary)]">
+            {isUsed && ticket.redeemed_at
+              ? `Used ${new Date(ticket.redeemed_at).toLocaleString()}`
+              : isVoid
+              ? "Cancelled by host"
+              : "Tap to present"}
+          </p>
+        </div>
+        {isActive ? (
+          <TicketDialog
+            ticket={ticket}
+            onRedeemed={onRedeemed}
+            triggerLabel="Tap to redeem"
+            themeCard={themeCard}
+            headingFont={headingFont}
+          />
+        ) : (
+          <Button variant="sera-outline" size="sm" disabled>
+            {isUsed ? "Redeemed" : "Unavailable"}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TicketStateBadge({ status }: { status: TicketRow["status"] }) {
+  if (status === "active") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-status-success-soft px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-status-success">
+        <span className="h-1.5 w-1.5 rounded-full bg-status-success animate-pulse" />
+        Active
+      </span>
+    );
+  }
+  if (status === "redeemed") {
+    return (
+      <span className="inline-flex items-center rounded-full bg-sera-line/60 px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-sera-warm-grey">
+        Used
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center rounded-full bg-destructive/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-destructive">
+      Void
+    </span>
+  );
+}
