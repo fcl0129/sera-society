@@ -11,8 +11,9 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { detectNfcCapability, startNfcRead } from "@/lib/nfc";
 import { redeemTicket } from "@/lib/redemption";
-import { CalendarClock, Clock3, LogOut, MapPin, ScanLine, Smartphone } from "lucide-react";
+import { CalendarClock, Clock3, LogOut, MapPin, ScanLine, Smartphone, Ticket as TicketIcon } from "lucide-react";
 import { toast } from "sonner";
+import { RedemptionReceipt, type ReceiptData, receiptStatusFromCode } from "@/components/ops/RedemptionReceipt";
 
 const fmt = new Intl.DateTimeFormat(undefined, {
   weekday: "long",
