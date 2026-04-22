@@ -749,12 +749,12 @@ export default function HostAdminDashboard() {
 
 function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="border border-sera-sand/40 p-3">
-      <div className="flex items-center gap-2 text-sera-warm-grey">
+    <div className="rounded-2xl border border-sera-line bg-sera-cloud px-4 py-3">
+      <div className="flex items-center gap-1.5 text-sera-warm-grey">
         {icon}
-        <p className="text-[10px] uppercase tracking-wider">{label}</p>
+        <p className="text-[10px] uppercase tracking-[0.18em]">{label}</p>
       </div>
-      <p className="font-serif text-2xl text-sera-navy mt-1">{value}</p>
+      <p className="mt-1 font-serif text-2xl text-sera-ink tabular-nums">{value}</p>
     </div>
   );
 }
@@ -765,10 +765,22 @@ function EntryCard({ icon, title, description, onClick }: {
   return (
     <button
       onClick={onClick}
-      className="text-left p-5 border border-sera-sand/60 bg-white hover:border-sera-navy/40 transition-colors"
+      className="group rounded-[24px] border border-sera-line bg-sera-ivory p-5 text-left transition-all hover:-translate-y-px hover:border-sera-ink/30 hover:shadow-soft"
     >
-      <div className="flex items-center gap-2 text-sera-navy mb-2">{icon}<span className="font-serif text-lg">{title}</span></div>
-      <p className="text-sm text-sera-warm-grey">{description}</p>
+      <div className="flex items-center gap-2 text-sera-ink">
+        {icon}
+        <span className="font-serif text-lg">{title}</span>
+      </div>
+      <p className="mt-2 text-sm text-sera-warm-grey">{description}</p>
     </button>
+  );
+}
+
+function FieldGroup({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-[10px] uppercase tracking-[0.18em] text-sera-warm-grey">{label}</Label>
+      {children}
+    </div>
   );
 }
