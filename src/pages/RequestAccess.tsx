@@ -1,10 +1,11 @@
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { motion } from "framer-motion";
-import PageHero from "@/components/marketing/PageHero";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
 import { useState } from "react";
+import { Link } from "react-router-dom";
+
+import { SeraContainer } from "@/components/sera/container";
+import { SeraLayout } from "@/components/sera/layout";
+import { SeraPageHeader } from "@/components/sera/page-header";
+import { SeraSection } from "@/components/sera/section";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,20 +31,17 @@ export default function RequestAccess() {
     const cleanReason = reason.trim();
 
     if (!cleanName || !cleanEmail) {
-      setErrorMsg("Please provide your name and email.");
+      setErrorMsg("Please share your name and email.");
       setIsSubmitting(false);
       return;
     }
 
-    // 1. Persist the request to the database (RLS allows anon insert)
-    const { error: insertError } = await (supabase as any)
-      .from("access_requests")
-      .insert({
-        name: cleanName,
-        email: cleanEmail,
-        organization: cleanOrg || null,
-        reason: cleanReason || null,
-      });
+    const { error: insertError } = await (supabase as any).from("access_requests").insert({
+      name: cleanName,
+      email: cleanEmail,
+      organization: cleanOrg || null,
+      reason: cleanReason || null,
+    });
 
     if (insertError) {
       setErrorMsg(`We couldn't save your request: ${insertError.message}`);
@@ -51,7 +49,6 @@ export default function RequestAccess() {
       return;
     }
 
-    // 2. Best-effort admin notification email (non-blocking failure)
     try {
       await supabase.functions.invoke("send-sera-email", {
         body: {
@@ -60,15 +57,13 @@ export default function RequestAccess() {
           data: {
             event_title: `New access request — ${cleanName}`,
             event_date: new Date().toLocaleString(),
-            venue: `${cleanEmail}${cleanOrg ? ` · ${cleanOrg}` : ""}${
-              cleanReason ? ` — ${cleanReason}` : ""
-            }`,
+            venue: `${cleanEmail}${cleanOrg ? ` · ${cleanOrg}` : ""}${cleanReason ? ` — ${cleanReason}` : ""}`,
             app_url: window.location.origin,
           },
         },
       });
     } catch {
-      // best-effort; the request is already saved
+      // best effort
     }
 
     setSubmitted(true);
@@ -76,87 +71,45 @@ export default function RequestAccess() {
   };
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <PageHero
-        eyebrow="Join Sera Society"
-        title={
-          <>
-            Request
-            <br />
-            <span className="italic">access</span>
-          </>
-        }
-        description="Sera is currently available by invitation. Tell us about your events and we&rsquo;ll be in touch."
-      />
+    <SeraLayout>
+      <SeraContainer>
+        <SeraPageHeader
+          title="Request access"
+          description="Tell us a little about your events and we’ll follow up with the next step."
+        />
+      </SeraContainer>
 
-      <section className="py-20 sera-surface-light">
-        <div className="max-w-lg mx-auto px-6">
+      <SeraSection>
+        <SeraContainer className="max-w-2xl">
           {!submitted ? (
-            <motion.form
-              onSubmit={handleSubmit}
-              className="space-y-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
+            <form onSubmit={handleSubmit} className="space-y-5 border-t border-[#e6d7c3]/20 pt-6">
               <div className="space-y-2">
-                <Label className="sera-label text-sera-navy text-[10px]">Name</Label>
-                <Input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="border-sera-sand bg-sera-ivory/50 rounded-none h-11 font-sans text-sm focus:border-sera-navy"
-                  required
-                />
+                <Label className="text-[#e7d8c3]">Name</Label>
+                <Input value={name} onChange={(e) => setName(e.target.value)} required className="h-11 rounded-none border-[#e2d2bc]/30 bg-[#0f1725]/35 text-[#f0e4d2]" />
               </div>
               <div className="space-y-2">
-                <Label className="sera-label text-sera-navy text-[10px]">Email</Label>
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="border-sera-sand bg-sera-ivory/50 rounded-none h-11 font-sans text-sm focus:border-sera-navy"
-                  required
-                />
+                <Label className="text-[#e7d8c3]">Email</Label>
+                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11 rounded-none border-[#e2d2bc]/30 bg-[#0f1725]/35 text-[#f0e4d2]" />
               </div>
               <div className="space-y-2">
-                <Label className="sera-label text-sera-navy text-[10px]">Company / Organization (optional)</Label>
-                <Input
-                  value={organization}
-                  onChange={(e) => setOrganization(e.target.value)}
-                  className="border-sera-sand bg-sera-ivory/50 rounded-none h-11 font-sans text-sm focus:border-sera-navy"
-                />
+                <Label className="text-[#e7d8c3]">Organization (optional)</Label>
+                <Input value={organization} onChange={(e) => setOrganization(e.target.value)} className="h-11 rounded-none border-[#e2d2bc]/30 bg-[#0f1725]/35 text-[#f0e4d2]" />
               </div>
               <div className="space-y-2">
-                <Label className="sera-label text-sera-navy text-[10px]">Tell us about your events</Label>
-                <Textarea
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  className="border-sera-sand bg-sera-ivory/50 rounded-none font-sans text-sm focus:border-sera-navy min-h-[120px]"
-                />
+                <Label className="text-[#e7d8c3]">Tell us what you host (optional)</Label>
+                <Textarea value={reason} onChange={(e) => setReason(e.target.value)} className="min-h-[130px] rounded-none border-[#e2d2bc]/30 bg-[#0f1725]/35 text-[#f0e4d2]" />
               </div>
-              {errorMsg && <p className="text-xs text-sera-oxblood">{errorMsg}</p>}
-              <Button variant="sera" size="lg" className="w-full" type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Submitting…" : "Submit request"}
-              </Button>
-            </motion.form>
+              {errorMsg ? <p className="text-sm text-[#f0c7be]">{errorMsg}</p> : null}
+              <Button disabled={isSubmitting} className="sera-landing-btn sera-landing-btn--primary h-11 rounded-none px-6 py-0 text-[0.72rem]">{isSubmitting ? "Sending..." : "Send request"}</Button>
+            </form>
           ) : (
-            <motion.div className="text-center py-12" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <div className="w-14 h-14 border border-sera-navy/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-sera-navy text-xl">✓</span>
-              </div>
-              <h2 className="sera-subheading text-sera-navy text-2xl mb-3">Request received</h2>
-              <p className="sera-body text-sera-warm-grey">
-                We&rsquo;ll review your request and email you when access is granted.
-              </p>
-              <Button variant="sera-outline" size="lg" className="mt-8" asChild>
-                <Link to="/">Back to home</Link>
-              </Button>
-            </motion.div>
+            <div className="space-y-4 border-t border-[#e6d7c3]/20 pt-6 text-[#d7cab8]">
+              <p>Thank you — your request is in. We’ll reach out soon.</p>
+              <Link to="/" className="text-[#f0e4d3] underline underline-offset-4">Return to home</Link>
+            </div>
           )}
-        </div>
-      </section>
-      <Footer />
-    </div>
+        </SeraContainer>
+      </SeraSection>
+    </SeraLayout>
   );
 }
