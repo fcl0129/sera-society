@@ -367,6 +367,7 @@ export type Database = {
         Row: {
           capacity: number | null
           contact_host_email: string | null
+          cover_image_url: string | null
           created_at: string
           description: string | null
           enable_nfc: boolean
@@ -387,6 +388,7 @@ export type Database = {
         Insert: {
           capacity?: number | null
           contact_host_email?: string | null
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           enable_nfc?: boolean
@@ -407,6 +409,7 @@ export type Database = {
         Update: {
           capacity?: number | null
           contact_host_email?: string | null
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           enable_nfc?: boolean
