@@ -167,21 +167,18 @@ export function CreateEventFlow({ open, onClose, onCreated }: Props) {
       return;
     }
 
-    const descriptionWithCover = (() => {
-      const trimmed = description.trim();
-      if (!coverUrl.trim()) return trimmed || null;
-      const marker = `[cover:${coverUrl.trim()}]`;
-      return trimmed ? `${marker}\n\n${trimmed}` : marker;
-    })();
+    const cleanCoverUrl = coverUrl.trim() || null;
+    const cleanDescription = description.trim() || null;
 
-    const { data, error: insertError } = await (supabase as any)
+    const { data, error: insertError } = await supabase
       .from("events")
       .insert({
         organizer_id: user.id,
         title: title.trim(),
         venue: venue.trim() || null,
         starts_at: startsAtIso,
-        description: descriptionWithCover,
+        description: cleanDescription,
+        cover_image_url: cleanCoverUrl,
         status: "draft",
       })
       .select("id")

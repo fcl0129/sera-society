@@ -69,16 +69,18 @@ export default function BartenderPanel() {
 
   const beginNfcRead = async () => {
     setNfcListening(true);
-    const stop = await startNfcRead(
+    let stopFn: (() => void) | undefined;
+    stopFn = await startNfcRead(
       async (tap) => {
         const payload = tap.payload?.trim();
         if (payload) await handleRedeem(payload, "nfc");
         setNfcListening(false);
-        stop();
+        stopFn?.();
       },
       () => {
         setNfcListening(false);
-      }
+        stopFn?.();
+      },
     );
   };
 
