@@ -193,9 +193,25 @@ export default function AdminAccessRequests() {
                   </p>
                 </div>
 
-                <p className="mt-4 text-sm text-sera-warm-grey whitespace-pre-wrap">
-                  {request.events_details || "Ingen ytterligare information."}
-                </p>
+                <div className="mt-4 space-y-2 text-sm text-sera-warm-grey">
+                  {request.organization && (
+                    <p>
+                      <span className="sera-label text-sera-stone mr-2">Organization</span>
+                      {request.organization}
+                    </p>
+                  )}
+                  {request.reason ? (
+                    <p className="whitespace-pre-wrap">{request.reason}</p>
+                  ) : (
+                    <p className="italic">No additional information provided.</p>
+                  )}
+                  {request.admin_notes && (
+                    <p className="rounded-md bg-sera-ivory/50 p-2 text-xs italic">
+                      <span className="sera-label text-sera-stone mr-2">Internal note</span>
+                      {request.admin_notes}
+                    </p>
+                  )}
+                </div>
 
                 {request.status === "pending" && (
                   <div className="flex gap-3 mt-5">
@@ -205,7 +221,7 @@ export default function AdminAccessRequests() {
                       disabled={processingId === request.id}
                       onClick={() => reviewRequest(request.id, "approved")}
                     >
-                      Godkänn
+                      Approve
                     </Button>
                     <Button
                       variant="sera-outline"
@@ -213,7 +229,7 @@ export default function AdminAccessRequests() {
                       disabled={processingId === request.id}
                       onClick={() => reviewRequest(request.id, "rejected")}
                     >
-                      Avslå
+                      Decline
                     </Button>
                   </div>
                 )}
