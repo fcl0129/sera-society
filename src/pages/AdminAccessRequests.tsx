@@ -1,22 +1,19 @@
-// @ts-nocheck — legacy schema references; will be regenerated when platform tables exist
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
+import type { AccessRequestView, TierLevel, UserTierAccessRow } from "@/types/db";
 
-type AccessRequest = Tables<"access_requests">;
+const TIER_OPTIONS: TierLevel[] = ["essential", "social", "host", "occasions"];
 
 export default function AdminAccessRequests() {
-  const [requests, setRequests] = useState<AccessRequest[]>([]);
+  const [requests, setRequests] = useState<AccessRequestView[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [tierEmail, setTierEmail] = useState("");
-  const [tierValue, setTierValue] = useState<"essential" | "social" | "host" | "occasions">("essential");
-  const [tierAssignments, setTierAssignments] = useState<
-    { id: string; email: string | null; user_id: string | null; max_tier: string; created_at: string }[]
-  >([]);
+  const [tierValue, setTierValue] = useState<TierLevel>("essential");
+  const [tierAssignments, setTierAssignments] = useState<UserTierAccessRow[]>([]);
 
   const loadRequests = async () => {
     setLoading(true);
@@ -28,24 +25,24 @@ export default function AdminAccessRequests() {
       .order("created_at", { ascending: false });
 
     if (fetchError) {
-      setError("Kunde inte hämta ansökningar.");
+      setError("Could not load requests.");
       setLoading(false);
       return;
     }
 
-    setRequests(data ?? []);
+    setRequests((data ?? []) as AccessRequestView[]);
     setLoading(false);
   };
 
   const loadTierAssignments = async () => {
     const { data, error: fetchError } = await supabase
       .from("user_tier_access")
-      .select("id,email,user_id,max_tier,created_at")
+      .select("*")
       .order("created_at", { ascending: false })
       .limit(50);
 
     if (fetchError) return;
-    setTierAssignments(data ?? []);
+    setTierAssignments((data ?? []) as UserTierAccessRow[]);
   };
 
   useEffect(() => {
