@@ -36,8 +36,8 @@ type EventRow = {
   title: string;
   venue: string | null;
   starts_at: string;
-  slug: string | null;
   description: string | null;
+  cover_image_url: string | null;
 };
 
 export default function GuestEventPage() {
@@ -65,39 +65,68 @@ export default function GuestEventPage() {
     backgroundPosition: backgroundImage ? "center" : undefined,
   };
 
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["guest-tickets"],
     queryFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
       const user = userData.user;
-      if (!user) return { event: null as EventRow | null, tickets: [] as TicketRow[] };
+      if (!user) return { events: [] as EventRow[], tickets: [] as TicketRow[] };
 
-      const { data: tickets, error } = await (supabase as any)
+      const { data: tickets, error } = await supabase
         .from("drink_tickets")
         .select("id, token, status, redeemed_at, event_id")
         .eq("guest_id", user.id)
         .order("created_at", { ascending: true });
       if (error) throw error;
 
-      const firstEventId = tickets?.[0]?.event_id;
-      if (!firstEventId) return { event: null, tickets: [] as TicketRow[] };
+      const eventIds = Array.from(new Set((tickets ?? []).map((t) => t.event_id)));
+      if (eventIds.length === 0) return { events: [] as EventRow[], tickets: [] as TicketRow[] };
 
-      const { data: event } = await (supabase as any)
+      const { data: events } = await supabase
         .from("events")
-        .select("id, title, venue, starts_at, description")
-        .eq("id", firstEventId)
-        .maybeSingle();
+        .select("id, title, venue, starts_at, description, cover_image_url")
+        .in("id", eventIds)
+        .order("starts_at", { ascending: true });
 
       return {
-        event: event ? ({ ...event, slug: null } as EventRow) : null,
+        events: (events ?? []) as EventRow[],
         tickets: (tickets ?? []) as TicketRow[],
       };
     },
   });
 
-  const event = data?.event;
+  const events = data?.events ?? [];
   const tickets = data?.tickets ?? [];
-  const activeTicket = tickets.find((ticket) => ticket.status === "active") ?? null;
+
+  // Pick the user's currently relevant event:
+  // 1. Explicit selection
+  // 2. Soonest upcoming event (>= now)
+  // 3. Most recent past event
+  const currentEvent = useMemo<EventRow | null>(() => {
+    if (events.length === 0) return null;
+    if (selectedEventId) {
+      const found = events.find((e) => e.id === selectedEventId);
+      if (found) return found;
+    }
+    const now = Date.now();
+    const upcoming = events
+      .filter((e) => new Date(e.starts_at).getTime() >= now)
+      .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime());
+    if (upcoming[0]) return upcoming[0];
+    const past = [...events].sort(
+      (a, b) => new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime(),
+    );
+    return past[0] ?? null;
+  }, [events, selectedEventId]);
+
+  const event = currentEvent;
+  const eventTickets = useMemo(
+    () => (event ? tickets.filter((t) => t.event_id === event.id) : []),
+    [event, tickets],
+  );
+  const activeTicket = eventTickets.find((ticket) => ticket.status === "active") ?? null;
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -152,13 +181,31 @@ export default function GuestEventPage() {
               <InfoTile icon={<ScanLine className="h-4 w-4" />} title="Redemption" text="Use your ticket for drinks/items where enabled." cardStyle={theme.cardStyle} />
             </section>
 
+            {events.length > 1 && (
+              <section className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--event-accent)]/30 bg-[var(--event-background)]/30 p-2">
+                <span className="px-1 text-[10px] uppercase tracking-[0.22em] text-[var(--event-text-secondary)]">
+                  Your events
+                </span>
+                {events.map((ev) => (
+                  <Button
+                    key={ev.id}
+                    size="sm"
+                    variant={ev.id === event.id ? "sera" : "sera-outline"}
+                    onClick={() => setSelectedEventId(ev.id)}
+                  >
+                    {ev.title}
+                  </Button>
+                ))}
+              </section>
+            )}
+
             <section className="space-y-3">
               <div className="flex items-baseline justify-between">
                 <p className="text-xs uppercase tracking-[0.22em] text-[var(--event-text-secondary)]">Your tickets</p>
-                <p className="text-xs text-[var(--event-text-secondary)]">{tickets.length} total</p>
+                <p className="text-xs text-[var(--event-text-secondary)]">{eventTickets.length} total</p>
               </div>
               <div className="space-y-3">
-                {tickets.map((ticket, idx) => (
+                {eventTickets.map((ticket, idx) => (
                   <WalletTicket
                     key={ticket.id}
                     ticket={ticket}
@@ -171,6 +218,11 @@ export default function GuestEventPage() {
                     headingFont={theme.fontHeading}
                   />
                 ))}
+                {eventTickets.length === 0 && (
+                  <p className="text-sm text-[var(--event-text-secondary)]">
+                    No tickets issued for this event yet.
+                  </p>
+                )}
               </div>
             </section>
           </>

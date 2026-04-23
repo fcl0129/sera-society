@@ -36,7 +36,7 @@ export default function RequestAccess() {
       return;
     }
 
-    const { error: insertError } = await (supabase as any).from("access_requests").insert({
+    const { error: insertError } = await supabase.from("access_requests").insert({
       name: cleanName,
       email: cleanEmail,
       organization: cleanOrg || null,

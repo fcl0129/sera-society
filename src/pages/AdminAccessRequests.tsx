@@ -1,22 +1,19 @@
-// @ts-nocheck — legacy schema references; will be regenerated when platform tables exist
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
+import type { AccessRequestView, TierLevel, UserTierAccessRow } from "@/types/db";
 
-type AccessRequest = Tables<"access_requests">;
+const TIER_OPTIONS: TierLevel[] = ["essential", "social", "host", "occasions"];
 
 export default function AdminAccessRequests() {
-  const [requests, setRequests] = useState<AccessRequest[]>([]);
+  const [requests, setRequests] = useState<AccessRequestView[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [tierEmail, setTierEmail] = useState("");
-  const [tierValue, setTierValue] = useState<"essential" | "social" | "host" | "occasions">("essential");
-  const [tierAssignments, setTierAssignments] = useState<
-    { id: string; email: string | null; user_id: string | null; max_tier: string; created_at: string }[]
-  >([]);
+  const [tierValue, setTierValue] = useState<TierLevel>("essential");
+  const [tierAssignments, setTierAssignments] = useState<UserTierAccessRow[]>([]);
 
   const loadRequests = async () => {
     setLoading(true);
@@ -28,24 +25,24 @@ export default function AdminAccessRequests() {
       .order("created_at", { ascending: false });
 
     if (fetchError) {
-      setError("Kunde inte hämta ansökningar.");
+      setError("Could not load requests.");
       setLoading(false);
       return;
     }
 
-    setRequests(data ?? []);
+    setRequests((data ?? []) as AccessRequestView[]);
     setLoading(false);
   };
 
   const loadTierAssignments = async () => {
     const { data, error: fetchError } = await supabase
       .from("user_tier_access")
-      .select("id,email,user_id,max_tier,created_at")
+      .select("*")
       .order("created_at", { ascending: false })
       .limit(50);
 
     if (fetchError) return;
-    setTierAssignments(data ?? []);
+    setTierAssignments((data ?? []) as UserTierAccessRow[]);
   };
 
   useEffect(() => {
@@ -70,7 +67,7 @@ export default function AdminAccessRequests() {
       .eq("id", requestId);
 
     if (updateError) {
-      setError("Kunde inte uppdatera ansökan.");
+      setError("Could not update the request.");
       setProcessingId(null);
       return;
     }
@@ -81,7 +78,7 @@ export default function AdminAccessRequests() {
 
   const saveTierAssignment = async () => {
     if (!tierEmail.trim()) {
-      setError("Ange en e-postadress för tier-tilldelning.");
+      setError("Enter an email address for the tier assignment.");
       return;
     }
 
@@ -97,7 +94,7 @@ export default function AdminAccessRequests() {
       .maybeSingle();
 
     if (findError) {
-      setError(`Kunde inte läsa befintlig tier-tilldelning: ${findError.message}`);
+      setError(`Could not read existing tier assignment: ${findError.message}`);
       return;
     }
 
@@ -112,7 +109,7 @@ export default function AdminAccessRequests() {
       : await supabase.from("user_tier_access").insert(payload);
 
     if (writeError) {
-      setError(`Kunde inte spara tier-tilldelning: ${writeError.message}`);
+      setError(`Could not save tier assignment: ${writeError.message}`);
       return;
     }
 
@@ -134,12 +131,12 @@ export default function AdminAccessRequests() {
           </Button>
         </div>
 
-        {error && <p className="text-sm text-red-700 mb-6">{error}</p>}
+        {error && <p className="text-sm text-destructive mb-6">{error}</p>}
 
         <div className="border border-sera-sand/70 bg-white p-5 mb-8">
           <h2 className="font-serif text-sera-navy text-2xl mb-2">Tier access control</h2>
           <p className="text-sm text-sera-warm-grey mb-4">
-            Sätt vilken max-tier en användare får använda. Organizers kan inte välja högre tier än denna nivå.
+            Set the highest tier a user is allowed to operate. Organizers cannot select a tier above this level.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <input
@@ -151,15 +148,16 @@ export default function AdminAccessRequests() {
             />
             <select
               value={tierValue}
-              onChange={(e) => setTierValue(e.target.value as "essential" | "social" | "host" | "occasions")}
-              className="border border-sera-sand px-3 py-2 text-sm"
+              onChange={(e) => setTierValue(e.target.value as TierLevel)}
+              className="border border-sera-sand px-3 py-2 text-sm capitalize"
             >
-              <option value="essential">Essential</option>
-              <option value="social">Social</option>
-              <option value="host">Host</option>
-              <option value="occasions">Occasions</option>
+              {TIER_OPTIONS.map((tier) => (
+                <option key={tier} value={tier}>
+                  {tier.charAt(0).toUpperCase() + tier.slice(1)}
+                </option>
+              ))}
             </select>
-            <Button variant="sera" onClick={saveTierAssignment}>
+            <Button variant="sera" onClick={() => void saveTierAssignment()}>
               Save tier
             </Button>
           </div>
@@ -171,14 +169,16 @@ export default function AdminAccessRequests() {
                 <span className="uppercase tracking-wider text-sera-oxblood">{assignment.max_tier}</span>
               </div>
             ))}
-            {tierAssignments.length === 0 && <p className="text-sm text-sera-warm-grey">Inga tier-tilldelningar ännu.</p>}
+            {tierAssignments.length === 0 && (
+              <p className="text-sm text-sera-warm-grey">No tier assignments yet.</p>
+            )}
           </div>
         </div>
 
         {loading ? (
-          <p className="sera-body text-sera-warm-grey">Laddar ansökningar...</p>
+          <p className="sera-body text-sera-warm-grey">Loading requests…</p>
         ) : requests.length === 0 ? (
-          <p className="sera-body text-sera-warm-grey">Inga ansökningar ännu.</p>
+          <p className="sera-body text-sera-warm-grey">No access requests yet.</p>
         ) : (
           <div className="space-y-4">
             {requests.map((request) => (
@@ -188,7 +188,7 @@ export default function AdminAccessRequests() {
                     <h2 className="font-serif text-sera-navy text-xl">{request.name}</h2>
                     <p className="text-sm text-sera-warm-grey">{request.email}</p>
                     <p className="text-xs text-sera-stone mt-1">
-                      {new Date(request.created_at).toLocaleString("sv-SE")}
+                      {new Date(request.created_at).toLocaleString()}
                     </p>
                   </div>
                   <p className="text-xs uppercase tracking-wider text-sera-oxblood">
@@ -196,9 +196,25 @@ export default function AdminAccessRequests() {
                   </p>
                 </div>
 
-                <p className="mt-4 text-sm text-sera-warm-grey whitespace-pre-wrap">
-                  {request.events_details || "Ingen ytterligare information."}
-                </p>
+                <div className="mt-4 space-y-2 text-sm text-sera-warm-grey">
+                  {request.organization && (
+                    <p>
+                      <span className="sera-label text-sera-stone mr-2">Organization</span>
+                      {request.organization}
+                    </p>
+                  )}
+                  {request.reason ? (
+                    <p className="whitespace-pre-wrap">{request.reason}</p>
+                  ) : (
+                    <p className="italic">No additional information provided.</p>
+                  )}
+                  {request.admin_notes && (
+                    <p className="rounded-md bg-sera-ivory/50 p-2 text-xs italic">
+                      <span className="sera-label text-sera-stone mr-2">Internal note</span>
+                      {request.admin_notes}
+                    </p>
+                  )}
+                </div>
 
                 {request.status === "pending" && (
                   <div className="flex gap-3 mt-5">
@@ -208,7 +224,7 @@ export default function AdminAccessRequests() {
                       disabled={processingId === request.id}
                       onClick={() => reviewRequest(request.id, "approved")}
                     >
-                      Godkänn
+                      Approve
                     </Button>
                     <Button
                       variant="sera-outline"
@@ -216,7 +232,7 @@ export default function AdminAccessRequests() {
                       disabled={processingId === request.id}
                       onClick={() => reviewRequest(request.id, "rejected")}
                     >
-                      Avslå
+                      Decline
                     </Button>
                   </div>
                 )}
