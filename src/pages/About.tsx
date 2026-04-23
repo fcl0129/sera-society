@@ -1,113 +1,56 @@
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import PageHero from "@/components/marketing/PageHero";
+
+import { SeraContainer } from "@/components/sera/container";
+import { SeraLayout } from "@/components/sera/layout";
+import { SeraPageHeader } from "@/components/sera/page-header";
+import { SeraSection } from "@/components/sera/section";
+import { Button } from "@/components/ui/button";
 
 export default function About() {
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <PageHero
-        eyebrow="About"
-        title={
-          <>
-            A new standard
-            <br />
-            <span className="italic">for modern events</span>
-          </>
-        }
-        description="Sera Society is a premium event platform that brings together beautiful design and practical operations — so organizers can focus on the experience."
-      />
+    <SeraLayout>
+      <SeraContainer>
+        <SeraPageHeader
+          title="A platform for thoughtful hosts"
+          description="Sera Society brings creative direction and event operations into one quiet, confident system."
+        />
+      </SeraContainer>
 
-      <section className="py-20 sera-surface-light">
-        <div className="max-w-3xl mx-auto px-6">
-          <motion.div
-            className="space-y-12"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <div>
-              <p className="sera-label text-sera-oxblood mb-3">What Sera Does</p>
-              <h2 className="sera-subheading text-sera-navy text-2xl md:text-3xl mb-4">Design meets operations</h2>
-              <p className="sera-body text-sera-warm-grey">
-                Most event tools force you to choose between aesthetics and functionality. Sera brings both together. 
-                Create stunning digital invitations and guest-facing event pages. Then manage your guest list, RSVPs, 
-                check-in, drink tickets, and event-night operations — all from a single platform built mobile-first.
-              </p>
-            </div>
+      <SeraSection>
+        <SeraContainer className="space-y-12">
+          <div className="space-y-4 border-t border-[#e6d7c3]/20 pt-6">
+            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-[#decfbe]/70">What we believe</p>
+            <h2 className="font-display text-[2rem] leading-[0.95] text-[#f1e6d7]">Hosting should feel composed, not chaotic.</h2>
+            <p className="max-w-3xl text-[#d5c9b8]">Sera is built for teams who care about guest experience as much as logistics. Invitations, RSVPs, check-in, and service tools all stay aligned under one brand voice.</p>
+          </div>
 
-            <div className="h-px bg-sera-sand/50" />
+          <div className="space-y-4 border-t border-[#e6d7c3]/20 pt-6">
+            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-[#decfbe]/70">Who it serves</p>
+            <h2 className="font-display text-[2rem] leading-[0.95] text-[#f1e6d7]">For organizers who notice every detail.</h2>
+            <p className="max-w-3xl text-[#d5c9b8]">From intimate dinners to major cultural nights, Sera scales with your guest count while preserving an intentional tone throughout the journey.</p>
+          </div>
 
-            <div>
-              <p className="sera-label text-sera-oxblood mb-3">Who It's For</p>
-              <h2 className="sera-subheading text-sera-navy text-2xl md:text-3xl mb-4">Organizers who care about <span className="italic">every</span> detail</h2>
-              <p className="sera-body text-sera-warm-grey mb-4">
-                Sera is built for people who host intentionally — from intimate dinners and private gatherings to 
-                headline parties and cultural events. Whether you're managing 30 guests or 3,000, the platform 
-                scales to match your ambition without sacrificing the premium experience.
-              </p>
-              <p className="sera-body text-sera-warm-grey">
-                Event producers, creative directors, brand hosts, cultural curators, and anyone 
-                who believes an event should feel as polished in its operations as it looks on the invitation.
-              </p>
-            </div>
+          <div className="space-y-4 border-t border-[#e6d7c3]/20 pt-6">
+            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-[#decfbe]/70">What you can run</p>
+            <ul className="grid gap-2 text-[#d5c9b8] md:grid-cols-2">
+              {[
+                "Invitations and flyers",
+                "Guest pages and RSVP",
+                "Door check-in",
+                "Digital drink tickets",
+                "Live redemption flow",
+                "Team roles and access",
+              ].map((item) => (
+                <li key={item} className="border-t border-[#e6d7c3]/15 py-2">{item}</li>
+              ))}
+            </ul>
+          </div>
 
-            <div className="h-px bg-sera-sand/50" />
-
-            <div>
-              <p className="sera-label text-sera-oxblood mb-3">The Full Stack</p>
-              <h2 className="sera-subheading text-sera-navy text-2xl md:text-3xl mb-4">From first invitation to last call</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-                {[
-                  "Invitation & flyer design",
-                  "Guest-facing event pages",
-                  "Guest list & RSVP management",
-                  "Digital drink tickets",
-                  "QR & NFC check-in",
-                  "Drink ticket redemption",
-                  "Organizer dashboard",
-                  "Staff roles & permissions",
-                ].map((item) => (
-                  <div key={item} className="flex items-center gap-3 p-3 border border-sera-sand/40 bg-sera-ivory/50">
-                    <div className="w-1.5 h-1.5 rounded-full bg-sera-oxblood flex-shrink-0" />
-                    <span className="sera-body text-sera-navy text-sm">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="h-px bg-sera-sand/50" />
-
-            <div>
-              <p className="sera-label text-sera-oxblood mb-3">Our Approach</p>
-              <h2 className="sera-subheading text-sera-navy text-2xl md:text-3xl mb-4">Premium by default</h2>
-              <p className="sera-body text-sera-warm-grey">
-                We believe event technology should match the standards of the events it powers. That means editorial-quality 
-                design, mobile-first usability, and operational tools that work under pressure — on the night, in the venue, 
-                with hundreds of guests walking through the door. Sera is built for the real conditions of event night, 
-                not just the planning phase.
-              </p>
-            </div>
-          </motion.div>
-
-          <motion.div
-            className="mt-16 text-center"
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <Button variant="sera" size="lg" asChild>
-              <Link to="/request-access">Request Access</Link>
-            </Button>
-          </motion.div>
-        </div>
-      </section>
-      <Footer />
-    </div>
+          <Button asChild className="sera-landing-btn sera-landing-btn--primary h-11 rounded-none px-6 py-0 text-[0.72rem]">
+            <Link to="/request-access">Request access</Link>
+          </Button>
+        </SeraContainer>
+      </SeraSection>
+    </SeraLayout>
   );
 }

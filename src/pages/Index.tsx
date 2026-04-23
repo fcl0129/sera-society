@@ -1,8 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
-import { AmbientBackground } from "@/components/sera/ambient-background";
-import { SiteHeader } from "@/components/sera/site-header";
+import { SeraLayout } from "@/components/sera/layout";
 
 const sections = [
   {
@@ -31,9 +30,8 @@ const sectionMotion = {
 
 export default function Index() {
   return (
-    <AmbientBackground className="min-h-screen">
-      <SiteHeader />
-      <motion.main
+    <SeraLayout showFooter={false}>
+      <motion.div
         id="main-content"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -113,7 +111,7 @@ export default function Index() {
             </Link>
           </div>
         </motion.section>
-      </motion.main>
-    </AmbientBackground>
+      </motion.div>
+    </SeraLayout>
   );
 }
