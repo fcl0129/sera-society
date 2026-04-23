@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { HamburgerMenuIcon } from "@radix-ui/react-icons";
+import { Menu } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -86,7 +86,7 @@ export function SiteHeader() {
               className="inline-flex h-10 w-10 items-center justify-center border border-[#e5d5c0]/35 text-[#f2e8da] md:hidden"
               aria-label="Open navigation"
             >
-              <HamburgerMenuIcon className="h-5 w-5" />
+              <Menu className="h-5 w-5" strokeWidth={1.5} />
             </button>
           </PopoverTrigger>
           <PopoverContent
