@@ -188,7 +188,7 @@ export default function AdminAccessRequests() {
                     <h2 className="font-serif text-sera-navy text-xl">{request.name}</h2>
                     <p className="text-sm text-sera-warm-grey">{request.email}</p>
                     <p className="text-xs text-sera-stone mt-1">
-                      {new Date(request.created_at).toLocaleString("sv-SE")}
+                      {new Date(request.created_at).toLocaleString()}
                     </p>
                   </div>
                   <p className="text-xs uppercase tracking-wider text-sera-oxblood">
