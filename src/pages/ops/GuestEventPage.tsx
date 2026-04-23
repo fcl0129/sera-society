@@ -181,13 +181,31 @@ export default function GuestEventPage() {
               <InfoTile icon={<ScanLine className="h-4 w-4" />} title="Redemption" text="Use your ticket for drinks/items where enabled." cardStyle={theme.cardStyle} />
             </section>
 
+            {events.length > 1 && (
+              <section className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--event-accent)]/30 bg-[var(--event-background)]/30 p-2">
+                <span className="px-1 text-[10px] uppercase tracking-[0.22em] text-[var(--event-text-secondary)]">
+                  Your events
+                </span>
+                {events.map((ev) => (
+                  <Button
+                    key={ev.id}
+                    size="sm"
+                    variant={ev.id === event.id ? "sera" : "sera-outline"}
+                    onClick={() => setSelectedEventId(ev.id)}
+                  >
+                    {ev.title}
+                  </Button>
+                ))}
+              </section>
+            )}
+
             <section className="space-y-3">
               <div className="flex items-baseline justify-between">
                 <p className="text-xs uppercase tracking-[0.22em] text-[var(--event-text-secondary)]">Your tickets</p>
-                <p className="text-xs text-[var(--event-text-secondary)]">{tickets.length} total</p>
+                <p className="text-xs text-[var(--event-text-secondary)]">{eventTickets.length} total</p>
               </div>
               <div className="space-y-3">
-                {tickets.map((ticket, idx) => (
+                {eventTickets.map((ticket, idx) => (
                   <WalletTicket
                     key={ticket.id}
                     ticket={ticket}
@@ -200,6 +218,11 @@ export default function GuestEventPage() {
                     headingFont={theme.fontHeading}
                   />
                 ))}
+                {eventTickets.length === 0 && (
+                  <p className="text-sm text-[var(--event-text-secondary)]">
+                    No tickets issued for this event yet.
+                  </p>
+                )}
               </div>
             </section>
           </>
