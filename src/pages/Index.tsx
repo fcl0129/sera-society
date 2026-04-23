@@ -1,78 +1,119 @@
+import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
 import { AmbientBackground } from "@/components/sera/ambient-background";
 import { SiteHeader } from "@/components/sera/site-header";
 
-const pillars = [
+const sections = [
   {
-    title: "Invitations with presence",
-    copy: "Editorial invitations and private event pages that communicate mood before anyone arrives.",
+    label: "Before the evening",
+    title: "Set expectation before the first arrival.",
+    copy: "From the first note to final confirmation, every touchpoint carries the same tone so guests arrive already in rhythm.",
   },
   {
-    title: "Guests handled with calm",
-    copy: "Approvals, circles, and notes in one quiet flow so every entrance feels expected.",
+    label: "At the door",
+    title: "A calm entrance changes the room.",
+    copy: "Approvals, list flow, and service cues stay precise and discreet, so welcome feels personal even at peak pace.",
   },
   {
-    title: "Service that stays discreet",
-    copy: "QR and NFC ticket redemption built for bars and floor teams without interrupting the room.",
+    label: "Through the night",
+    title: "Control the pace without showing control.",
+    copy: "Keep the evening moving with quiet precision while atmosphere, conversation, and timing remain uninterrupted.",
   },
 ] as const;
+
+const sectionMotion = {
+  initial: { opacity: 0, y: 10 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, amount: 0.35 },
+  transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const },
+};
 
 export default function Index() {
   return (
     <AmbientBackground className="min-h-screen">
       <SiteHeader />
-      <main id="main-content" className="px-6 pb-24 pt-32 md:px-10 md:pt-40">
+      <motion.main
+        id="main-content"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        className="px-6 pb-28 pt-32 md:px-10 md:pb-36 md:pt-44"
+      >
         <section className="mx-auto max-w-6xl">
-          <p className="max-w-xl text-[0.66rem] uppercase tracking-[0.32em] text-[#decfbf]/75">
+          <motion.p
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.03 }}
+            className="max-w-xl text-[0.66rem] uppercase tracking-[0.3em] text-[#decfbf]/76"
+          >
             Sera Society · Private Event Hosting
-          </p>
-          <h1 className="mt-7 max-w-5xl font-display text-[clamp(2.9rem,8.4vw,7.2rem)] leading-[0.9] tracking-[-0.02em] text-[#f4eadb]">
-            Evenings remembered for how they felt, not how they were managed.
-          </h1>
-          <p className="mt-8 max-w-2xl text-[1.05rem] leading-relaxed text-[#d8cbba] md:ml-16 md:text-[1.15rem]">
-            Sera Society is a curated hosting platform for invitation-led gatherings, where guest flow, check-in, and drink ticket
-            service are designed to disappear into the atmosphere of the night.
-          </p>
-          <div className="mt-10 flex flex-wrap gap-3 md:ml-16">
-            <Link
-              to="/request-access"
-              className="inline-flex h-11 items-center border border-[#f4e6d2]/70 bg-[#efe2cf] px-6 text-[0.74rem] uppercase tracking-[0.18em] text-[#2b2320] transition hover:bg-[#f6ecdc]"
-            >
+          </motion.p>
+          {/* Hero headline options:
+            1) Host something worth remembering.
+            2) Nothing memorable is ever accidental.
+            3) Details make the evening.
+            4) Some events deserve more than planning.
+            5) The night should feel considered from the first word.
+          */}
+          <motion.h1
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+            className="mt-7 max-w-5xl font-display text-[clamp(3rem,8.2vw,7.1rem)] leading-[0.88] tracking-[-0.026em] text-[#f4eadb]"
+          >
+            Nothing memorable is ever accidental.
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.48, delay: 0.14 }}
+            className="mt-8 max-w-xl text-[1.02rem] leading-[1.72] text-[#d8ccbc] md:ml-16 md:text-[1.1rem]"
+          >
+            Invitations, guests, and details — handled with intention.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.44, delay: 0.18 }}
+            className="mt-11 flex flex-wrap gap-3 md:ml-16"
+          >
+            <Link to="/request-access" className="sera-landing-btn sera-landing-btn--primary">
               Request access
             </Link>
-            <Link
-              to="/platform"
-              className="inline-flex h-11 items-center border border-[#e4d5c2]/35 bg-[#f2e5d4]/5 px-6 text-[0.74rem] uppercase tracking-[0.18em] text-[#f2e8da] transition hover:bg-[#f1e4d2]/12"
-            >
-              Explore the platform
+            <Link to="/platform" className="sera-landing-btn sera-landing-btn--secondary">
+              View the experience
             </Link>
-          </div>
+          </motion.div>
         </section>
 
-        <section className="mx-auto mt-24 max-w-6xl border-y border-[#eadbc8]/15 py-16 md:mt-28 md:py-20">
-          <div className="grid gap-14 md:grid-cols-3 md:gap-10">
-            {pillars.map((pillar) => (
-              <article key={pillar.title} className="space-y-4">
-                <h2 className="font-display text-[2rem] leading-[0.92] tracking-[-0.015em] text-[#efe4d3]">{pillar.title}</h2>
-                <p className="text-sm leading-relaxed text-[#d6c9b8] md:text-base">{pillar.copy}</p>
+        <motion.section {...sectionMotion} className="mx-auto mt-28 max-w-6xl border-y border-[#eadbc8]/14 py-20 md:mt-32 md:py-24">
+          <div className="grid gap-14 md:gap-10">
+            {sections.map((section) => (
+              <article key={section.label} className="grid gap-4 md:grid-cols-[0.24fr_1fr] md:gap-10">
+                <p className="pt-1 text-[0.63rem] uppercase tracking-[0.28em] text-[#d8cab9]/65">{section.label}</p>
+                <div className="space-y-4">
+                  <h2 className="max-w-3xl font-display text-[clamp(1.95rem,4.5vw,3.8rem)] leading-[0.93] tracking-[-0.02em] text-[#eee4d5]">
+                    {section.title}
+                  </h2>
+                  <p className="max-w-2xl text-[0.98rem] leading-[1.76] text-[#d3c6b5] md:text-[1.04rem]">{section.copy}</p>
+                </div>
               </article>
             ))}
           </div>
-        </section>
+        </motion.section>
 
-        <section className="mx-auto mt-20 grid max-w-6xl gap-8 md:mt-24 md:grid-cols-[1.2fr_auto] md:items-end">
-          <h2 className="max-w-4xl font-display text-[clamp(2.2rem,5.8vw,5rem)] leading-[0.9] tracking-[-0.02em] text-[#2f2522]">
-            A quieter, more intentional way to host invitations, arrivals, and the moments in between.
-          </h2>
-          <Link
-            to="/contact"
-            className="inline-flex h-11 items-center justify-center border border-[#5f4a42]/40 px-6 text-[0.72rem] uppercase tracking-[0.2em] text-[#44342f] transition hover:bg-[#fff7ec]/35"
-          >
-            Speak with our team
-          </Link>
-        </section>
-      </main>
+        <motion.section {...sectionMotion} className="mx-auto mt-24 max-w-6xl md:mt-28">
+          <div className="grid gap-8 border-t border-[#e3d4bf]/22 pt-11 md:grid-cols-[1.18fr_auto] md:items-end md:gap-12">
+            <h2 className="max-w-4xl font-display text-[clamp(2.2rem,5.6vw,5rem)] leading-[0.9] tracking-[-0.024em] text-[#2b221f]">
+              Built for evenings that matter, and hosts who notice every detail.
+            </h2>
+            <Link to="/contact" className="sera-landing-btn sera-landing-btn--tertiary self-start md:self-auto">
+              Speak with our team
+            </Link>
+          </div>
+        </motion.section>
+      </motion.main>
     </AmbientBackground>
   );
 }

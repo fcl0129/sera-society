@@ -39,7 +39,7 @@ export function SiteHeader() {
             : "border-[#efe3d2]/10 bg-[#101827]/38 backdrop-blur-md",
         )}
       >
-        <Link to="/" className="flex items-baseline gap-2 text-[#f1e5d5]">
+        <Link to="/" className="flex items-baseline gap-2 text-[#f1e5d5] transition-opacity duration-200 hover:opacity-90">
           <span className="font-display text-[1.5rem] leading-none tracking-[-0.02em] md:text-[1.75rem]">Sera</span>
           <span className="text-[0.63rem] uppercase tracking-[0.34em] text-[#d8cab7]/78">Society</span>
         </Link>
@@ -53,11 +53,17 @@ export function SiteHeader() {
                 to={item.href}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "text-[0.8rem] uppercase tracking-[0.17em] transition-colors duration-200",
+                  "group relative text-[0.78rem] uppercase tracking-[0.17em] transition-colors duration-200",
                   isActive ? "text-[#f4e7d4]" : "text-[#d8ccbc]/82 hover:text-[#f4e7d4]",
                 )}
               >
                 {item.label}
+                <span
+                  className={cn(
+                    "absolute -bottom-1 left-0 h-px w-full origin-left bg-[#efdfca]/80 transition-transform duration-300 ease-out",
+                    isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
+                  )}
+                />
               </Link>
             );
           })}
@@ -67,13 +73,13 @@ export function SiteHeader() {
           <Button
             asChild
             variant="ghost"
-            className="h-10 rounded-none border border-[#e5d5c0]/35 px-5 text-[0.72rem] uppercase tracking-[0.16em] text-[#f3e9db] hover:bg-[#efe1cf]/12"
+            className="h-10 rounded-none border border-[#e5d5c0]/35 px-5 text-[0.7rem] font-medium uppercase tracking-[0.18em] text-[#f3e9db] transition-all duration-200 hover:scale-[1.01] hover:bg-[#efe1cf]/10"
           >
             <Link to="/platform">View the experience</Link>
           </Button>
           <Button
             asChild
-            className="h-10 rounded-none border border-[#f6e8d1]/70 bg-[#efe2cf] px-5 text-[0.72rem] uppercase tracking-[0.16em] text-[#281f1c] hover:bg-[#f5ead9]"
+            className="h-10 rounded-none border border-[#f6e8d1]/70 bg-[#efe2cf] px-5 text-[0.7rem] font-medium uppercase tracking-[0.18em] text-[#281f1c] transition-all duration-200 hover:scale-[1.01] hover:bg-[#f4e8d7]"
           >
             <Link to="/request-access">Request access</Link>
           </Button>
@@ -83,7 +89,7 @@ export function SiteHeader() {
           <PopoverTrigger asChild>
             <button
               type="button"
-              className="inline-flex h-10 w-10 items-center justify-center border border-[#e5d5c0]/35 text-[#f2e8da] md:hidden"
+              className="inline-flex h-10 w-10 items-center justify-center border border-[#e5d5c0]/35 text-[#f2e8da] transition-colors duration-200 hover:bg-[#ecdfcc]/10 md:hidden"
               aria-label="Open navigation"
             >
               <Menu className="h-5 w-5" strokeWidth={1.5} />
@@ -100,7 +106,7 @@ export function SiteHeader() {
                   key={item.href}
                   to={item.href}
                   onClick={() => setMenuOpen(false)}
-                  className="block border-b border-[#e4d6c2]/20 py-3 text-[0.76rem] uppercase tracking-[0.2em] text-[#eaddcc]/86"
+                  className="block border-b border-[#e4d6c2]/20 py-3 text-[0.76rem] uppercase tracking-[0.2em] text-[#eaddcc]/86 transition-colors duration-200 hover:text-[#f3e8da]"
                 >
                   {item.label}
                 </Link>
@@ -110,7 +116,7 @@ export function SiteHeader() {
               <Button
                 asChild
                 variant="ghost"
-                className="h-10 rounded-none border border-[#e5d5c0]/30 text-[0.72rem] uppercase tracking-[0.16em] text-[#f2e7d6] hover:bg-[#ecdfcd]/12"
+                className="h-10 rounded-none border border-[#e5d5c0]/30 text-[0.72rem] uppercase tracking-[0.16em] text-[#f2e7d6] transition-all duration-200 hover:bg-[#ecdfcd]/12"
               >
                 <Link to="/platform" onClick={() => setMenuOpen(false)}>
                   View the experience
@@ -118,7 +124,7 @@ export function SiteHeader() {
               </Button>
               <Button
                 asChild
-                className="h-10 rounded-none border border-[#f6e8d1]/70 bg-[#efe2cf] text-[0.72rem] uppercase tracking-[0.16em] text-[#281f1c] hover:bg-[#f5ead9]"
+                className="h-10 rounded-none border border-[#f6e8d1]/70 bg-[#efe2cf] text-[0.72rem] uppercase tracking-[0.16em] text-[#281f1c] transition-all duration-200 hover:bg-[#f5ead9]"
               >
                 <Link to="/request-access" onClick={() => setMenuOpen(false)}>
                   Request access

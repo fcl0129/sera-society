@@ -308,6 +308,69 @@
     background: hsl(var(--sera-ivory-paper) / 0.66);
   }
 
+
+  .sera-landing-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.8rem;
+    border: 1px solid transparent;
+    padding: 0.72rem 1.36rem;
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.17em;
+    transition:
+      transform var(--motion-fast) var(--ease-emphasized),
+      opacity var(--motion-fast) var(--ease-standard),
+      background-color var(--motion-fast) var(--ease-standard),
+      border-color var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard),
+      box-shadow var(--motion-fast) var(--ease-standard);
+    will-change: transform;
+  }
+
+  .sera-landing-btn:hover {
+    transform: scale(1.015);
+  }
+
+  .sera-landing-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 1px rgba(245, 232, 216, 0.65);
+  }
+
+  .sera-landing-btn--primary {
+    border-color: rgba(247, 233, 214, 0.68);
+    background: #efe2cf;
+    color: #281f1c;
+  }
+
+  .sera-landing-btn--primary:hover {
+    background: #f4e8d8;
+  }
+
+  .sera-landing-btn--secondary {
+    border-color: rgba(226, 211, 192, 0.4);
+    background: rgba(242, 229, 212, 0.06);
+    color: #f1e7d8;
+  }
+
+  .sera-landing-btn--secondary:hover {
+    background: rgba(242, 229, 212, 0.12);
+    border-color: rgba(232, 217, 198, 0.5);
+  }
+
+  .sera-landing-btn--tertiary {
+    border-color: rgba(98, 78, 68, 0.34);
+    color: #44342f;
+    background: rgba(255, 248, 236, 0.1);
+  }
+
+  .sera-landing-btn--tertiary:hover {
+    background: rgba(255, 247, 235, 0.28);
+  }
+
   .landing-editorial h1,
   .landing-editorial h2,
   .landing-editorial h3 {
