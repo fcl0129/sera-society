@@ -9,11 +9,54 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { LogOut, Plus, Calendar, Users, Ticket, ScanLine, Trash2, Mail, Link2, Pencil, Check, X, Clock, Ban } from "lucide-react";
+import { LogOut, Plus, Calendar, Users, Ticket, ScanLine, Trash2, Mail, Link2, Pencil, Check, X, Clock, Ban, Send } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { CreateEventFlow } from "@/components/organizer/CreateEventFlow";
 
 const fmt = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+const fmtFull = new Intl.DateTimeFormat(undefined, {
+  weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit",
+});
+
+const buildRsvpUrl = (token: string) =>
+  `${window.location.origin}/rsvp/${encodeURIComponent(token)}`;
+
+/**
+ * Best-effort send of the branded invitation email via the send-sera-email edge function.
+ * Failures do NOT block guest creation — organizer always has the manual "copy RSVP link" fallback.
+ */
+async function sendInvitationEmail(args: {
+  to: string;
+  rsvpUrl: string;
+  eventTitle: string;
+  startsAt: string;
+  venue: string | null;
+  hostName: string | null;
+}): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const { data, error } = await supabase.functions.invoke("send-sera-email", {
+      body: {
+        template: "invitation",
+        to: args.to,
+        data: {
+          event_title: args.eventTitle,
+          event_date: fmtFull.format(new Date(args.startsAt)),
+          venue: args.venue ?? "",
+          rsvp_url: args.rsvpUrl,
+          host_name: args.hostName ?? "Your host",
+          app_url: window.location.origin,
+        },
+      },
+    });
+    if (error) return { ok: false, error: error.message };
+    if (data && typeof data === "object" && "error" in data && (data as any).error) {
+      return { ok: false, error: String((data as any).error) };
+    }
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Unknown error" };
+  }
+}
 
 type EventRow = {
   id: string;
@@ -166,7 +209,7 @@ export default function HostAdminDashboard() {
     if (!currentEventId || !guestEmail.trim()) return;
     setAddingGuest(true);
     const email = guestEmail.trim().toLowerCase();
-    const { error } = await (supabase as any)
+    const { data: inserted, error } = await (supabase as any)
       .from("event_guests")
       .insert({
         event_id: currentEventId,
@@ -174,18 +217,60 @@ export default function HostAdminDashboard() {
         full_name: guestName.trim() || null,
         phone_number: guestPhone.trim() || null,
         plus_one_allowed: guestPlusOne,
-      });
-    if (!error) {
+      })
+      .select("id, rsvp_token, invited_email, full_name")
+      .single();
+    if (!error && inserted && currentEvent) {
       setGuestEmail(""); setGuestName(""); setGuestPhone(""); setGuestPlusOne(false);
       await qc.invalidateQueries({ queryKey: ["org-guests", currentEventId] });
-      toast({ title: "Guest added", description: email });
-    } else {
+
+      // Best-effort branded invitation email. Manual "copy RSVP link" remains as fallback.
+      const rsvpUrl = buildRsvpUrl(inserted.rsvp_token);
+      const sendResult = await sendInvitationEmail({
+        to: email,
+        rsvpUrl,
+        eventTitle: currentEvent.title,
+        startsAt: currentEvent.starts_at,
+        venue: currentEvent.venue,
+        hostName: fullName ?? null,
+      });
+      if (sendResult.ok) {
+        toast({ title: "Guest added", description: `Invitation sent to ${email}` });
+      } else {
+        toast({
+          title: "Guest added — email not sent",
+          description: `Use the copy-link icon to share manually. (${sendResult.error ?? "send failed"})`,
+        });
+      }
+    } else if (error) {
       const msg = error.code === "23505"
         ? "This email is already on the guest list for this event."
         : error.message;
       toast({ title: "Could not add guest", description: msg, variant: "destructive" });
     }
     setAddingGuest(false);
+  };
+
+  const resendInvitation = async (g: GuestRow) => {
+    if (!currentEvent) return;
+    const rsvpUrl = buildRsvpUrl(g.rsvp_token);
+    const result = await sendInvitationEmail({
+      to: g.invited_email,
+      rsvpUrl,
+      eventTitle: currentEvent.title,
+      startsAt: currentEvent.starts_at,
+      venue: currentEvent.venue,
+      hostName: fullName ?? null,
+    });
+    if (result.ok) {
+      toast({ title: "Invitation resent", description: g.invited_email });
+    } else {
+      toast({
+        title: "Could not resend invitation",
+        description: result.error ?? "Try the copy-link icon as a fallback.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleRemoveGuest = async (guestRowId: string) => {
