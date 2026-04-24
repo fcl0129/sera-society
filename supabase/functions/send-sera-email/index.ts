@@ -82,16 +82,21 @@ function render(template: TemplateName, data: Record<string, unknown>): { subjec
       const eventTitle = String(data.event_title ?? "your evening");
       const eventDate = String(data.event_date ?? "");
       const venue = String(data.venue ?? "");
-      const url = String(data.app_url ?? "https://sera-society.lovable.app") + "/login";
+      const appUrl = String(data.app_url ?? "https://sera-society.lovable.app");
+      // Prefer a direct RSVP link (with token) when provided. Fall back to /login.
+      const rsvpUrl = data.rsvp_url ? String(data.rsvp_url) : `${appUrl}/login`;
+      const hostName = data.host_name ? String(data.host_name) : "Your host";
       return {
-        subject: `You&rsquo;re invited: ${eventTitle}`,
+        subject: `You're invited: ${eventTitle}`,
         html: wrap(`
           <p class="label">Invitation</p>
           <h1>${eventTitle}</h1>
           ${eventDate ? `<p><strong>${eventDate}</strong></p>` : ""}
           ${venue ? `<p>${venue}</p>` : ""}
-          <p>Your host has reserved a place for you. Sign in to view your evening, your access, and your service.</p>
-          <a class="btn" href="${url}">Open your invitation</a>
+          <p>${hostName} has reserved a place for you. Tap below to RSVP &mdash; no account required.</p>
+          <a class="btn" href="${rsvpUrl}">RSVP now</a>
+          <hr class="rule" />
+          <p style="font-size:12px;color:#8a8478;">If the button doesn&rsquo;t work, copy this link into your browser:<br><span style="word-break:break-all;">${rsvpUrl}</span></p>
         `),
       };
     }
