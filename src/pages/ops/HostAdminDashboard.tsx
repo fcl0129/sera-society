@@ -639,6 +639,14 @@ export default function HostAdminDashboard() {
                                 <Link2 className="w-4 h-4" />
                               </button>
                               <button
+                                onClick={() => void resendInvitation(g)}
+                                className="p-1.5 text-sera-warm-grey hover:text-sera-navy"
+                                aria-label="Resend invitation email"
+                                title="Resend invitation email"
+                              >
+                                <Send className="w-4 h-4" />
+                              </button>
+                              <button
                                 onClick={() => {
                                   setEditingGuestId(g.id);
                                   setEditForm({
