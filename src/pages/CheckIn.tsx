@@ -7,6 +7,7 @@ import { SeraPageHeader } from "@/components/sera/page-header";
 import { SeraSection } from "@/components/sera/section";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 interface EventRow { id: string; title: string; starts_at: string }
 interface GuestRow { id: string; full_name: string | null; invited_email: string; rsvp_status: string }
@@ -18,15 +19,27 @@ export default function CheckIn() {
   const [guests, setGuests] = useState<GuestRow[]>([]);
   const [checkins, setCheckins] = useState<Record<string, string>>({});
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [loadingEvents, setLoadingEvents] = useState(true);
+  const [loadingGuests, setLoadingGuests] = useState(false);
 
   const selectedEvent = events.find((e) => e.id === selectedEventId);
 
   useEffect(() => {
     void (async () => {
+      setLoadingEvents(true);
       const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) return setErrorMessage("Sign in required.");
+      if (!userData.user) {
+        setErrorMessage("Sign in required.");
+        setLoadingEvents(false);
+        return;
+      }
       const { data, error } = await (supabase as any).from("events").select("id,title,starts_at").order("starts_at", { ascending: true });
-      if (error) return setErrorMessage("Could not load events.");
+      setLoadingEvents(false);
+      if (error) {
+        setErrorMessage("Could not load events.");
+        toast({ title: "Could not load events", description: error.message, variant: "destructive" });
+        return;
+      }
       const list = (data ?? []) as EventRow[];
       setEvents(list);
       if (list[0]) setSelectedEventId(list[0].id);
@@ -36,11 +49,19 @@ export default function CheckIn() {
   useEffect(() => {
     if (!selectedEventId) return;
     void (async () => {
+      setLoadingGuests(true);
+      setErrorMessage(null);
       const [guestsRes, checkinsRes] = await Promise.all([
         (supabase as any).from("event_guests").select("id,full_name,invited_email,rsvp_status").eq("event_id", selectedEventId).order("full_name", { ascending: true }),
         (supabase as any).from("checkins").select("id,guest_id").eq("event_id", selectedEventId),
       ]);
-      if (guestsRes.error || checkinsRes.error) return setErrorMessage("Could not load guests.");
+      setLoadingGuests(false);
+      if (guestsRes.error || checkinsRes.error) {
+        const msg = guestsRes.error?.message ?? checkinsRes.error?.message ?? "Unknown error";
+        setErrorMessage("Could not load guests.");
+        toast({ title: "Could not load guests", description: msg, variant: "destructive" });
+        return;
+      }
       setGuests((guestsRes.data ?? []) as GuestRow[]);
       const map: Record<string, string> = {};
       ((checkinsRes.data ?? []) as CheckinRow[]).forEach((row) => { map[row.guest_id] = row.id; });
@@ -53,13 +74,21 @@ export default function CheckIn() {
     const existing = checkins[guestId];
     if (existing) {
       const { error } = await (supabase as any).from("checkins").delete().eq("id", existing);
-      if (error) return setErrorMessage("Could not undo check-in.");
+      if (error) {
+        setErrorMessage("Could not undo check-in.");
+        toast({ title: "Could not undo check-in", description: error.message, variant: "destructive" });
+        return;
+      }
       setCheckins((prev) => { const next = { ...prev }; delete next[guestId]; return next; });
       return;
     }
     const { data: userData } = await supabase.auth.getUser();
     const { data, error } = await (supabase as any).from("checkins").insert({ event_id: selectedEventId, guest_id: guestId, checked_in_by: userData.user?.id ?? null }).select("id,guest_id").single();
-    if (error || !data) return setErrorMessage("Could not check in guest.");
+    if (error || !data) {
+      setErrorMessage("Could not check in guest.");
+      toast({ title: "Check-in failed", description: error?.message ?? "Unknown error", variant: "destructive" });
+      return;
+    }
     setCheckins((prev) => ({ ...prev, [data.guest_id]: data.id }));
   };
 
@@ -89,7 +118,13 @@ export default function CheckIn() {
 
           <section className="space-y-2 border-t border-[#e7d8c4]/20 pt-6 text-[#d7cab8]">
             <h2 className="font-display text-3xl text-[#f1e6d7]">{selectedEvent ? `Guests · ${selectedEvent.title}` : "Guests"}</h2>
-            {guests.length === 0 ? <p>No guests to display.</p> : guests.map((guest) => (
+            {loadingEvents || loadingGuests ? (
+              <p className="opacity-70">Loading…</p>
+            ) : !selectedEventId ? (
+              <p className="opacity-70">Select an event to view its guest list.</p>
+            ) : guests.length === 0 ? (
+              <p>No guests to display.</p>
+            ) : guests.map((guest) => (
               <div key={guest.id} className="flex items-center justify-between gap-3 border-t border-[#e7d8c4]/15 py-3">
                 <div>
                   <p className="text-[#f0e5d5]">{guest.full_name ?? guest.invited_email}</p>
