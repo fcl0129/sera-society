@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { LogOut, Plus, Calendar, Users, Ticket, ScanLine, Trash2, Mail, Link2, Pencil, Check, X, Clock, Ban, Send } from "lucide-react";
+import { LogOut, Plus, Calendar, Users, Ticket, ScanLine, Trash2, Mail, Link2, Pencil, Check, X, Clock, Ban, Send, Wallet } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { CreateEventFlow } from "@/components/organizer/CreateEventFlow";
 
@@ -28,6 +28,7 @@ const buildRsvpUrl = (token: string) =>
 async function sendInvitationEmail(args: {
   to: string;
   rsvpUrl: string;
+  passUrl: string;
   eventTitle: string;
   startsAt: string;
   venue: string | null;
@@ -43,6 +44,7 @@ async function sendInvitationEmail(args: {
           event_date: fmtFull.format(new Date(args.startsAt)),
           venue: args.venue ?? "",
           rsvp_url: args.rsvpUrl,
+          pass_url: args.passUrl,
           host_name: args.hostName ?? "Your host",
           app_url: window.location.origin,
         },
@@ -91,6 +93,7 @@ type TicketRow = {
   guest_id: string | null;
   redeemed_at: string | null;
   token: string;
+  event_guest_id: string | null;
 };
 
 export default function HostAdminDashboard() {
@@ -145,7 +148,7 @@ export default function HostAdminDashboard() {
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from("drink_tickets")
-        .select("id,status,guest_id,redeemed_at,token")
+        .select("id,status,guest_id,redeemed_at,token,event_guest_id")
         .eq("event_id", currentEventId);
       if (error) throw error;
       return (data ?? []) as TicketRow[];
@@ -165,17 +168,33 @@ export default function HostAdminDashboard() {
     };
   }, [guestsQuery.data, ticketsQuery.data]);
 
-  // Map guest_id (auth uid) → tickets for quick lookup in the guest table.
-  const ticketsByGuest = useMemo(() => {
+  // Map by event_guest_id (preferred, account-agnostic) AND fall back to
+  // guest_id (auth uid) for legacy tickets that pre-date event_guest_id.
+  const ticketsByEventGuest = useMemo(() => {
     const map = new Map<string, TicketRow[]>();
     for (const t of ticketsQuery.data ?? []) {
-      if (!t.guest_id) continue;
+      if (!t.event_guest_id) continue;
+      const arr = map.get(t.event_guest_id) ?? [];
+      arr.push(t);
+      map.set(t.event_guest_id, arr);
+    }
+    return map;
+  }, [ticketsQuery.data]);
+  const ticketsByGuestUid = useMemo(() => {
+    const map = new Map<string, TicketRow[]>();
+    for (const t of ticketsQuery.data ?? []) {
+      if (!t.guest_id || t.event_guest_id) continue;
       const arr = map.get(t.guest_id) ?? [];
       arr.push(t);
       map.set(t.guest_id, arr);
     }
     return map;
   }, [ticketsQuery.data]);
+  const ticketsForGuest = (g: GuestRow): TicketRow[] => {
+    const a = ticketsByEventGuest.get(g.id) ?? [];
+    const b = g.guest_id ? ticketsByGuestUid.get(g.guest_id) ?? [] : [];
+    return [...a, ...b];
+  };
 
   const handleEventCreated = async (eventId: string) => {
     setShowCreate(false);
@@ -226,9 +245,11 @@ export default function HostAdminDashboard() {
 
       // Best-effort branded invitation email. Manual "copy RSVP link" remains as fallback.
       const rsvpUrl = buildRsvpUrl(inserted.rsvp_token);
+      const passUrl = `${window.location.origin}/pass/${encodeURIComponent(inserted.rsvp_token)}`;
       const sendResult = await sendInvitationEmail({
         to: email,
         rsvpUrl,
+        passUrl,
         eventTitle: currentEvent.title,
         startsAt: currentEvent.starts_at,
         venue: currentEvent.venue,
@@ -254,9 +275,11 @@ export default function HostAdminDashboard() {
   const resendInvitation = async (g: GuestRow) => {
     if (!currentEvent) return;
     const rsvpUrl = buildRsvpUrl(g.rsvp_token);
+    const passUrl = `${window.location.origin}/pass/${encodeURIComponent(g.rsvp_token)}`;
     const result = await sendInvitationEmail({
       to: g.invited_email,
       rsvpUrl,
+      passUrl,
       eventTitle: currentEvent.title,
       startsAt: currentEvent.starts_at,
       venue: currentEvent.venue,
@@ -321,17 +344,15 @@ export default function HostAdminDashboard() {
 
   const issueTicketForGuest = async (g: GuestRow) => {
     if (!currentEventId) return;
-    if (!g.guest_id) {
-      toast({
-        title: "Guest hasn't signed in yet",
-        description: "Tickets can only be issued once the guest has logged in and a profile is linked.",
-        variant: "destructive",
-      });
-      return;
-    }
-    const { error } = await (supabase as any)
-      .from("drink_tickets")
-      .insert({ event_id: currentEventId, guest_id: g.guest_id, status: "active" });
+    // Prefer event_guest_id so accountless guests work too. If the guest has
+    // signed in we still link guest_id for backward compatibility.
+    const row: Record<string, unknown> = {
+      event_id: currentEventId,
+      event_guest_id: g.id,
+      status: "active",
+    };
+    if (g.guest_id) row.guest_id = g.guest_id;
+    const { error } = await (supabase as any).from("drink_tickets").insert(row);
     if (error) {
       toast({ title: "Could not issue ticket", description: error.message, variant: "destructive" });
     } else {
@@ -352,14 +373,24 @@ export default function HostAdminDashboard() {
 
   const issueTicketsToAllAccepted = async () => {
     if (!currentEventId) return;
-    const accepted = (guestsQuery.data ?? []).filter(
-      (g) => g.rsvp_status === "accepted" && g.guest_id && !ticketsByGuest.has(g.guest_id)
-    );
+    const accepted = (guestsQuery.data ?? []).filter((g) => {
+      if (g.rsvp_status !== "accepted") return false;
+      const existing = ticketsForGuest(g).filter((t) => t.status !== "void");
+      return existing.length === 0;
+    });
     if (accepted.length === 0) {
-      toast({ title: "Nothing to issue", description: "All accepted guests with linked accounts already have a ticket." });
+      toast({ title: "Nothing to issue", description: "All accepted guests already have an active ticket." });
       return;
     }
-    const rows = accepted.map((g) => ({ event_id: currentEventId, guest_id: g.guest_id, status: "active" }));
+    const rows = accepted.map((g) => {
+      const r: Record<string, unknown> = {
+        event_id: currentEventId,
+        event_guest_id: g.id,
+        status: "active",
+      };
+      if (g.guest_id) r.guest_id = g.guest_id;
+      return r;
+    });
     const { error } = await (supabase as any).from("drink_tickets").insert(rows);
     if (error) toast({ title: "Bulk issue failed", description: error.message, variant: "destructive" });
     else {
@@ -371,6 +402,15 @@ export default function HostAdminDashboard() {
   const copyTicketToken = (token: string) => {
     navigator.clipboard.writeText(token);
     toast({ title: "Ticket token copied", description: "Paste into the bartender's manual entry to test." });
+  };
+
+  const buildPassUrl = (token: string) =>
+    `${window.location.origin}/pass/${encodeURIComponent(token)}`;
+
+  const copyPassLink = (g: GuestRow) => {
+    const url = buildPassUrl(g.rsvp_token);
+    navigator.clipboard.writeText(url);
+    toast({ title: "Pass link copied", description: url });
   };
 
   // Realtime subscriptions: keep guests + tickets fresh.
@@ -674,49 +714,74 @@ export default function HostAdminDashboard() {
                           </div>
                         )}
                         {!isEditing && (() => {
-                          const guestTickets = g.guest_id ? ticketsByGuest.get(g.guest_id) ?? [] : [];
-                          const activeTicket = guestTickets.find((t) => t.status === "active");
+                          const guestTickets = ticketsForGuest(g);
+                          const activeTickets = guestTickets.filter((t) => t.status === "active");
                           const redeemedCount = guestTickets.filter((t) => t.status === "redeemed").length;
+                          const accepted = g.rsvp_status === "accepted";
                           return (
                             <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-sera-sand/30 pt-2 text-xs">
                               <span className="sera-label text-sera-stone">Drink ticket</span>
-                              {!g.guest_id ? (
-                                <span className="text-sera-warm-grey italic">guest must sign in first</span>
-                              ) : guestTickets.length === 0 ? (
-                                <Button size="sm" variant="sera-outline" onClick={() => issueTicketForGuest(g)}>
+                              {guestTickets.length === 0 ? (
+                                <Button
+                                  size="sm"
+                                  variant="sera-outline"
+                                  onClick={() => issueTicketForGuest(g)}
+                                  disabled={!accepted}
+                                  title={accepted ? "Issue a drink ticket" : "Guest must accept first"}
+                                >
                                   <Ticket className="w-3 h-3 mr-1" /> Issue
                                 </Button>
                               ) : (
                                 <>
-                                  {activeTicket ? (
+                                  {activeTickets.length > 0 ? (
                                     <>
-                                      <Badge variant="outline" className="text-[10px]">active</Badge>
-                                      <button
-                                        onClick={() => copyTicketToken(activeTicket.token)}
-                                        className="text-sera-navy underline-offset-2 hover:underline"
-                                        aria-label="Copy ticket token"
-                                        title="Copy token to test in bartender manual entry"
-                                      >
-                                        copy token
-                                      </button>
-                                      <button
-                                        onClick={() => voidTicket(activeTicket.id)}
-                                        className="p-1 text-sera-warm-grey hover:text-sera-oxblood"
-                                        aria-label="Void ticket"
-                                        title="Void"
-                                      >
-                                        <Ban className="w-3.5 h-3.5" />
-                                      </button>
+                                      <Badge variant="outline" className="text-[10px]">
+                                        {activeTickets.length} active
+                                      </Badge>
+                                      {activeTickets[0] && (
+                                        <>
+                                          <button
+                                            onClick={() => copyTicketToken(activeTickets[0].token)}
+                                            className="text-sera-navy underline-offset-2 hover:underline"
+                                            aria-label="Copy ticket token"
+                                            title="Copy token to test in bartender manual entry"
+                                          >
+                                            copy token
+                                          </button>
+                                          <button
+                                            onClick={() => voidTicket(activeTickets[0].id)}
+                                            className="p-1 text-sera-warm-grey hover:text-sera-oxblood"
+                                            aria-label="Void ticket"
+                                            title="Void"
+                                          >
+                                            <Ban className="w-3.5 h-3.5" />
+                                          </button>
+                                        </>
+                                      )}
                                     </>
-                                  ) : (
-                                    <Button size="sm" variant="sera-outline" onClick={() => issueTicketForGuest(g)}>
-                                      <Ticket className="w-3 h-3 mr-1" /> Issue another
-                                    </Button>
-                                  )}
+                                  ) : null}
+                                  <Button
+                                    size="sm"
+                                    variant="sera-outline"
+                                    onClick={() => issueTicketForGuest(g)}
+                                    disabled={!accepted}
+                                  >
+                                    <Ticket className="w-3 h-3 mr-1" /> Issue another
+                                  </Button>
                                   {redeemedCount > 0 && (
                                     <span className="text-sera-warm-grey">· {redeemedCount} redeemed</span>
                                   )}
                                 </>
+                              )}
+                              {accepted && (
+                                <button
+                                  onClick={() => copyPassLink(g)}
+                                  className="ml-auto inline-flex items-center gap-1 text-sera-navy underline-offset-2 hover:underline"
+                                  aria-label="Copy guest pass link"
+                                  title="Copy guest pass link"
+                                >
+                                  <Wallet className="w-3.5 h-3.5" /> Copy pass link
+                                </button>
                               )}
                             </div>
                           );

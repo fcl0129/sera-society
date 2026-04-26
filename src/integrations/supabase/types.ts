@@ -110,8 +110,9 @@ export type Database = {
       drink_tickets: {
         Row: {
           created_at: string
+          event_guest_id: string | null
           event_id: string
-          guest_id: string
+          guest_id: string | null
           id: string
           redeemed_at: string | null
           redeemed_by: string | null
@@ -121,8 +122,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          event_guest_id?: string | null
           event_id: string
-          guest_id: string
+          guest_id?: string | null
           id?: string
           redeemed_at?: string | null
           redeemed_by?: string | null
@@ -132,8 +134,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          event_guest_id?: string | null
           event_id?: string
-          guest_id?: string
+          guest_id?: string | null
           id?: string
           redeemed_at?: string | null
           redeemed_by?: string | null
@@ -142,6 +145,13 @@ export type Database = {
           token?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "drink_tickets_event_guest_id_fkey"
+            columns: ["event_guest_id"]
+            isOneToOne: false
+            referencedRelation: "event_guests"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "drink_tickets_event_id_fkey"
             columns: ["event_id"]
@@ -821,6 +831,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_guest_pass_by_token: { Args: { _token: string }; Returns: Json }
       get_rsvp_by_token: { Args: { _token: string }; Returns: Json }
       has_role: {
         Args: {
