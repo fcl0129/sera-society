@@ -28,6 +28,7 @@ const buildRsvpUrl = (token: string) =>
 async function sendInvitationEmail(args: {
   to: string;
   rsvpUrl: string;
+  passUrl: string;
   eventTitle: string;
   startsAt: string;
   venue: string | null;
@@ -43,6 +44,7 @@ async function sendInvitationEmail(args: {
           event_date: fmtFull.format(new Date(args.startsAt)),
           venue: args.venue ?? "",
           rsvp_url: args.rsvpUrl,
+          pass_url: args.passUrl,
           host_name: args.hostName ?? "Your host",
           app_url: window.location.origin,
         },
@@ -243,9 +245,11 @@ export default function HostAdminDashboard() {
 
       // Best-effort branded invitation email. Manual "copy RSVP link" remains as fallback.
       const rsvpUrl = buildRsvpUrl(inserted.rsvp_token);
+      const passUrl = `${window.location.origin}/pass/${encodeURIComponent(inserted.rsvp_token)}`;
       const sendResult = await sendInvitationEmail({
         to: email,
         rsvpUrl,
+        passUrl,
         eventTitle: currentEvent.title,
         startsAt: currentEvent.starts_at,
         venue: currentEvent.venue,
@@ -271,9 +275,11 @@ export default function HostAdminDashboard() {
   const resendInvitation = async (g: GuestRow) => {
     if (!currentEvent) return;
     const rsvpUrl = buildRsvpUrl(g.rsvp_token);
+    const passUrl = `${window.location.origin}/pass/${encodeURIComponent(g.rsvp_token)}`;
     const result = await sendInvitationEmail({
       to: g.invited_email,
       rsvpUrl,
+      passUrl,
       eventTitle: currentEvent.title,
       startsAt: currentEvent.starts_at,
       venue: currentEvent.venue,
