@@ -85,6 +85,7 @@ function render(template: TemplateName, data: Record<string, unknown>): { subjec
       const appUrl = String(data.app_url ?? "https://sera-society.lovable.app");
       // Prefer a direct RSVP link (with token) when provided. Fall back to /login.
       const rsvpUrl = data.rsvp_url ? String(data.rsvp_url) : `${appUrl}/login`;
+      const passUrl = data.pass_url ? String(data.pass_url) : "";
       const hostName = data.host_name ? String(data.host_name) : "Your host";
       return {
         subject: `You're invited: ${eventTitle}`,
@@ -95,6 +96,7 @@ function render(template: TemplateName, data: Record<string, unknown>): { subjec
           ${venue ? `<p>${venue}</p>` : ""}
           <p>${hostName} has reserved a place for you. Tap below to RSVP &mdash; no account required.</p>
           <a class="btn" href="${rsvpUrl}">RSVP now</a>
+          ${passUrl ? `<p style="margin-top:18px;font-size:13px;">After you RSVP, your guest pass lives here:<br><a href="${passUrl}" style="color:#1a2332;">View your pass</a></p>` : ""}
           <hr class="rule" />
           <p style="font-size:12px;color:#8a8478;">If the button doesn&rsquo;t work, copy this link into your browser:<br><span style="word-break:break-all;">${rsvpUrl}</span></p>
         `),
