@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { LogOut, Plus, Calendar, Users, Ticket, ScanLine, Trash2, Mail, Link2, Pencil, Check, X, Clock, Ban, Send } from "lucide-react";
+import { LogOut, Plus, Calendar, Users, Ticket, ScanLine, Trash2, Mail, Link2, Pencil, Check, X, Clock, Ban, Send, Wallet } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { CreateEventFlow } from "@/components/organizer/CreateEventFlow";
 
@@ -708,49 +708,74 @@ export default function HostAdminDashboard() {
                           </div>
                         )}
                         {!isEditing && (() => {
-                          const guestTickets = g.guest_id ? ticketsByGuest.get(g.guest_id) ?? [] : [];
-                          const activeTicket = guestTickets.find((t) => t.status === "active");
+                          const guestTickets = ticketsForGuest(g);
+                          const activeTickets = guestTickets.filter((t) => t.status === "active");
                           const redeemedCount = guestTickets.filter((t) => t.status === "redeemed").length;
+                          const accepted = g.rsvp_status === "accepted";
                           return (
                             <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-sera-sand/30 pt-2 text-xs">
                               <span className="sera-label text-sera-stone">Drink ticket</span>
-                              {!g.guest_id ? (
-                                <span className="text-sera-warm-grey italic">guest must sign in first</span>
-                              ) : guestTickets.length === 0 ? (
-                                <Button size="sm" variant="sera-outline" onClick={() => issueTicketForGuest(g)}>
+                              {guestTickets.length === 0 ? (
+                                <Button
+                                  size="sm"
+                                  variant="sera-outline"
+                                  onClick={() => issueTicketForGuest(g)}
+                                  disabled={!accepted}
+                                  title={accepted ? "Issue a drink ticket" : "Guest must accept first"}
+                                >
                                   <Ticket className="w-3 h-3 mr-1" /> Issue
                                 </Button>
                               ) : (
                                 <>
-                                  {activeTicket ? (
+                                  {activeTickets.length > 0 ? (
                                     <>
-                                      <Badge variant="outline" className="text-[10px]">active</Badge>
-                                      <button
-                                        onClick={() => copyTicketToken(activeTicket.token)}
-                                        className="text-sera-navy underline-offset-2 hover:underline"
-                                        aria-label="Copy ticket token"
-                                        title="Copy token to test in bartender manual entry"
-                                      >
-                                        copy token
-                                      </button>
-                                      <button
-                                        onClick={() => voidTicket(activeTicket.id)}
-                                        className="p-1 text-sera-warm-grey hover:text-sera-oxblood"
-                                        aria-label="Void ticket"
-                                        title="Void"
-                                      >
-                                        <Ban className="w-3.5 h-3.5" />
-                                      </button>
+                                      <Badge variant="outline" className="text-[10px]">
+                                        {activeTickets.length} active
+                                      </Badge>
+                                      {activeTickets[0] && (
+                                        <>
+                                          <button
+                                            onClick={() => copyTicketToken(activeTickets[0].token)}
+                                            className="text-sera-navy underline-offset-2 hover:underline"
+                                            aria-label="Copy ticket token"
+                                            title="Copy token to test in bartender manual entry"
+                                          >
+                                            copy token
+                                          </button>
+                                          <button
+                                            onClick={() => voidTicket(activeTickets[0].id)}
+                                            className="p-1 text-sera-warm-grey hover:text-sera-oxblood"
+                                            aria-label="Void ticket"
+                                            title="Void"
+                                          >
+                                            <Ban className="w-3.5 h-3.5" />
+                                          </button>
+                                        </>
+                                      )}
                                     </>
-                                  ) : (
-                                    <Button size="sm" variant="sera-outline" onClick={() => issueTicketForGuest(g)}>
-                                      <Ticket className="w-3 h-3 mr-1" /> Issue another
-                                    </Button>
-                                  )}
+                                  ) : null}
+                                  <Button
+                                    size="sm"
+                                    variant="sera-outline"
+                                    onClick={() => issueTicketForGuest(g)}
+                                    disabled={!accepted}
+                                  >
+                                    <Ticket className="w-3 h-3 mr-1" /> Issue another
+                                  </Button>
                                   {redeemedCount > 0 && (
                                     <span className="text-sera-warm-grey">· {redeemedCount} redeemed</span>
                                   )}
                                 </>
+                              )}
+                              {accepted && (
+                                <button
+                                  onClick={() => copyPassLink(g)}
+                                  className="ml-auto inline-flex items-center gap-1 text-sera-navy underline-offset-2 hover:underline"
+                                  aria-label="Copy guest pass link"
+                                  title="Copy guest pass link"
+                                >
+                                  <Wallet className="w-3.5 h-3.5" /> Copy pass link
+                                </button>
                               )}
                             </div>
                           );
