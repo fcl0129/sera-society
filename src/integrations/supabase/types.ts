@@ -118,6 +118,7 @@ export type Database = {
           redeemed_by: string | null
           redemption_method: string | null
           status: string
+          ticket_code: string | null
           token: string
         }
         Insert: {
@@ -130,6 +131,7 @@ export type Database = {
           redeemed_by?: string | null
           redemption_method?: string | null
           status?: string
+          ticket_code?: string | null
           token?: string
         }
         Update: {
@@ -142,6 +144,7 @@ export type Database = {
           redeemed_by?: string | null
           redemption_method?: string | null
           status?: string
+          ticket_code?: string | null
           token?: string
         }
         Relationships: [
@@ -646,8 +649,9 @@ export type Database = {
       ticket_redemptions: {
         Row: {
           created_at: string
+          event_guest_id: string | null
           event_id: string
-          guest_id: string
+          guest_id: string | null
           id: string
           method: string
           redeemed_by: string | null
@@ -656,8 +660,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          event_guest_id?: string | null
           event_id: string
-          guest_id: string
+          guest_id?: string | null
           id?: string
           method: string
           redeemed_by?: string | null
@@ -666,8 +671,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          event_guest_id?: string | null
           event_id?: string
-          guest_id?: string
+          guest_id?: string | null
           id?: string
           method?: string
           redeemed_by?: string | null
@@ -675,6 +681,13 @@ export type Database = {
           ticket_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ticket_redemptions_event_guest_id_fkey"
+            columns: ["event_guest_id"]
+            isOneToOne: false
+            referencedRelation: "event_guests"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ticket_redemptions_event_id_fkey"
             columns: ["event_id"]
