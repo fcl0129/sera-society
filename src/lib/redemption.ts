@@ -1,5 +1,38 @@
 import { supabase } from "@/integrations/supabase/client";
 
+/**
+ * Normalize a raw scanner value (QR/NFC/manual) into a ticket token string.
+ * Accepts:
+ *  - raw token text
+ *  - URLs containing /pass/:token
+ *  - URLs with ?token=... or ?ticket=...
+ */
+export function normalizeScannedTicketValue(value: string | null | undefined): string {
+  if (!value) return "";
+  const trimmed = String(value).trim();
+  if (!trimmed) return "";
+
+  // Try URL parse
+  try {
+    const url = new URL(trimmed);
+    const qsToken = url.searchParams.get("token") ?? url.searchParams.get("ticket");
+    if (qsToken) return qsToken.trim();
+    const segments = url.pathname.split("/").filter(Boolean);
+    const passIdx = segments.findIndex((s) => s.toLowerCase() === "pass");
+    if (passIdx >= 0 && segments[passIdx + 1]) {
+      return decodeURIComponent(segments[passIdx + 1]).trim();
+    }
+    // Fallback: last path segment
+    if (segments.length > 0) {
+      return decodeURIComponent(segments[segments.length - 1]).trim();
+    }
+  } catch {
+    // Not a URL — return raw
+  }
+
+  return trimmed;
+}
+
 export type RedemptionResponse = {
   ok: boolean;
   code: "redeemed" | "already_redeemed" | "invalid" | "void" | "forbidden" | "unauthorized" | "invalid_method" | "rpc_error" | string;

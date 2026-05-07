@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthState } from "@/lib/auth";
 import { detectNfcCapability, startNfcRead } from "@/lib/nfc";
-import { redeemTicket, type RedemptionResponse } from "@/lib/redemption";
+import { redeemTicket, normalizeScannedTicketValue, type RedemptionResponse } from "@/lib/redemption";
 import { LogOut, RefreshCcw, Smartphone, Ticket, ScanLine } from "lucide-react";
 import QrScanner from "@/components/ops/QrScanner";
 import { RedemptionReceipt, type ReceiptData, receiptStatusFromCode } from "@/components/ops/RedemptionReceipt";
@@ -24,21 +24,22 @@ export default function BartenderPanel() {
   const nfcCap = useMemo(() => detectNfcCapability(), []);
 
   const handleRedeem = async (code: string, method: "qr" | "nfc" | "manual") => {
-    if (!code || busy || scanLocked) return;
+    const token = normalizeScannedTicketValue(code);
+    if (!token || busy || scanLocked) return;
 
     setBusy(true);
     setScanLocked(true);
 
     try {
       const redemption = await redeemTicket({
-        token: code,
+        token,
         method,
         stationLabel: "bartender_panel",
       });
       setResult(redemption);
       setReceipt({
         status: receiptStatusFromCode(redemption.code, redemption.ok),
-        token: code,
+        token,
         timestamp: redemption.redeemed_at ?? new Date().toISOString(),
         stationLabel: "bartender_panel",
         message: redemption.message,
@@ -50,7 +51,7 @@ export default function BartenderPanel() {
       setResult({ ok: false, code: "invalid", message });
       setReceipt({
         status: "invalid",
-        token: code,
+        token,
         timestamp: new Date().toISOString(),
         stationLabel: "bartender_panel",
         message,
