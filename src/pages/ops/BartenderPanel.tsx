@@ -11,6 +11,39 @@ import QrScanner from "@/components/ops/QrScanner";
 import { RedemptionReceipt, type ReceiptData, receiptStatusFromCode } from "@/components/ops/RedemptionReceipt";
 import { cn } from "@/lib/utils";
 
+type ScanMethod = "qr" | "nfc" | "manual";
+type ScanHistoryEntry = {
+  id: string;
+  timestamp: string;
+  token: string;
+  method: ScanMethod;
+  status: ReceiptData["status"];
+  message?: string;
+};
+const SCAN_HISTORY_LIMIT = 10;
+
+const METHOD_LABEL: Record<ScanMethod, string> = { qr: "QR", nfc: "NFC", manual: "Manual" };
+const STATUS_TONE: Record<ReceiptData["status"], string> = {
+  success: "bg-status-success-soft text-status-success",
+  already_used: "bg-status-warning-soft text-status-warning",
+  void: "bg-sera-line/60 text-sera-warm-grey",
+  invalid: "bg-status-error-soft text-status-error",
+};
+const STATUS_LABEL: Record<ReceiptData["status"], string> = {
+  success: "Redeemed",
+  already_used: "Already used",
+  void: "Void",
+  invalid: "Invalid",
+};
+const formatScanTime = (iso: string) => {
+  try {
+    return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  } catch {
+    return iso;
+  }
+};
+const truncateToken = (token: string) => (token.length > 14 ? `${token.slice(0, 6)}…${token.slice(-4)}` : token);
+
 export default function BartenderPanel() {
   const { fullName, email } = useAuthState();
   const navigate = useNavigate();
@@ -20,10 +53,20 @@ export default function BartenderPanel() {
   const [result, setResult] = useState<RedemptionResponse | null>(null);
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
   const [nfcListening, setNfcListening] = useState(false);
+  const [history, setHistory] = useState<ScanHistoryEntry[]>([]);
 
   const nfcCap = useMemo(() => detectNfcCapability(), []);
 
-  const handleRedeem = async (code: string, method: "qr" | "nfc" | "manual") => {
+  const recordHistory = (entry: Omit<ScanHistoryEntry, "id">) => {
+    setHistory((prev) =>
+      [
+        { ...entry, id: `${entry.timestamp}-${entry.token}-${Math.random().toString(36).slice(2, 7)}` },
+        ...prev,
+      ].slice(0, SCAN_HISTORY_LIMIT),
+    );
+  };
+
+  const handleRedeem = async (code: string, method: ScanMethod) => {
     const token = normalizeScannedTicketValue(code);
     if (!token || busy || scanLocked) return;
 
@@ -37,25 +80,30 @@ export default function BartenderPanel() {
         stationLabel: "bartender_panel",
       });
       setResult(redemption);
+      const status = receiptStatusFromCode(redemption.code, redemption.ok);
+      const timestamp = redemption.redeemed_at ?? new Date().toISOString();
       setReceipt({
-        status: receiptStatusFromCode(redemption.code, redemption.ok),
+        status,
         token,
-        timestamp: redemption.redeemed_at ?? new Date().toISOString(),
+        timestamp,
         stationLabel: "bartender_panel",
         message: redemption.message,
         ticketId: redemption.ticket_id ?? null,
       });
+      recordHistory({ timestamp, token, method, status, message: redemption.message });
       if (navigator.vibrate) navigator.vibrate(redemption.ok ? [80] : [40, 80, 40]);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Scan failed";
       setResult({ ok: false, code: "invalid", message });
+      const timestamp = new Date().toISOString();
       setReceipt({
         status: "invalid",
         token,
-        timestamp: new Date().toISOString(),
+        timestamp,
         stationLabel: "bartender_panel",
         message,
       });
+      recordHistory({ timestamp, token, method, status: "invalid", message });
     } finally {
       setBusy(false);
     }
@@ -190,6 +238,45 @@ export default function BartenderPanel() {
             <p className="mt-1 text-sm text-sera-warm-grey">A receipt will appear here after each scan.</p>
           </section>
         )}
+
+        <section className="rounded-[24px] border border-sera-line bg-sera-cloud p-5">
+          <div className="flex items-center justify-between">
+            <p className="sera-label text-sera-warm-grey">Recent scans</p>
+            {history.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setHistory([])}
+                className="text-[11px] uppercase tracking-[0.18em] text-sera-warm-grey hover:text-sera-ink"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          {history.length === 0 ? (
+            <p className="mt-3 text-sm text-sera-warm-grey">No scans yet this session.</p>
+          ) : (
+            <ul className="mt-3 divide-y divide-sera-line/70">
+              {history.map((entry) => (
+                <li key={entry.id} className="flex items-center justify-between gap-3 py-2.5">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className={cn("rounded-full px-2 py-0.5 text-[10px] uppercase tracking-[0.16em]", STATUS_TONE[entry.status])}>
+                        {STATUS_LABEL[entry.status]}
+                      </span>
+                      <span className="text-[11px] uppercase tracking-[0.16em] text-sera-warm-grey">
+                        {METHOD_LABEL[entry.method]}
+                      </span>
+                    </div>
+                    <p className="mt-1 truncate font-mono text-xs text-sera-ink">{truncateToken(entry.token)}</p>
+                  </div>
+                  <span className="shrink-0 text-[11px] tabular-nums text-sera-warm-grey">
+                    {formatScanTime(entry.timestamp)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </main>
 
       {/* Receipt overlay */}
