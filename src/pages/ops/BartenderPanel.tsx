@@ -28,12 +28,14 @@ const STATUS_TONE: Record<ReceiptData["status"], string> = {
   already_used: "bg-status-warning-soft text-status-warning",
   void: "bg-sera-line/60 text-sera-warm-grey",
   invalid: "bg-status-error-soft text-status-error",
+  unauthorized: "bg-status-error-soft text-status-error",
 };
 const STATUS_LABEL: Record<ReceiptData["status"], string> = {
   success: "Redeemed",
   already_used: "Already used",
   void: "Void",
   invalid: "Invalid",
+  unauthorized: "Unauthorized",
 };
 const formatScanTime = (iso: string) => {
   try {
