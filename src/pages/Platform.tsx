@@ -1,198 +1,121 @@
-import { motion } from "framer-motion";
+import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
-import { CalendarDays, ClipboardList, Globe, Palette, ScanLine, Search, ShieldCheck, Smartphone, Ticket, Users } from "lucide-react";
+import MktLayout from "@/components/marketing/MktLayout";
+import PageHero from "@/components/marketing/PageHero";
 
-import { SeraContainer } from "@/components/sera/container";
-import { SeraLayout } from "@/components/sera/layout";
-import { SeraPageHeader } from "@/components/sera/page-header";
-import { SeraSection } from "@/components/sera/section";
-
-const features = [
-  { icon: CalendarDays, title: "Plan the evening", desc: "Shape your timeline, venue details, and pacing in one calm workspace." },
-  { icon: Palette, title: "Design your invitation", desc: "Create invitations and flyers with an editorial look that feels true to your event." },
-  { icon: Users, title: "Keep track of your guests", desc: "See responses, plus-ones, and arrivals without losing the human side of hosting." },
-  { icon: Globe, title: "Share one event page", desc: "Offer guests a polished home for schedule, location, and everything they need." },
-  { icon: Ticket, title: "Offer digital drink tickets", desc: "Deliver tickets directly to guests and keep service moving naturally." },
-  { icon: ShieldCheck, title: "Welcome guests with confidence", desc: "Support your door team with fast check-in and clear status at a glance." },
-  { icon: ScanLine, title: "Run Scan Pass", desc: "Let staff confirm drink tickets in seconds with the same tracking logic used across Sera." },
-  { icon: Smartphone, title: "Run smoothly on mobile", desc: "Every step is designed for real event conditions, right from your phone." },
+const capabilities = [
+  { label: "01", title: "Invitations with atmosphere", body: "Editorial covers, private links, and reply prompts written in the host's own voice. Sera is the only place a guest hears from you between save-the-date and the door.", moments: ["Cover composer", "Private RSVP link", "Plus-one and dietary fields", "Host message"] },
+  { label: "02", title: "A guest list with selective gravity", body: "Approve, tier, and hold with intent. Waitlists, plus-ones, and dietary notes are surfaced where the host needs them — not buried three menus deep.", moments: ["Tiered access states", "Hold list", "Notes on every guest", "Bulk approve / decline"] },
+  { label: "03", title: "Event pages, not registration forms", body: "A digital invitation that reads like the start of the evening: dress code, schedule, venue notes, and a small piece of the host's voice carrying through.", moments: ["Event narrative", "Dress + schedule", "Venue and arrival guidance", "Per-guest status"] },
+  { label: "04", title: "Door flow that holds the mood", body: "Fast lookup, NFC and QR side by side, hold-list overrides without breaking pacing. Pressure is absorbed by the system, never the room.", moments: ["NFC + QR readers", "Pacing controls", "Lane-aware throughput", "Hold-list overrides"] },
+  { label: "05", title: "Drink tickets, redeemed quietly", body: "One pour per ticket, held in the wallet. The bar sees redemptions as they land, with manual entry and void for the edge cases.", moments: ["NFC tap to redeem", "Manual entry fallback", "Per-station counters", "Void + reissue"] },
+  { label: "06", title: "After the night, the wrap", body: "A composed summary of arrival times, redemption pace, regret notes, and which guests the host should write to first.", moments: ["Arrival timeline", "Redemption pace", "Notes from the floor", "Follow-up shortlist"] },
 ];
-
-const redemptionOptions = [
-  {
-    icon: ScanLine,
-    name: "Scan Pass",
-    status: "Available now",
-    description: "Guests show their pass. Staff scan. Sera checks the ticket instantly and records the redemption.",
-    tags: ["No app required", "Works on all phones", "Real-time ticket tracking", "Same logic as TapStation"],
-    cta: "Use Scan Pass",
-    href: "/ops/bartender",
-    tone: "ready",
-  },
-  {
-    icon: Smartphone,
-    name: "Bar Mode",
-    status: "Available now / Beta",
-    description: "A focused view for staff working the bar — built for fast scanning, clear confirmations, and fewer mistakes.",
-    tags: ["Mobile-first", "Staff-friendly", "Duplicate protection", "Built for live events"],
-    cta: "Open Bar Mode",
-    href: "/ops/bartender",
-    tone: "ready",
-  },
-  {
-    icon: Search,
-    name: "Guest Lookup",
-    status: "Available now",
-    description: "For smaller events or edge cases, staff can search the guest list and redeem a ticket manually.",
-    tags: ["Search by guest", "Manual confirmation", "Perfect backup flow", "Still fully tracked"],
-    cta: "Search guests",
-    href: "/ops/bartender",
-    tone: "ready",
-  },
-  {
-    icon: ClipboardList,
-    name: "Bar Ledger",
-    status: "Available now",
-    description: "A live record of every drink ticket used during the event.",
-    tags: ["Who redeemed what", "When it happened", "How many remain", "Export-ready history"],
-    cta: "View Bar Ledger",
-    href: "/ops/bartender",
-    tone: "ready",
-  },
-  {
-    icon: Ticket,
-    name: "TapStation",
-    status: "Launching soon / Private testing",
-    description: "The bar experience, without the bottleneck. Guests tap, staff confirm, Sera tracks the rest.",
-    tags: ["NFC-powered", "Private testing", "Built for high-flow bars", "No setup required"],
-    cta: "Request TapStation access",
-    href: "/request-access",
-    tone: "soon",
-  },
-  {
-    icon: Globe,
-    name: "TapMarkers",
-    status: "Future premium add-on",
-    description: "Pre-configured NFC markers for venues, bars, and premium hosted events.",
-    tags: ["Ready to place", "Pre-configured by Sera", "Connected to TapStation", "No setup required"],
-    cta: "Coming soon",
-    href: null,
-    tone: "future",
-  },
-];
-
-const statusStyles: Record<string, string> = {
-  ready: "border-sera-moss/25 bg-sera-moss/10 text-sera-moss",
-  soon: "border-sera-oxblood/25 bg-sera-oxblood/10 text-sera-oxblood",
-  future: "border-sera-sand/70 bg-sera-beige/55 text-sera-warm-grey",
-};
 
 export default function Platform() {
   return (
-    <SeraLayout>
-      <SeraContainer>
-        <SeraPageHeader
-          title="Everything for the evening, in one place"
-          description="From first invitation to final pour, Sera keeps every moment aligned with your brand and pace."
-        />
-      </SeraContainer>
+    <MktLayout>
+      <PageHero
+        eyebrow="The platform"
+        title={<>Everything the host needs.<br /><span style={{ fontStyle: "italic", color: "var(--mkt-brass)" }}>Nothing</span> the guest sees.</>}
+        lede="Sera Society is the private layer behind a well-run evening — invitations, lists, RSVPs, check-in, drink tickets. Front-of-house finish, mission-critical infrastructure underneath."
+      >
+        <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+          <Link to="/request-access" className="mkt-btn mkt-btn--primary">Request an introduction</Link>
+          <Link to="/event-pages" className="mkt-btn mkt-btn--ghost-dark">See an event page</Link>
+        </div>
+      </PageHero>
 
-      <SeraSection spacing="large">
-        <SeraContainer>
-          <div className="grid gap-10 md:grid-cols-2">
-            {features.map((feature, index) => (
-              <motion.article
-                key={feature.title}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.45, delay: index * 0.04 }}
-                className="space-y-3 border-t border-[#e7d8c4]/20 pt-5"
-              >
-                <feature.icon className="h-5 w-5 text-[#e2cbb2]" strokeWidth={1.5} />
-                <h2 className="font-display text-[1.7rem] leading-[1] tracking-[-0.02em] text-[#f1e7d9]">{feature.title}</h2>
-                <p className="text-[0.98rem] leading-[1.75] text-[#d6cab9]">{feature.desc}</p>
-              </motion.article>
-            ))}
-          </div>
-        </SeraContainer>
-      </SeraSection>
-
-      <SeraSection spacing="large" className="bg-sera-ivory text-sera-ink">
-        <SeraContainer>
-          <div className="mb-10 grid gap-7 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+      {/* Editorial table of contents */}
+      <section style={{ background: "var(--mkt-cream)", padding: "120px 40px" }}>
+        <div style={{ maxWidth: 1180, margin: "0 auto" }}>
+          <div
+            style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr", gap: 80, marginBottom: 80 }}
+            className="block md:grid"
+          >
             <div>
-              <p className="sera-label mb-4 text-sera-oxblood">Drink ticket redemption</p>
-              <h2 className="font-display text-4xl leading-[0.96] tracking-[-0.035em] text-sera-navy sm:text-5xl">
-                Redeem drink tickets without slowing down the bar.
+              <span className="mkt-eyebrow" style={{ color: "var(--mkt-oxblood)" }}>In the room</span>
+              <h2
+                style={{
+                  margin: "16px 0 0", fontFamily: "var(--font-display)", fontWeight: 500,
+                  fontSize: "clamp(2rem,4vw,3.6rem)", lineHeight: 0.98,
+                  letterSpacing: "-0.04em", color: "var(--mkt-navy)",
+                }}
+              >
+                Six rooms<br /><span style={{ fontStyle: "italic" }}>under</span> one roof.
               </h2>
             </div>
-            <p className="max-w-2xl text-base leading-[1.8] text-sera-warm-grey sm:text-lg">
-              Start with Scan Pass, Bar Mode, or Guest Lookup. Every redemption is tracked in real time, so hosts always know who has used what — and how many tickets remain.
-            </p>
-          </div>
-
-          <div className="mb-8 grid gap-3 rounded-[28px] border border-sera-sand/70 bg-sera-beige/45 p-4 text-sm text-sera-navy shadow-soft md:grid-cols-3">
-            <div className="rounded-2xl bg-sera-ivory/85 p-4">
-              <p className="sera-label text-sera-moss">Available now</p>
-              <p className="mt-2 font-serif text-2xl text-sera-navy">Scan Pass, Bar Mode, Guest Lookup, Bar Ledger</p>
-            </div>
-            <div className="rounded-2xl bg-sera-ivory/70 p-4">
-              <p className="sera-label text-sera-oxblood">Launching soon</p>
-              <p className="mt-2 font-serif text-2xl text-sera-navy">TapStation private testing</p>
-            </div>
-            <div className="rounded-2xl bg-sera-ivory/55 p-4">
-              <p className="sera-label text-sera-warm-grey">Future premium add-on</p>
-              <p className="mt-2 font-serif text-2xl text-sera-navy">TapMarkers by Sera</p>
-            </div>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {redemptionOptions.map((option, index) => (
-              <motion.article
-                key={option.name}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.25 }}
-                transition={{ duration: 0.42, delay: index * 0.045 }}
-                className="group flex min-h-[360px] flex-col rounded-[30px] border border-sera-sand/80 bg-sera-surface-light p-6 shadow-[0_24px_70px_-48px_rgba(8,14,28,0.72)] transition duration-200 hover:-translate-y-1 hover:border-sera-oxblood/30 hover:shadow-[0_28px_82px_-52px_rgba(8,14,28,0.82)]"
+            <div>
+              <p
+                style={{
+                  margin: 0, fontFamily: "var(--font-serif)", fontStyle: "italic",
+                  fontSize: "1.3rem", lineHeight: 1.5, color: "rgba(18,16,14,0.78)", maxWidth: 540,
+                }}
               >
-                <div className="mb-6 flex items-start justify-between gap-4">
-                  <div className="rounded-2xl border border-sera-sand/70 bg-sera-beige/55 p-3 text-sera-oxblood">
-                    <option.icon className="h-5 w-5" strokeWidth={1.5} />
-                  </div>
-                  <span className={`rounded-full border px-3 py-1 text-[10px] font-medium uppercase tracking-[0.18em] ${statusStyles[option.tone]}`}>
-                    {option.status}
-                  </span>
+                Each surface of Sera is shaped by one principle: the host stays composed,
+                and the guest never sees the machinery.
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {capabilities.map((c, i) => (
+              <article
+                key={c.label}
+                style={{
+                  display: "grid", gridTemplateColumns: "100px 1.4fr 1fr",
+                  gap: 48, alignItems: "start",
+                  padding: "44px 0",
+                  borderTop: "1px solid var(--mkt-brass-30)",
+                }}
+                className="block md:grid"
+              >
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.78rem", letterSpacing: "0.2em", color: "var(--mkt-brass)" }}>
+                  0{i + 1} / 06
+                </span>
+                <div>
+                  <h3
+                    style={{
+                      margin: 0, fontFamily: "var(--font-display)", fontWeight: 500,
+                      fontSize: "clamp(1.6rem,2.8vw,2.4rem)", lineHeight: 1.04,
+                      letterSpacing: "-0.03em", color: "var(--mkt-navy)",
+                    }}
+                  >
+                    {c.title}
+                  </h3>
+                  <p style={{ margin: "16px 0 0", fontFamily: "var(--font-sans)", fontSize: "1rem", lineHeight: 1.65, color: "rgba(18,16,14,0.74)", maxWidth: 540, textWrap: "pretty" as CSSProperties["textWrap"] }}>
+                    {c.body}
+                  </p>
                 </div>
-                <h3 className="font-display text-[2rem] leading-[0.95] tracking-[-0.03em] text-sera-navy">{option.name}</h3>
-                <p className="mt-4 text-[0.98rem] leading-[1.72] text-sera-ink/78">{option.description}</p>
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {option.tags.map((tag) => (
-                    <span key={tag} className="rounded-full border border-sera-sand/65 bg-sera-beige/40 px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-sera-warm-grey">
-                      {tag}
-                    </span>
+                <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8, borderLeft: "1px solid var(--mkt-brass-30)", paddingLeft: 22 }}>
+                  {c.moments.map((m) => (
+                    <li key={m} style={{ fontFamily: "var(--font-sans)", fontSize: "0.86rem", color: "var(--mkt-navy)", opacity: 0.86 }}>{m}</li>
                   ))}
-                </div>
-                <div className="mt-auto pt-7">
-                  {option.href ? (
-                    <Link
-                      to={option.href}
-                      className="inline-flex rounded-full border border-sera-navy/15 bg-sera-navy px-4 py-2 text-sm font-medium text-sera-ivory transition hover:bg-sera-oxblood"
-                    >
-                      {option.cta}
-                    </Link>
-                  ) : (
-                    <span className="inline-flex rounded-full border border-sera-sand bg-sera-beige/70 px-4 py-2 text-sm font-medium text-sera-warm-grey">
-                      {option.cta}
-                    </span>
-                  )}
-                </div>
-              </motion.article>
+                </ul>
+              </article>
             ))}
           </div>
-        </SeraContainer>
-      </SeraSection>
-    </SeraLayout>
+        </div>
+      </section>
+
+      {/* Quiet quote */}
+      <section style={{ background: "var(--mkt-navy)", padding: "120px 40px", borderTop: "1px solid var(--mkt-brass-30)" }}>
+        <div style={{ maxWidth: 980, margin: "0 auto", textAlign: "center" }}>
+          <p
+            style={{
+              margin: 0, fontFamily: "var(--font-display)", fontWeight: 500,
+              fontSize: "clamp(1.8rem,4vw,3rem)", lineHeight: 1.15,
+              letterSpacing: "-0.025em", color: "var(--mkt-cream)",
+              textWrap: "balance" as CSSProperties["textWrap"],
+            }}
+          >
+            "We don't sell software. <span style={{ fontStyle: "italic", color: "var(--mkt-brass)" }}>We carry</span> the parts of an evening the host shouldn't have to."
+          </p>
+          <p style={{ margin: "28px 0 0", fontFamily: "var(--font-sans)", fontSize: "0.66rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "var(--mkt-brass)" }}>
+            — From the house manual
+          </p>
+        </div>
+      </section>
+    </MktLayout>
   );
 }

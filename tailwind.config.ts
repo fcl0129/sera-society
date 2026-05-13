@@ -14,10 +14,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['"Instrument Serif"', "serif"],
-        serif: ["Fraunces", "Iowan Old Style", "Times New Roman", "serif"],
+        display: ['"Playfair Display"', '"Cormorant Garamond"', '"Iowan Old Style"', "serif"],
+        serif: ['"Cormorant Garamond"', '"Iowan Old Style"', "Georgia", "serif"],
         sans: ["Inter", "Avenir Next", "Segoe UI", "system-ui", "sans-serif"],
-        mono: ["JetBrains Mono", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"],
+        mono: ['"JetBrains Mono"', "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"],
       },
       colors: {
         border: "hsl(var(--border))",
