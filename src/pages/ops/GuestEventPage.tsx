@@ -369,7 +369,7 @@ function TicketDialog({
             </div>
 
             <p className="mx-auto mt-1 max-w-[260px] text-center text-xs text-[var(--event-text-secondary)]">
-              Brightness up. Hold the screen to the bartender's scanner.
+              Brightness up. Hold this pass to Bar Mode.
             </p>
 
             <p className="mt-1 break-all rounded-xl border border-dashed border-[var(--event-text-secondary)]/40 bg-[var(--event-background)]/40 px-3 py-2 text-center font-mono text-[11px] text-[var(--event-text-secondary)]">

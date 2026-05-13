@@ -106,7 +106,7 @@ const App = () => (
               }
             />
 
-            {/* Bartender */}
+            {/* Bar Mode */}
             <Route
               path="/ops/bartender"
               element={

@@ -27,7 +27,7 @@ export default function TicketTestStation() {
     })();
   }, [slug, params]);
 
-  let title = "Tap Station";
+  let title = "TapStation";
   let body = "Processing…";
   let tone = "neutral";
   if (result) {
@@ -37,8 +37,8 @@ export default function TicketTestStation() {
         body = `${result.remaining} of ${result.total} remaining`;
         tone = "ok";
       } else {
-        title = "Awaiting bartender";
-        body = "Hand the bartender your phone or wait for confirmation.";
+        title = "Awaiting staff confirmation";
+        body = "Hold for staff confirmation before the drink is served.";
         tone = "warn";
       }
     } else if (result.code === "no_active_intent") {
@@ -68,7 +68,7 @@ export default function TicketTestStation() {
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 font-mono p-6">
       <div className="max-w-md mx-auto space-y-5 pt-12">
-        <div className="text-xs uppercase text-neutral-500">Tap Station · {slug}</div>
+        <div className="text-xs uppercase text-neutral-500">TapStation · {slug}</div>
         <div className={`border p-6 text-center ${color}`}>
           <div className="text-2xl">{title}</div>
           <div className="text-sm mt-2 opacity-80">{body}</div>

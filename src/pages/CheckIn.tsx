@@ -110,7 +110,7 @@ export default function CheckIn() {
             </div>
             <div className="flex gap-2">
               <Button asChild variant="sera-outline"><Link to="/organizer">Organizer</Link></Button>
-              <Button asChild variant="sera-outline"><Link to="/ops/bartender">Bartender</Link></Button>
+              <Button asChild variant="sera-outline"><Link to="/ops/bartender">Bar Mode</Link></Button>
             </div>
           </div>
 

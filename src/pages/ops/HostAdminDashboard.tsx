@@ -811,8 +811,8 @@ export default function HostAdminDashboard() {
                 />
                 <EntryCard
                   icon={<Users className="w-5 h-5" />}
-                  title="Bartender panel"
-                  description="Live redemption feed"
+                  title="Bar Mode"
+                  description="Open the staff-friendly drink ticket scanner"
                   onClick={() => navigate("/ops/bartender")}
                 />
               </div>
