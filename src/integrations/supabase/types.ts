@@ -743,6 +743,320 @@ export type Database = {
           },
         ]
       }
+      tt_drink_units: {
+        Row: {
+          created_at: string
+          event_id: string
+          guest_pass_id: string
+          id: string
+          metadata: Json
+          public_code: string
+          redeemed_at: string | null
+          redemption_method: string | null
+          redemption_station_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          guest_pass_id: string
+          id?: string
+          metadata?: Json
+          public_code?: string
+          redeemed_at?: string | null
+          redemption_method?: string | null
+          redemption_station_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          guest_pass_id?: string
+          id?: string
+          metadata?: Json
+          public_code?: string
+          redeemed_at?: string | null
+          redemption_method?: string | null
+          redemption_station_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tt_drink_units_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "tt_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tt_drink_units_guest_pass_id_fkey"
+            columns: ["guest_pass_id"]
+            isOneToOne: false
+            referencedRelation: "tt_guest_passes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tt_events: {
+        Row: {
+          created_at: string
+          id: string
+          is_test: boolean
+          name: string
+          slug: string
+          tap_station_mode: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_test?: boolean
+          name: string
+          slug: string
+          tap_station_mode?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_test?: boolean
+          name?: string
+          slug?: string
+          tap_station_mode?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tt_guest_passes: {
+        Row: {
+          created_at: string
+          display_name: string
+          event_id: string
+          guest_email: string | null
+          id: string
+          manual_code: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string
+          event_id: string
+          guest_email?: string | null
+          id?: string
+          manual_code: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          event_id?: string
+          guest_email?: string | null
+          id?: string
+          manual_code?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tt_guest_passes_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "tt_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tt_intents: {
+        Row: {
+          created_at: string
+          event_id: string
+          expires_at: string
+          guest_pass_id: string
+          id: string
+          metadata: Json
+          redeemed_at: string | null
+          station_id: string | null
+          status: string
+          tapped_at: string | null
+          ticket_unit_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          expires_at: string
+          guest_pass_id: string
+          id?: string
+          metadata?: Json
+          redeemed_at?: string | null
+          station_id?: string | null
+          status?: string
+          tapped_at?: string | null
+          ticket_unit_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          expires_at?: string
+          guest_pass_id?: string
+          id?: string
+          metadata?: Json
+          redeemed_at?: string | null
+          station_id?: string | null
+          status?: string
+          tapped_at?: string | null
+          ticket_unit_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tt_intents_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "tt_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tt_intents_guest_pass_id_fkey"
+            columns: ["guest_pass_id"]
+            isOneToOne: false
+            referencedRelation: "tt_guest_passes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tt_intents_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "tt_stations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tt_intents_ticket_unit_id_fkey"
+            columns: ["ticket_unit_id"]
+            isOneToOne: false
+            referencedRelation: "tt_drink_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tt_redemptions: {
+        Row: {
+          device_info: Json
+          event_id: string
+          guest_pass_id: string
+          id: string
+          metadata: Json
+          method: string
+          redeemed_at: string
+          redeemed_by: string | null
+          result: string
+          station_id: string | null
+          ticket_unit_id: string | null
+        }
+        Insert: {
+          device_info?: Json
+          event_id: string
+          guest_pass_id: string
+          id?: string
+          metadata?: Json
+          method: string
+          redeemed_at?: string
+          redeemed_by?: string | null
+          result: string
+          station_id?: string | null
+          ticket_unit_id?: string | null
+        }
+        Update: {
+          device_info?: Json
+          event_id?: string
+          guest_pass_id?: string
+          id?: string
+          metadata?: Json
+          method?: string
+          redeemed_at?: string
+          redeemed_by?: string | null
+          result?: string
+          station_id?: string | null
+          ticket_unit_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tt_redemptions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "tt_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tt_redemptions_guest_pass_id_fkey"
+            columns: ["guest_pass_id"]
+            isOneToOne: false
+            referencedRelation: "tt_guest_passes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tt_redemptions_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "tt_stations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tt_redemptions_ticket_unit_id_fkey"
+            columns: ["ticket_unit_id"]
+            isOneToOne: false
+            referencedRelation: "tt_drink_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tt_stations: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          station_secret_hash: string
+          station_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          station_secret_hash: string
+          station_type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          station_secret_hash?: string
+          station_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tt_stations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "tt_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_tier_access: {
         Row: {
           assigned_by: string | null
@@ -819,6 +1133,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _tt_expire_stale: { Args: { _pass_id: string }; Returns: undefined }
+      _tt_lock_one_unit: { Args: { _pass_id: string }; Returns: string }
       current_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
@@ -869,6 +1185,29 @@ export type Database = {
           _plus_one_count?: number
           _status: string
           _token: string
+        }
+        Returns: Json
+      }
+      tt_add_units: {
+        Args: { _count: number; _pass_id: string }
+        Returns: Json
+      }
+      tt_cancel_intent: { Args: { _intent_id: string }; Returns: Json }
+      tt_confirm_intent: { Args: { _intent_id: string }; Returns: Json }
+      tt_create_intent: { Args: { _pass_id: string }; Returns: Json }
+      tt_get_bartender_state: { Args: { _event_slug: string }; Returns: Json }
+      tt_get_pass_state: { Args: { _pass_id: string }; Returns: Json }
+      tt_redeem_manual: { Args: { _manual_code: string }; Returns: Json }
+      tt_redeem_qr: { Args: { _pass_id: string }; Returns: Json }
+      tt_reject_intent: { Args: { _intent_id: string }; Returns: Json }
+      tt_reset_demo: { Args: never; Returns: Json }
+      tt_seed_demo: { Args: never; Returns: Json }
+      tt_set_mode: { Args: { _event_id: string; _mode: string }; Returns: Json }
+      tt_tap_station: {
+        Args: {
+          _pass_id: string
+          _station_secret: string
+          _station_slug: string
         }
         Returns: Json
       }

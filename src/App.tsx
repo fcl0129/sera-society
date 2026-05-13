@@ -26,6 +26,11 @@ import OpsHome from "./pages/ops/OpsHome";
 import HostAdminDashboard from "./pages/ops/HostAdminDashboard";
 import BartenderPanel from "./pages/ops/BartenderPanel";
 import GuestEventPage from "./pages/ops/GuestEventPage";
+import TicketTestDashboard from "./pages/ticket-test/TicketTestDashboard";
+import TicketTestGuest from "./pages/ticket-test/TicketTestGuest";
+import TicketTestBartender from "./pages/ticket-test/TicketTestBartender";
+import TicketTestStation from "./pages/ticket-test/TicketTestStation";
+import TicketTestScan from "./pages/ticket-test/TicketTestScan";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +55,13 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<Faq />} />
+
+            {/* Isolated ticket-test harness — not linked from nav */}
+            <Route path="/ticket-test" element={<TicketTestDashboard />} />
+            <Route path="/ticket-test/guest" element={<TicketTestGuest />} />
+            <Route path="/ticket-test/bartender" element={<TicketTestBartender />} />
+            <Route path="/ticket-test/station/:slug" element={<TicketTestStation />} />
+            <Route path="/ticket-test/scan" element={<TicketTestScan />} />
 
             {/* Authenticated app */}
             <Route path="/ops" element={<OpsHome />} />
