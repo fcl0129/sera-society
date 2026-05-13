@@ -26,8 +26,8 @@ const faqCategories = [
   {
     label: "Night operations",
     items: [
-      { q: "How does check-in work?", a: "Guests are verified by QR or NFC, with live status for your door team." },
-      { q: "How do drink tickets work?", a: "Tickets are issued digitally and redeemed at station level, with real-time tracking." },
+      { q: "How does check-in work?", a: "Guests are verified with fast, staff-friendly check-in and live status for your door team." },
+      { q: "How do drink tickets work?", a: "Tickets are issued digitally and redeemed with Scan Pass, Bar Mode, or Guest Lookup, with Bar Ledger tracking every use in real time." },
     ],
   },
 ];

@@ -67,17 +67,17 @@ export default function TicketTestDashboard() {
 
         <section className="grid grid-cols-2 gap-3">
           <Link className="btn" to="/ticket-test/guest">Open guest view</Link>
-          <Link className="btn" to="/ticket-test/bartender">Open bartender view</Link>
-          <a className="btn" href={stationUrl} target="_blank" rel="noreferrer">Open Tap Station URL</a>
-          <button className="btn" onClick={() => navigator.clipboard.writeText(stationUrl)}>Copy Tap Station URL</button>
-          <Link className="btn" to="/ticket-test/scan">Simulate QR scan</Link>
+          <Link className="btn" to="/ticket-test/bartender">Open Bar Mode</Link>
+          <a className="btn" href={stationUrl} target="_blank" rel="noreferrer">Open TapStation URL</a>
+          <button className="btn" onClick={() => navigator.clipboard.writeText(stationUrl)}>Copy TapStation URL</button>
+          <Link className="btn" to="/ticket-test/scan">Simulate Scan Pass</Link>
           <button className="btn" disabled={loading} onClick={() => action(() => resetDemo().then(setDemo))}>Reset demo (wipe + reseed)</button>
           <button className="btn" disabled={loading || !demo} onClick={() => action(() => rpc("tt_add_units", { _pass_id: demo!.pass_id, _count: 5 }))}>Add 5 fresh tickets</button>
           <button className="btn" disabled={loading || !demo} onClick={() => action(() => rpc("tt_set_mode", { _event_id: demo!.event_id, _mode: state?.event?.tap_station_mode === "auto_redeem" ? "staff_confirm" : "auto_redeem" }))}>Toggle mode</button>
         </section>
 
         <section className="border border-neutral-800 p-4">
-          <div className="text-xs uppercase text-neutral-500 mb-2">Tap Station URL</div>
+          <div className="text-xs uppercase text-neutral-500 mb-2">TapStation URL</div>
           <div className="text-xs break-all text-neutral-300">{stationUrl || "—"}</div>
           {!demo?.station_secret && (
             <div className="text-xs text-amber-400 mt-2">Station secret not stored locally — click "Reset demo" to generate a fresh one.</div>
@@ -85,7 +85,7 @@ export default function TicketTestDashboard() {
         </section>
 
         <section className="border border-neutral-800 p-4">
-          <div className="text-xs uppercase text-neutral-500 mb-2">Recent redemptions</div>
+          <div className="text-xs uppercase text-neutral-500 mb-2">Bar Ledger</div>
           <ul className="text-xs space-y-1">
             {(state?.recent ?? []).slice(0, 10).map((r: any) => (
               <li key={r.id} className="flex justify-between text-neutral-300">

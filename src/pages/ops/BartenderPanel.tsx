@@ -1,17 +1,16 @@
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthState } from "@/lib/auth";
-import { detectNfcCapability, startNfcRead } from "@/lib/nfc";
 import { redeemTicket, normalizeScannedTicketValue, type RedemptionResponse } from "@/lib/redemption";
-import { LogOut, RefreshCcw, Smartphone, Ticket, ScanLine } from "lucide-react";
+import { LogOut, RefreshCcw, Ticket, ScanLine } from "lucide-react";
 import QrScanner from "@/components/ops/QrScanner";
 import { RedemptionReceipt, type ReceiptData, receiptStatusFromCode } from "@/components/ops/RedemptionReceipt";
 import { cn } from "@/lib/utils";
 
-type ScanMethod = "qr" | "nfc" | "manual";
+type ScanMethod = "qr" | "manual";
 type ScanHistoryEntry = {
   id: string;
   timestamp: string;
@@ -22,7 +21,7 @@ type ScanHistoryEntry = {
 };
 const SCAN_HISTORY_LIMIT = 10;
 
-const METHOD_LABEL: Record<ScanMethod, string> = { qr: "QR", nfc: "NFC", manual: "Manual" };
+const METHOD_LABEL: Record<ScanMethod, string> = { qr: "Scan Pass", manual: "Guest Lookup" };
 const STATUS_TONE: Record<ReceiptData["status"], string> = {
   success: "bg-status-success-soft text-status-success",
   already_used: "bg-status-warning-soft text-status-warning",
@@ -54,10 +53,8 @@ export default function BartenderPanel() {
   const [scanLocked, setScanLocked] = useState(false);
   const [result, setResult] = useState<RedemptionResponse | null>(null);
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
-  const [nfcListening, setNfcListening] = useState(false);
   const [history, setHistory] = useState<ScanHistoryEntry[]>([]);
 
-  const nfcCap = useMemo(() => detectNfcCapability(), []);
 
   const recordHistory = (entry: Omit<ScanHistoryEntry, "id">) => {
     setHistory((prev) =>
@@ -118,23 +115,6 @@ export default function BartenderPanel() {
     setManualCode("");
   };
 
-  const beginNfcRead = async () => {
-    setNfcListening(true);
-    let stopFn: (() => void) | undefined;
-    stopFn = await startNfcRead(
-      async (tap) => {
-        const payload = tap.payload?.trim();
-        if (payload) await handleRedeem(payload, "nfc");
-        setNfcListening(false);
-        stopFn?.();
-      },
-      () => {
-        setNfcListening(false);
-        stopFn?.();
-      },
-    );
-  };
-
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/login");
@@ -151,7 +131,7 @@ export default function BartenderPanel() {
       <header className="border-b border-sera-line/70 bg-sera-cloud/80 backdrop-blur supports-[backdrop-filter]:bg-sera-cloud/60">
         <div className="mx-auto flex max-w-lg items-center justify-between px-5 py-4">
           <div>
-            <p className="sera-label text-sera-warm-grey">Bartender · Sera</p>
+            <p className="sera-label text-sera-warm-grey">Bar Mode · Sera</p>
             <p className="font-serif text-base text-sera-ink">{fullName ?? email}</p>
           </div>
           <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-sera-warm-grey hover:text-sera-ink">
@@ -163,12 +143,12 @@ export default function BartenderPanel() {
       <main className="mx-auto max-w-lg px-5 pt-6 pb-24 space-y-6">
         {/* Hero / instruction */}
         <section className="space-y-2">
-          <p className="sera-label text-sera-warm-grey">Tap to redeem</p>
+          <p className="sera-label text-sera-warm-grey">Bar Mode</p>
           <h1 className="font-serif text-4xl leading-[1.05] text-sera-ink">
             Hold a guest's pass<br />to the camera.
           </h1>
           <p className="text-sm text-sera-warm-grey">
-            QR is fastest. Manual entry and NFC tap are available below.
+            Scan Pass is ready for live service. Guest Lookup is available below for controlled staff support.
           </p>
         </section>
 
@@ -177,7 +157,7 @@ export default function BartenderPanel() {
           <div className="flex items-center justify-between border-b border-sera-line/70 px-5 py-3">
             <div className="flex items-center gap-2 text-sera-ink">
               <ScanLine className="h-4 w-4" />
-              <p className="sera-label">Live scanner</p>
+              <p className="sera-label">Scan Pass</p>
             </div>
             <span
               className={cn(
@@ -198,52 +178,35 @@ export default function BartenderPanel() {
           </div>
         </section>
 
-        {/* Manual entry */}
+        {/* Guest Lookup */}
         <section className="rounded-[24px] border border-sera-line bg-sera-cloud p-5">
-          <p className="sera-label text-sera-warm-grey">Manual entry</p>
+          <p className="sera-label text-sera-warm-grey">Guest Lookup</p>
           <form onSubmit={onSubmit} className="mt-3 space-y-3">
             <Input
               value={manualCode}
               onChange={(e) => setManualCode(e.target.value)}
-              placeholder="Paste ticket token"
+              placeholder="Paste guest pass code"
               className="h-12 rounded-xl bg-sera-ivory font-mono text-sm tracking-tight"
             />
             <Button type="submit" disabled={busy || !manualCode.trim()} className="w-full rounded-full" variant="sera">
               <Ticket className="h-4 w-4 mr-2" />
-              Validate code
+              Redeem with Guest Lookup
             </Button>
           </form>
         </section>
 
-        {/* NFC */}
-        {nfcCap.supported ? (
-          <Button
-            type="button"
-            onClick={() => void beginNfcRead()}
-            disabled={busy || nfcListening}
-            className="w-full rounded-full"
-            variant="sera-outline"
-          >
-            <Smartphone className="h-4 w-4 mr-2" />
-            {nfcListening ? "Listening for NFC…" : "Read NFC tag"}
-          </Button>
-        ) : (
-          <p className="text-center text-xs text-sera-warm-grey">
-            NFC is unsupported on this browser. Continue with QR or manual entry.
-          </p>
-        )}
 
         {/* Idle hint when no receipt */}
         {!receipt && (
           <section className="rounded-[24px] border border-dashed border-sera-line bg-transparent p-6 text-center">
             <p className="font-serif text-xl text-sera-ink">Awaiting next guest</p>
-            <p className="mt-1 text-sm text-sera-warm-grey">A receipt will appear here after each scan.</p>
+            <p className="mt-1 text-sm text-sera-warm-grey">A receipt will appear here after each redemption.</p>
           </section>
         )}
 
         <section className="rounded-[24px] border border-sera-line bg-sera-cloud p-5">
           <div className="flex items-center justify-between">
-            <p className="sera-label text-sera-warm-grey">Recent scans</p>
+            <p className="sera-label text-sera-warm-grey">Bar Ledger</p>
             {history.length > 0 && (
               <button
                 type="button"
@@ -255,7 +218,7 @@ export default function BartenderPanel() {
             )}
           </div>
           {history.length === 0 ? (
-            <p className="mt-3 text-sm text-sera-warm-grey">No scans yet this session.</p>
+            <p className="mt-3 text-sm text-sera-warm-grey">No redemptions yet this session.</p>
           ) : (
             <ul className="mt-3 divide-y divide-sera-line/70">
               {history.map((entry) => (
@@ -291,7 +254,7 @@ export default function BartenderPanel() {
               onClick={dismissReceipt}
               className="mx-auto mt-3 flex items-center gap-2 rounded-full bg-sera-ivory/90 px-4 py-2 text-xs text-sera-ink shadow-soft hover:bg-sera-ivory"
             >
-              <RefreshCcw className="h-3 w-3" /> Scan next
+              <RefreshCcw className="h-3 w-3" /> Ready for next guest
             </button>
           </div>
         </div>

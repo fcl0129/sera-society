@@ -76,7 +76,7 @@ export default function TicketTestGuest() {
           <div className="border border-emerald-500/40 bg-emerald-500/10 p-4 text-center">
             <div className="text-emerald-300 text-sm uppercase tracking-wider">Ready to tap</div>
             <div className="text-3xl mt-1">{seconds}s</div>
-            <div className="text-xs text-neutral-400 mt-1">Open the Tap Station URL on this device or another.</div>
+            <div className="text-xs text-neutral-400 mt-1">Open the TapStation URL on this device or another.</div>
             <button className="btn mt-3" onClick={cancel}>Cancel</button>
           </div>
         )}
@@ -98,9 +98,9 @@ export default function TicketTestGuest() {
         )}
 
         <div className="border border-neutral-800 p-4 flex flex-col items-center gap-2">
-          <div className="text-xs uppercase text-neutral-500">Pass QR</div>
+          <div className="text-xs uppercase text-neutral-500">Scan Pass</div>
           {qrUrl && <div className="bg-white p-3"><QRCodeSVG value={qrUrl} size={160} /></div>}
-          <div className="text-xs text-neutral-400">Manual code: <span className="text-neutral-100 tracking-widest">{state?.pass?.manual_code ?? "—"}</span></div>
+          <div className="text-xs text-neutral-400">Guest Lookup code: <span className="text-neutral-100 tracking-widest">{state?.pass?.manual_code ?? "—"}</span></div>
         </div>
 
         {err && <div className="text-red-400 text-xs">{err}</div>}

@@ -37,12 +37,12 @@ export default function TicketTestBartender() {
   const simulateQr = async () => {
     if (!demo) return;
     const r: any = await rpc("tt_redeem_qr", { _pass_id: demo.pass_id });
-    setMsg(r.ok ? `QR redeemed · remaining ${r.remaining}` : r.code);
+    setMsg(r.ok ? `Scan Pass redeemed · remaining ${r.remaining}` : r.code);
     load();
   };
   const submitManual = async () => {
     const r: any = await rpc("tt_redeem_manual", { _manual_code: manual });
-    setMsg(r.ok ? `Manual redeemed · remaining ${r.remaining}` : r.code);
+    setMsg(r.ok ? `Guest Lookup redeemed · remaining ${r.remaining}` : r.code);
     setManual("");
     load();
   };
@@ -51,7 +51,7 @@ export default function TicketTestBartender() {
     <div className="min-h-screen bg-neutral-950 text-neutral-100 font-mono p-6">
       <div className="max-w-2xl mx-auto space-y-5">
         <Link to="/ticket-test" className="text-xs text-neutral-500">← back to test dashboard</Link>
-        <h1 className="text-xl">Bartender · Bar 1 ({state?.event?.tap_station_mode})</h1>
+        <h1 className="text-xl">Bar Mode · Bar 1 ({state?.event?.tap_station_mode})</h1>
 
         {msg && <div className="text-xs border border-neutral-700 p-2 text-neutral-300">{msg}</div>}
 
@@ -72,9 +72,9 @@ export default function TicketTestBartender() {
         </section>
 
         <section className="grid grid-cols-2 gap-3">
-          <button className="btn" onClick={simulateQr}>Simulate QR scan for Demo Guest</button>
+          <button className="btn" onClick={simulateQr}>Simulate Scan Pass for Demo Guest</button>
           <div className="flex gap-2">
-            <input value={manual} onChange={e => setManual(e.target.value)} placeholder="Manual code" className="flex-1 bg-neutral-900 border border-neutral-700 px-2 py-2 text-sm uppercase tracking-widest" />
+            <input value={manual} onChange={e => setManual(e.target.value)} placeholder="Guest Lookup code" className="flex-1 bg-neutral-900 border border-neutral-700 px-2 py-2 text-sm uppercase tracking-widest" />
             <button className="btn" onClick={submitManual} disabled={!manual}>Redeem</button>
           </div>
         </section>

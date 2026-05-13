@@ -247,7 +247,7 @@ function PassTicketCard({ ticket, index }: { ticket: PassTicket; index: number }
               <QRCodeSVG value={ticket.token} size={196} level="H" />
             </div>
             <p className="mt-4 text-xs text-sera-warm-grey">
-              Brightness up. Hold this code to the bartender's scanner.
+              Brightness up. Hold this pass to Bar Mode.
             </p>
             <p className="mt-3 break-all rounded-xl border border-dashed border-sera-line bg-sera-cloud px-3 py-2 text-center font-mono text-[11px] text-sera-warm-grey">
               {ticket.token}
