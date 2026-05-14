@@ -375,6 +375,7 @@ export type Database = {
       }
       events: {
         Row: {
+          builder_config: Json
           capacity: number | null
           contact_host_email: string | null
           cover_image_url: string | null
@@ -387,6 +388,7 @@ export type Database = {
           organizer_id: string
           reminder_days: number[] | null
           rsvp_cutoff_at: string | null
+          slug: string | null
           starts_at: string
           status: string
           test_mode: boolean
@@ -396,6 +398,7 @@ export type Database = {
           venue: string | null
         }
         Insert: {
+          builder_config?: Json
           capacity?: number | null
           contact_host_email?: string | null
           cover_image_url?: string | null
@@ -408,6 +411,7 @@ export type Database = {
           organizer_id: string
           reminder_days?: number[] | null
           rsvp_cutoff_at?: string | null
+          slug?: string | null
           starts_at: string
           status?: string
           test_mode?: boolean
@@ -417,6 +421,7 @@ export type Database = {
           venue?: string | null
         }
         Update: {
+          builder_config?: Json
           capacity?: number | null
           contact_host_email?: string | null
           cover_image_url?: string | null
@@ -429,6 +434,7 @@ export type Database = {
           organizer_id?: string
           reminder_days?: number[] | null
           rsvp_cutoff_at?: string | null
+          slug?: string | null
           starts_at?: string
           status?: string
           test_mode?: boolean
