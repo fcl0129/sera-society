@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           template,
           to: request.email,
-          data: { app_url: Deno.env.get("SERA_APP_URL") ?? "https://sera-society.lovable.app" },
+          data: { app_url: Deno.env.get("SERA_APP_URL") ?? "https://serasociety.com" },
         }),
       });
     } catch (e) { console.error("email send failed", e); }
