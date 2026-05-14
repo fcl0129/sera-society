@@ -53,21 +53,27 @@ export default function AdminAccessRequests() {
   const reviewRequest = async (requestId: string, status: "approved" | "rejected") => {
     setProcessingId(requestId);
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    // Route through the edge function so approvals also (a) invite the user
+    // via Supabase Auth, (b) set the right role on the profile, and
+    // (c) send the branded approval/rejection email.
+    const decision = status === "approved" ? "approved" : "rejected";
+    const { data, error: fnError } = await supabase.functions.invoke(
+      "review-access-request",
+      {
+        body: {
+          request_id: requestId,
+          decision,
+          assign_role: "organizer",
+        },
+      },
+    );
 
-    const { error: updateError } = await supabase
-      .from("access_requests")
-      .update({
-        status,
-        reviewed_at: new Date().toISOString(),
-        reviewed_by: session?.user.id ?? null,
-      })
-      .eq("id", requestId);
-
-    if (updateError) {
-      setError("Could not update the request.");
+    if (fnError || (data && (data as { error?: string }).error)) {
+      const msg =
+        (data as { error?: string } | null)?.error ??
+        fnError?.message ??
+        "Could not update the request.";
+      setError(msg);
       setProcessingId(null);
       return;
     }

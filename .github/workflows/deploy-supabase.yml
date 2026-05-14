@@ -37,12 +37,22 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
-      - name: Deploy auth-email-hook
-        run: supabase functions deploy auth-email-hook
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-
-      - name: Deploy process-email-queue
-        run: supabase functions deploy process-email-queue
+      - name: Deploy edge functions
+        run: |
+          set -euo pipefail
+          for fn in \
+            auth-email-hook \
+            process-email-queue \
+            send-sera-email \
+            review-access-request \
+            redeem-ticket \
+            generate-token; do
+            if [ -d "supabase/functions/$fn" ]; then
+              echo "Deploying $fn"
+              supabase functions deploy "$fn"
+            else
+              echo "Skipping $fn (not present)"
+            fi
+          done
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
