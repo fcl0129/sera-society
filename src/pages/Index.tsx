@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import MktLayout from "@/components/marketing/MktLayout";
 import { PhoneMockup, ScenePhone } from "@/components/marketing/PhoneMockup";
 import SectionTransition from "@/components/marketing/SectionTransition";
+import ProductDemos, { FinalProductCTA } from "@/components/marketing/ProductDemos";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -575,13 +576,13 @@ export default function Index() {
       <ScrollHero />
       <Showcase />
       <SectionTransition from="navy" to="cream" />
+      <ProductDemos />
+      <SectionTransition from="navy" to="cream" />
       <Manifesto />
       <SectionTransition from="cream" to="navy" />
       <FullBleedQuote />
       <SectionTransition from="navy" to="cream" />
-      <Features />
-      <UseCases />
-      <CTA />
+      <FinalProductCTA />
     </MktLayout>
   );
 }
