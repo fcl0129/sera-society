@@ -591,7 +591,7 @@ function TapStationDemo() {
                 {tickets}
               </p>
               <p style={{ margin: "4px 0 0", fontFamily: "var(--font-mono)", fontSize: "0.56rem", letterSpacing: "0.22em", color: "var(--mkt-brass)" }}>
-                {tickets === 1 ? "TICKET LEFT" : "TICKETS LEFT"}
+                TICKETS LEFT
               </p>
             </div>
             <div style={{
