@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import MktLayout from "@/components/marketing/MktLayout";
 import PageHero from "@/components/marketing/PageHero";
+import SectionTransition from "@/components/marketing/SectionTransition";
 
 const capabilities = [
   { label: "01", title: "Invitations with atmosphere", body: "Editorial covers, private links, and reply prompts written in the host's own voice. Sera is the only place a guest hears from you between save-the-date and the door.", moments: ["Cover composer", "Private RSVP link", "Plus-one and dietary fields", "Host message"] },
@@ -25,6 +26,8 @@ export default function Platform() {
           <Link to="/event-pages" className="mkt-btn mkt-btn--ghost-dark">See an event page</Link>
         </div>
       </PageHero>
+
+      <SectionTransition from="navy" to="cream" />
 
       {/* Editorial table of contents */}
       <section style={{ background: "var(--mkt-cream)", padding: "120px 40px" }}>
@@ -98,8 +101,10 @@ export default function Platform() {
         </div>
       </section>
 
+      <SectionTransition from="cream" to="navy" />
+
       {/* Quiet quote */}
-      <section style={{ background: "var(--mkt-navy)", padding: "120px 40px", borderTop: "1px solid var(--mkt-brass-30)" }}>
+      <section style={{ background: "var(--mkt-navy)", padding: "120px 40px" }}>
         <div style={{ maxWidth: 980, margin: "0 auto", textAlign: "center" }}>
           <p
             style={{
