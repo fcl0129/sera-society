@@ -1,6 +1,7 @@
 import { useState } from "react";
 import MktLayout from "@/components/marketing/MktLayout";
 import PageHero from "@/components/marketing/PageHero";
+import SectionTransition from "@/components/marketing/SectionTransition";
 
 const fieldStyle = {
   padding: "14px 16px",
@@ -40,7 +41,9 @@ export default function Contact() {
         lede="House replies are signed by hand, usually within a week. If your timing is tighter, mention it on the first line."
       />
 
-      <section style={{ background: "var(--mkt-cream)", padding: "100px 40px", borderTop: "1px solid var(--mkt-brass-30)" }}>
+      <SectionTransition from="navy" to="cream" />
+
+      <section style={{ background: "var(--mkt-cream)", padding: "100px 40px" }}>
         <div
           style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: 80, alignItems: "start" }}
           className="block md:grid"
