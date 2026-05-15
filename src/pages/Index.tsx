@@ -57,82 +57,61 @@ function mapToScene(p: number): { scene: SceneName; phase: number; kicker: strin
   };
 }
 
-const grain = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%25%23n)'/></svg>")`;
-
 // ── ScrollHero ───────────────────────────────────────────────────────────────
 function ScrollHero() {
   const ref = useRef<HTMLElement>(null);
   const progress = useScrollProgress(ref as React.RefObject<HTMLElement>);
   const { scene, phase, kicker, caption } = mapToScene(progress);
 
+  // Zoom curve: phone starts at ~0.55x, reaches full size by 35% scroll, then holds.
+  const zoom = lerp(0.55, 1, Math.min(1, progress / 0.35));
+  const textFade = Math.max(0, 1 - progress / 0.28);
+  const textLift = -progress * 80;
+
   return (
-    <section ref={ref} style={{ height: "400vh", position: "relative" }}>
-      <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden" }}>
-        {/* Background */}
-        <div
-          aria-hidden
-          style={{
-            position: "absolute", inset: 0,
-            background: `
-              radial-gradient(circle at 18% 12%, rgba(90,18,24,0.34), transparent 38%),
-              radial-gradient(circle at 84% 22%, rgba(169,132,92,0.20), transparent 32%),
-              radial-gradient(circle at 50% 110%, rgba(13,27,46,0.6), transparent 60%),
-              linear-gradient(180deg, #071426 0%, #0D1B2E 60%, #0a1422 100%)
-            `,
-          }}
-        />
-        {/* Film grain */}
-        <div
-          aria-hidden
-          style={{
-            position: "absolute", inset: 0, opacity: 0.1,
-            mixBlendMode: "overlay", pointerEvents: "none",
-            backgroundImage: grain,
-          }}
-        />
-
-        {/* Progress rail */}
-        <div
-          style={{
-            position: "absolute", right: 24, top: 96, bottom: 96,
-            width: 1, background: "var(--mkt-brass-30)",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute", left: -3, top: `${progress * 100}%`,
-              width: 7, height: 7, borderRadius: 999,
-              background: "var(--mkt-brass)",
-              transform: "translateY(-50%)",
-              boxShadow: "0 0 0 1px rgba(7,20,38,0.6)",
-              transition: "top 80ms linear",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute", left: 14, top: `${progress * 100}%`,
-              transform: "translateY(-50%)",
-              fontFamily: "var(--font-mono)", fontSize: "0.56rem",
-              letterSpacing: "0.18em", textTransform: "uppercase",
-              color: "var(--mkt-brass)", whiteSpace: "nowrap",
-            }}
-          >
-            {scene.toUpperCase()} · {Math.round(progress * 100).toString().padStart(2, "0")}
-          </div>
-        </div>
-
+    <section
+      ref={ref}
+      style={{
+        height: "400vh",
+        position: "relative",
+        background: "var(--mkt-navy)",
+      }}
+    >
+      <div
+        style={{
+          position: "sticky",
+          top: 0,
+          height: "100vh",
+          width: "100%",
+          overflow: "hidden",
+          background: "var(--mkt-navy)",
+        }}
+      >
         {/* Main stage */}
         <div
           style={{
-            position: "relative", height: "100%",
-            maxWidth: 1280, margin: "0 auto", padding: "84px 64px 0 40px",
-            display: "grid", gridTemplateColumns: "1.05fr 0.95fr",
-            alignItems: "center", gap: 56,
+            position: "relative",
+            height: "100%",
+            width: "100%",
+            maxWidth: 1280,
+            margin: "0 auto",
+            padding: "84px clamp(20px, 5vw, 56px) 0",
+            display: "grid",
+            alignItems: "center",
+            gap: 32,
+            boxSizing: "border-box",
           }}
-          className="block md:grid"
+          className="md:!grid-cols-[1.05fr_0.95fr] !grid-cols-1"
         >
           {/* Left — text */}
-          <div>
+          <div
+            style={{
+              opacity: textFade,
+              transform: `translateY(${textLift}px)`,
+              transition: "opacity 120ms linear",
+              willChange: "opacity, transform",
+            }}
+          >
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
               <span style={{ width: 28, height: 1, background: "var(--mkt-brass)" }} />
               <span className="mkt-eyebrow" style={{ color: "var(--mkt-brass)" }}>
@@ -143,7 +122,7 @@ function ScrollHero() {
             <h1
               style={{
                 margin: 0, fontFamily: "var(--font-display)", fontWeight: 500,
-                fontSize: "clamp(3rem,6.4vw,6.4rem)", lineHeight: 0.88,
+                fontSize: "clamp(2.4rem,9vw,6.4rem)", lineHeight: 0.92,
                 letterSpacing: "-0.05em", color: "var(--mkt-cream)",
                 textWrap: "balance" as CSSProperties["textWrap"],
               }}
@@ -154,8 +133,8 @@ function ScrollHero() {
 
             <p
               style={{
-                margin: "32px 0 0", maxWidth: 520,
-                fontFamily: "var(--font-sans)", fontSize: "1.05rem",
+                margin: "24px 0 0", maxWidth: 520,
+                fontFamily: "var(--font-sans)", fontSize: "1rem",
                 lineHeight: 1.6, color: "var(--mkt-smoke)",
                 textWrap: "pretty" as CSSProperties["textWrap"],
               }}
@@ -164,44 +143,32 @@ function ScrollHero() {
               and the details that make a night feel effortless.
             </p>
 
-            {/* Live caption */}
-            <div style={{ marginTop: 40, paddingTop: 22, borderTop: "1px solid var(--mkt-brass-30)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6rem", color: "var(--mkt-brass)", letterSpacing: "0.18em" }}>
-                  {scene === "invite" ? "01" : scene === "redeem" ? "02" : "03"} / 03
-                </span>
-                <span style={{ width: 24, height: 1, background: "var(--mkt-brass-30)" }} />
-                <span className="mkt-eyebrow" style={{ color: "var(--mkt-brass)" }}>{kicker}</span>
-              </div>
-              <p
-                key={kicker}
-                style={{
-                  margin: "16px 0 0", maxWidth: 460,
-                  fontFamily: "var(--font-display)", fontStyle: "italic", fontWeight: 500,
-                  fontSize: "1.7rem", lineHeight: 1.15, letterSpacing: "-0.02em",
-                  color: "var(--mkt-cream)",
-                  animation: "mkt-caption-in 600ms cubic-bezier(0.22,1,0.36,1) both",
-                }}
-              >
-                {caption}
-              </p>
-            </div>
-
-            <div style={{ marginTop: 32, display: "flex", gap: 14, flexWrap: "wrap" }}>
+            <div style={{ marginTop: 28, display: "flex", gap: 12, flexWrap: "wrap" }}>
               <Link to="/request-access" className="mkt-btn mkt-btn--primary">Request an introduction</Link>
               <Link to="/platform" className="mkt-btn mkt-btn--ghost-dark">Step inside</Link>
             </div>
           </div>
 
-          {/* Right — phone */}
+          {/* Right — phone (zooms in on scroll) */}
           <div
             style={{
               position: "relative",
-              display: "flex", justifyContent: "center", alignItems: "center",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: 0,
             }}
-            className="hidden md:flex"
           >
-            <ScenePhone scene={scene} phase={phase} width={300} />
+            <div
+              style={{
+                transform: `scale(${zoom})`,
+                transformOrigin: "center center",
+                transition: "transform 80ms linear",
+                willChange: "transform",
+              }}
+            >
+              <ScenePhone scene={scene} phase={phase} width={260} />
+            </div>
           </div>
         </div>
 
