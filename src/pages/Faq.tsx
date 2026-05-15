@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import MktLayout from "@/components/marketing/MktLayout";
 import PageHero from "@/components/marketing/PageHero";
+import SectionTransition from "@/components/marketing/SectionTransition";
 
 const faqs = [
   {
@@ -47,7 +48,9 @@ export default function Faq() {
         <Link to="/contact" className="mkt-btn mkt-btn--ghost-dark">Write to the house</Link>
       </PageHero>
 
-      <section style={{ background: "var(--mkt-cream)", padding: "100px 40px", borderTop: "1px solid var(--mkt-brass-30)" }}>
+      <SectionTransition from="navy" to="cream" />
+
+      <section style={{ background: "var(--mkt-cream)", padding: "100px 40px" }}>
         <div
           style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 2fr", gap: 80, alignItems: "start" }}
           className="block md:grid"
@@ -125,7 +128,9 @@ export default function Faq() {
         </div>
       </section>
 
-      <section style={{ background: "var(--mkt-navy)", padding: "80px 40px", borderTop: "1px solid var(--mkt-brass-30)" }}>
+      <SectionTransition from="cream" to="navy" />
+
+      <section style={{ background: "var(--mkt-navy)", padding: "80px 40px" }}>
         <div
           style={{ maxWidth: 980, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: 32 }}
           className="block md:grid"
