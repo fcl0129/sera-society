@@ -68,6 +68,14 @@ function ScrollHero() {
   const textFade = Math.max(0, 1 - progress / 0.28);
   const textLift = -progress * 80;
 
+  // Cinematic parallax: tilt + lift + glare sweep driven by scroll.
+  const tiltX = lerp(8, -2, Math.min(1, progress / 0.5));   // forward tilt eases out
+  const tiltY = lerp(-6, 4, Math.min(1, progress));          // gentle yaw across the scroll
+  const phoneLift = lerp(0, -36, Math.min(1, progress));     // floats up subtly
+  const screenShift = lerp(-10, 10, Math.min(1, progress));  // inner content parallax
+  const glareX = lerp(-30, 130, Math.min(1, progress));      // glare sweeps across
+  const glareOpacity = Math.sin(Math.min(1, progress) * Math.PI) * 0.55;
+
   return (
     <section
       ref={ref}
@@ -149,7 +157,7 @@ function ScrollHero() {
             </div>
           </div>
 
-          {/* Right — phone (zooms in on scroll) */}
+          {/* Right — phone (zooms + parallax on scroll) */}
           <div
             style={{
               position: "relative",
@@ -157,17 +165,53 @@ function ScrollHero() {
               justifyContent: "center",
               alignItems: "center",
               minHeight: 0,
+              perspective: 1200,
             }}
           >
             <div
               style={{
-                transform: `scale(${zoom})`,
+                position: "relative",
+                transform: `translateY(${phoneLift}px) scale(${zoom}) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`,
+                transformStyle: "preserve-3d",
                 transformOrigin: "center center",
                 transition: "transform 80ms linear",
                 willChange: "transform",
+                filter: `drop-shadow(0 ${30 + progress * 40}px ${50 + progress * 60}px rgba(0,0,0,${0.45 + progress * 0.2}))`,
               }}
             >
-              <ScenePhone scene={scene} phase={phase} width={260} />
+              <div
+                style={{
+                  transform: `translateY(${screenShift}px)`,
+                  transition: "transform 120ms linear",
+                  willChange: "transform",
+                }}
+              >
+                <ScenePhone scene={scene} phase={phase} width={260} />
+              </div>
+              {/* Glare sweep */}
+              <div
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  borderRadius: 38,
+                  pointerEvents: "none",
+                  background: `linear-gradient(110deg, transparent ${glareX - 18}%, rgba(244,235,221,${glareOpacity}) ${glareX}%, transparent ${glareX + 18}%)`,
+                  mixBlendMode: "screen",
+                  opacity: 0.85,
+                }}
+              />
+              {/* Edge highlight */}
+              <div
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  borderRadius: 38,
+                  pointerEvents: "none",
+                  boxShadow: `inset 0 1px 0 rgba(244,235,221,${0.08 + progress * 0.06}), inset 0 -1px 0 rgba(0,0,0,0.4)`,
+                }}
+              />
             </div>
           </div>
         </div>
