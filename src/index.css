@@ -535,4 +535,9 @@
     from { opacity: 0; transform: translateY(6px); }
     to   { opacity: 1; transform: translateY(0); }
   }
+  @keyframes mkt-scan-line {
+    0%   { top: 18%; opacity: 0.2; }
+    50%  { top: 82%; opacity: 1; }
+    100% { top: 18%; opacity: 0.2; }
+  }
 }
