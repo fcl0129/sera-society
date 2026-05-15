@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import MktLayout from "@/components/marketing/MktLayout";
 import PageHero from "@/components/marketing/PageHero";
+import SectionTransition from "@/components/marketing/SectionTransition";
 
 const principles = [
   { n: "01", title: "Editorial first", body: "We design rooms before we design features. The host should always feel like they're reading, not configuring." },
@@ -23,6 +24,8 @@ export default function About() {
           <Link to="/platform" className="mkt-btn mkt-btn--ghost-dark">Read the platform</Link>
         </div>
       </PageHero>
+
+      <SectionTransition from="navy" to="cream" />
 
       {/* Letter from the founder */}
       <section style={{ background: "var(--mkt-cream)", padding: "120px 40px" }}>
@@ -75,8 +78,10 @@ export default function About() {
         </div>
       </section>
 
+      <SectionTransition from="cream" to="navy" />
+
       {/* Principles */}
-      <section style={{ background: "var(--mkt-navy)", padding: "120px 40px", borderTop: "1px solid var(--mkt-brass-30)" }}>
+      <section style={{ background: "var(--mkt-navy)", padding: "120px 40px" }}>
         <div style={{ maxWidth: 1180, margin: "0 auto" }}>
           <div
             style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr", gap: 64, alignItems: "end", marginBottom: 56 }}
@@ -125,8 +130,10 @@ export default function About() {
         </div>
       </section>
 
+      <SectionTransition from="navy" to="cream" />
+
       {/* Next-step strip */}
-      <section style={{ background: "linear-gradient(180deg,#F4EBDD 0%,#E8D8C3 100%)", padding: "80px 40px", borderTop: "1px solid var(--mkt-brass-30)" }}>
+      <section style={{ background: "linear-gradient(180deg,#F4EBDD 0%,#E8D8C3 100%)", padding: "80px 40px" }}>
         <div
           style={{ maxWidth: 980, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: 32 }}
           className="block md:grid"
