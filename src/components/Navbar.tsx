@@ -52,118 +52,118 @@ export default function Navbar() {
         Skip to main content
       </a>
 
-      {/* Desktop nav */}
+      {/* Unified header — wordmark + CTAs + burger at every breakpoint */}
       <div
         style={{
-          maxWidth: 1280, margin: "0 auto", padding: "20px 40px",
-          display: "grid",
-          gridTemplateColumns: "auto 1fr auto",
-          alignItems: "center", gap: 32,
+          maxWidth: 1280,
+          margin: "0 auto",
+          padding: "16px clamp(16px, 4vw, 40px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
         }}
-        className="hidden md:grid"
       >
-        {/* Wordmark */}
         <Link
           to="/"
           style={{
-            fontFamily: "var(--font-display)", fontSize: "1.5rem", fontWeight: 500,
-            color: N.cream, textDecoration: "none", letterSpacing: "-0.01em",
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(1.15rem, 2.4vw, 1.5rem)",
+            fontWeight: 500,
+            color: N.cream,
+            textDecoration: "none",
+            letterSpacing: "-0.01em",
+            whiteSpace: "nowrap",
           }}
         >
           Sera <span style={{ color: N.brass, fontStyle: "italic" }}>Society</span>
         </Link>
 
-        {/* Links */}
-        <nav style={{ display: "flex", justifyContent: "center", gap: 36 }}>
-          {PAGES.map((p) => {
-            const active = location.pathname === p.slug;
-            return (
-              <Link
-                key={p.slug}
-                to={p.slug}
-                style={{
-                  fontFamily: "var(--font-sans)", fontSize: "0.78rem", fontWeight: 450,
-                  letterSpacing: "0.02em", color: N.cream,
-                  opacity: active ? 1 : 0.7, textDecoration: "none",
-                  borderBottom: active ? `1px solid ${N.brass}` : "1px solid transparent",
-                  paddingBottom: 4, transition: "all 200ms",
-                }}
-              >
-                {p.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* CTAs */}
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <Link
             to="/login"
+            className="hidden sm:inline-flex"
             style={{
-              fontFamily: "var(--font-sans)", fontSize: "0.74rem", letterSpacing: "0.18em",
-              textTransform: "uppercase", color: N.cream, opacity: 0.72,
-              textDecoration: "none", whiteSpace: "nowrap", padding: "0 12px",
+              fontFamily: "var(--font-sans)",
+              fontSize: "0.7rem",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: N.cream,
+              opacity: 0.72,
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+              padding: "0 10px",
             }}
           >
             Return to your studio
           </Link>
-          <Link to="/request-access" className="mkt-btn mkt-btn--primary">
-            Request an introduction
+          <Link
+            to="/request-access"
+            className="mkt-btn mkt-btn--primary"
+            style={{ whiteSpace: "nowrap", fontSize: "0.72rem", padding: "10px 16px" }}
+          >
+            <span className="hidden sm:inline">Request an introduction</span>
+            <span className="sm:hidden">Request access</span>
           </Link>
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-label="Toggle menu"
+            aria-expanded={open}
+            style={{
+              background: "transparent",
+              border: `1px solid ${N.cream14}`,
+              color: N.cream,
+              cursor: "pointer",
+              padding: 8,
+              borderRadius: 999,
+              marginLeft: 6,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {open ? <X size={18} /> : <Menu size={18} />}
+          </button>
         </div>
       </div>
 
-      {/* Mobile header */}
-      <div
-        style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "16px 20px",
-        }}
-        className="md:hidden"
-      >
-        <Link
-          to="/"
-          style={{
-            fontFamily: "var(--font-display)", fontSize: "1.2rem", fontWeight: 500,
-            color: N.cream, textDecoration: "none",
-          }}
-        >
-          Sera <span style={{ color: N.brass, fontStyle: "italic" }}>Society</span>
-        </Link>
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-label="Toggle menu"
-          aria-expanded={open}
-          style={{
-            background: "transparent", border: "none", color: N.cream,
-            cursor: "pointer", padding: 4,
-          }}
-        >
-          {open ? <X size={22} /> : <Menu size={22} />}
-        </button>
-      </div>
-
-      {/* Mobile drawer */}
+      {/* Drawer (all breakpoints) */}
       <AnimatePresence>
         {open && (
           <motion.nav
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            style={{ overflow: "hidden", borderTop: `1px solid ${N.cream14}` }}
-            className="md:hidden"
+            style={{
+              overflow: "hidden",
+              borderTop: `1px solid ${N.cream14}`,
+              background: "rgba(7,20,38,0.92)",
+              backdropFilter: "blur(24px)",
+              WebkitBackdropFilter: "blur(24px)",
+            }}
           >
-            <div style={{ padding: "16px 20px 24px", display: "flex", flexDirection: "column", gap: 4 }}>
+            <div
+              style={{
+                maxWidth: 1280,
+                margin: "0 auto",
+                padding: "16px clamp(16px, 4vw, 40px) 28px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 4,
+              }}
+            >
               {PAGES.map((p) => (
                 <Link
                   key={p.slug}
                   to={p.slug}
                   onClick={() => setOpen(false)}
                   style={{
-                    fontFamily: "var(--font-sans)", fontSize: "0.9rem",
-                    color: N.cream, textDecoration: "none",
-                    padding: "10px 0",
+                    fontFamily: "var(--font-display)",
+                    fontSize: "1.4rem",
+                    color: N.cream,
+                    textDecoration: "none",
+                    padding: "14px 0",
                     borderBottom: `1px solid ${N.cream08}`,
                     opacity: location.pathname === p.slug ? 1 : 0.72,
                   }}
@@ -171,14 +171,6 @@ export default function Navbar() {
                   {p.label}
                 </Link>
               ))}
-              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 16 }}>
-                <Link to="/login" onClick={() => setOpen(false)} className="mkt-btn mkt-btn--ghost-dark" style={{ textAlign: "center" }}>
-                  Return to your studio
-                </Link>
-                <Link to="/request-access" onClick={() => setOpen(false)} className="mkt-btn mkt-btn--primary" style={{ textAlign: "center" }}>
-                  Request an introduction
-                </Link>
-              </div>
             </div>
           </motion.nav>
         )}
