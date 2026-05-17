@@ -165,14 +165,12 @@ function ScrollHero() {
               justifyContent: "center",
               alignItems: "center",
               minHeight: 0,
-              perspective: 1200,
             }}
           >
             <div
               style={{
                 position: "relative",
-                transform: `translateY(${phoneLift}px) scale(${zoom}) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`,
-                transformStyle: "preserve-3d",
+                transform: `perspective(1200px) translateY(${phoneLift}px) scale(${zoom}) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`,
                 transformOrigin: "center center",
                 transition: "transform 80ms linear",
                 willChange: "transform",
