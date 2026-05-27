@@ -444,22 +444,22 @@ export default function HostAdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-sera-paper">
-      <header className="border-b border-sera-line/70 bg-sera-cloud/80 backdrop-blur supports-[backdrop-filter]:bg-sera-cloud/60">
+    <div style={{ minHeight: "100vh", background: "var(--app-bg)", color: "var(--app-text)", fontFamily: "var(--font-sans)" }}>
+      <header style={{ borderBottom: "1px solid var(--app-card-border)", background: "rgba(7,20,38,0.82)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", position: "sticky", top: 0, zIndex: 40 }}>
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
           <div>
-            <p className="sera-label text-sera-warm-grey">
+            <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--app-line-brass)", margin: 0 }}>
               Sera Society · {role === "admin" || role === "host_admin" ? "Studio" : "Studio"}
             </p>
-            <h1 className="font-serif text-xl text-sera-ink">{fullName ?? email ?? "Welcome"}</h1>
+            <h1 style={{ fontFamily: "var(--font-display)", fontSize: "1.25rem", fontWeight: 500, color: "var(--app-text)", margin: "2px 0 0", letterSpacing: "-0.01em" }}>{fullName ?? email ?? "Welcome"}</h1>
           </div>
           <div className="flex items-center gap-2">
             {(role === "admin" || role === "host_admin") && (
-              <Button variant="sera-outline" size="sm" className="rounded-full" onClick={() => navigate("/admin")}>
+              <button onClick={() => navigate("/admin")} style={{ fontFamily: "var(--font-sans)", fontSize: "0.7rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--app-text-muted)", background: "transparent", border: "1px solid var(--app-card-border)", borderRadius: 999, padding: "6px 14px", cursor: "pointer" }}>
                 Admin review
-              </Button>
+              </button>
             )}
-            <Button variant="ghost" size="sm" onClick={handleSignOut}>
+            <Button variant="ghost" size="sm" onClick={handleSignOut} style={{ color: "var(--app-text-muted)" }}>
               <LogOut className="w-4 h-4 mr-2" /> Sign out
             </Button>
           </div>
@@ -468,41 +468,40 @@ export default function HostAdminDashboard() {
 
       <main className="max-w-7xl mx-auto px-6 py-8 grid lg:grid-cols-[280px_1fr] gap-6">
         {/* Sidebar */}
-        <aside className="space-y-4">
+        <aside style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div className="flex items-center justify-between">
-            <h2 className="sera-label text-sera-warm-grey">Your events</h2>
-            <Button size="sm" variant="sera" className="rounded-full" onClick={() => setShowCreate(true)}>
-              <Plus className="w-4 h-4 mr-1" /> New
-            </Button>
+            <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--app-line-brass)" }}>Your events</span>
+            <button onClick={() => setShowCreate(true)} style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#5A1218", color: "#F4EBDD", border: 0, borderRadius: 999, padding: "6px 12px", fontFamily: "var(--font-sans)", fontSize: "0.62rem", fontWeight: 500, letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}>
+              <Plus className="w-3 h-3" /> New
+            </button>
           </div>
 
-          {eventsQuery.isLoading && <p className="text-sm text-sera-warm-grey">Loading…</p>}
+          {eventsQuery.isLoading && <p style={{ fontSize: "0.875rem", color: "var(--app-text-muted)" }}>Loading…</p>}
           {events.length === 0 && !eventsQuery.isLoading && (
-            <div className="rounded-2xl border border-dashed border-sera-line bg-transparent p-6 text-center">
-              <p className="font-serif text-base text-sera-ink">No events yet</p>
-              <p className="mt-1 text-xs text-sera-warm-grey">Compose your first invitation to begin.</p>
+            <div style={{ border: "1px dashed var(--app-card-border)", padding: "24px", textAlign: "center" }}>
+              <p style={{ fontFamily: "var(--font-display)", fontSize: "1rem", color: "var(--app-text)", margin: 0 }}>No events yet</p>
+              <p style={{ marginTop: 4, fontSize: "0.75rem", color: "var(--app-text-muted)" }}>Compose your first invitation to begin.</p>
             </div>
           )}
-          <div className="space-y-2">
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {events.map((ev) => (
               <button
                 key={ev.id}
                 onClick={() => setActiveEventId(ev.id)}
-                className={`w-full rounded-2xl border p-4 text-left transition-all ${
-                  ev.id === currentEventId
-                    ? "border-sera-ink bg-sera-ivory shadow-soft"
-                    : "border-sera-line bg-sera-cloud hover:border-sera-ink/30"
-                }`}
+                style={{
+                  width: "100%", textAlign: "left", padding: "14px 16px", cursor: "pointer",
+                  border: ev.id === currentEventId ? "1px solid #A9845C" : "1px solid var(--app-card-border)",
+                  background: ev.id === currentEventId ? "rgba(169,132,92,0.08)" : "transparent",
+                  color: "var(--app-text)", transition: "all 160ms",
+                }}
               >
-                <p className="font-serif text-base text-sera-ink">{ev.title}</p>
-                <p className="mt-1 text-xs text-sera-warm-grey">{fmt.format(new Date(ev.starts_at))}</p>
-                <span
-                  className={`mt-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] ${
-                    ev.status === "published"
-                      ? "bg-status-success-soft text-status-success"
-                      : "bg-sera-line/50 text-sera-warm-grey"
-                  }`}
-                >
+                <p style={{ fontFamily: "var(--font-display)", fontSize: "1rem", color: "var(--app-text)", margin: 0, letterSpacing: "-0.01em" }}>{ev.title}</p>
+                <p style={{ marginTop: 4, fontFamily: "var(--font-mono)", fontSize: "0.66rem", color: "var(--app-text-muted)" }}>{fmt.format(new Date(ev.starts_at))}</p>
+                <span style={{
+                  display: "inline-flex", alignItems: "center", marginTop: 6,
+                  fontFamily: "var(--font-sans)", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase",
+                  color: ev.status === "published" ? "#3D4A35" : "#A9845C",
+                }}>
                   {ev.status}
                 </span>
               </button>
@@ -511,40 +510,48 @@ export default function HostAdminDashboard() {
         </aside>
 
         {/* Main panel */}
-        <section className="space-y-6">
+        <section style={{ display: "flex", flexDirection: "column", gap: 24 }}>
           {!currentEvent ? (
-            <div className="rounded-[28px] border border-dashed border-sera-line bg-sera-ivory p-12 text-center">
-              <Calendar className="mx-auto mb-4 h-8 w-8 text-sera-warm-grey" strokeWidth={1.5} />
-              <h3 className="font-serif text-3xl text-sera-ink">Begin with an event</h3>
-              <p className="mt-2 text-sm text-sera-warm-grey">Select one from the left, or compose a new evening.</p>
+            <div style={{ border: "1px dashed var(--app-card-border)", padding: "48px", textAlign: "center" }}>
+              <Calendar className="mx-auto mb-4 h-8 w-8" style={{ color: "var(--app-text-muted)" }} strokeWidth={1.5} />
+              <h3 style={{ fontFamily: "var(--font-display)", fontSize: "2rem", fontWeight: 500, color: "var(--app-text)", letterSpacing: "-0.03em", margin: 0 }}>Begin with an event</h3>
+              <p style={{ marginTop: 8, fontSize: "0.875rem", color: "var(--app-text-muted)" }}>Select one from the left, or compose a new evening.</p>
             </div>
           ) : (
             <>
-              <div className="rounded-[28px] border border-sera-line bg-sera-ivory p-6 shadow-soft md:p-8">
+              <div style={{ border: "1px solid var(--app-card-border)", background: "var(--app-card-bg)", padding: "28px 32px" }}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
-                    <p className="sera-label text-sera-warm-grey">{currentEvent.status}</p>
-                    <h2 className="mt-1 font-serif text-4xl leading-[1.04] text-sera-ink">{currentEvent.title}</h2>
-                    <p className="mt-3 text-sm text-sera-warm-grey">
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+                      <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--app-line-brass)" }}>{currentEvent.status}</span>
+                      {currentEvent.status === "published" && (
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: "var(--font-mono)", fontSize: "0.6rem", color: "#3D4A35", border: "1px solid rgba(61,74,53,0.5)", padding: "2px 7px", borderRadius: 999, letterSpacing: "0.16em", textTransform: "uppercase" }}>
+                          <span style={{ width: 5, height: 5, borderRadius: 999, background: "#3D4A35" }} />
+                          Live
+                        </span>
+                      )}
+                    </div>
+                    <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 500, fontSize: "clamp(1.8rem,3vw,2.8rem)", lineHeight: 0.98, letterSpacing: "-0.04em", color: "var(--app-text)", margin: 0 }}>{currentEvent.title}</h2>
+                    <p style={{ marginTop: 12, fontFamily: "var(--font-mono)", fontSize: "0.7rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--app-text-muted)" }}>
                       {fmt.format(new Date(currentEvent.starts_at))}
                       {currentEvent.venue ? ` · ${currentEvent.venue}` : ""}
                       {currentEvent.capacity ? ` · cap ${currentEvent.capacity}` : ""}
                     </p>
                     {currentEvent.description && (
-                      <p className="mt-4 max-w-2xl text-sm leading-relaxed text-sera-warm-grey">{currentEvent.description}</p>
+                      <p style={{ marginTop: 12, maxWidth: 600, fontSize: "0.94rem", lineHeight: 1.6, color: "var(--app-text-muted)" }}>{currentEvent.description}</p>
                     )}
                   </div>
-                  <div className="flex shrink-0 flex-col gap-2">
-                    <Button variant="sera" size="sm" className="rounded-full" onClick={handlePublishToggle}>
+                  <div style={{ display: "flex", flexShrink: 0, flexDirection: "column", gap: 8 }}>
+                    <button onClick={handlePublishToggle} style={{ fontFamily: "var(--font-sans)", fontSize: "0.7rem", letterSpacing: "0.18em", textTransform: "uppercase", background: "#5A1218", color: "#F4EBDD", border: 0, borderRadius: 999, padding: "8px 16px", cursor: "pointer" }}>
                       {currentEvent.status === "published" ? "Unpublish" : "Publish"}
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={handleDeleteEvent}>
-                      <Trash2 className="w-4 h-4 mr-1" /> Delete
-                    </Button>
+                    </button>
+                    <button onClick={handleDeleteEvent} style={{ background: "transparent", border: "1px solid var(--app-card-border)", color: "var(--app-text-muted)", borderRadius: 999, padding: "6px 12px", fontSize: "0.75rem", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+                      <Trash2 className="w-3 h-3" /> Delete
+                    </button>
                   </div>
                 </div>
 
-                <div className="mt-7 grid grid-cols-2 gap-2 md:grid-cols-5">
+                <div style={{ marginTop: 24, display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10 }} className="grid-cols-2 md:!grid-cols-5">
                   <Stat icon={<Users className="w-4 h-4" />} label="Guests" value={String(stats.totalGuests)} />
                   <Stat icon={<Check className="w-4 h-4" />} label="Accepted" value={String(stats.accepted)} />
                   <Stat icon={<X className="w-4 h-4" />} label="Declined" value={String(stats.declined)} />
@@ -554,16 +561,16 @@ export default function HostAdminDashboard() {
               </div>
 
               {/* Guest management */}
-              <div className="rounded-[28px] border border-sera-line bg-sera-ivory p-6 shadow-soft md:p-8">
-                <div className="mb-5 flex items-baseline justify-between">
+              <div style={{ border: "1px solid var(--app-card-border)", background: "var(--app-card-bg)", padding: "24px 32px" }}>
+                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 20, paddingBottom: 20, borderBottom: "1px solid var(--app-line-brass)" }}>
                   <div>
-                    <p className="sera-label text-sera-warm-grey">The list</p>
-                    <h3 className="mt-1 font-serif text-2xl text-sera-ink">Guests & RSVPs</h3>
+                    <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--app-line-brass)", margin: 0 }}>The list</p>
+                    <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 500, fontSize: "1.5rem", letterSpacing: "-0.02em", color: "var(--app-text)", margin: "6px 0 0" }}>Guests &amp; RSVPs</h3>
                   </div>
-                  <p className="text-xs text-sera-warm-grey">{stats.totalGuests} invited</p>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.66rem", color: "var(--app-text-muted)" }}>{stats.totalGuests} invited · {stats.accepted} accepted</span>
                 </div>
-                <div className="rounded-2xl border border-sera-line bg-sera-cloud p-4">
-                  <p className="sera-label text-sera-warm-grey">Add a guest</p>
+                <div style={{ border: "1px solid var(--app-card-border)", background: "rgba(7,20,38,0.5)", padding: "18px 20px", marginBottom: 16 }}>
+                  <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--app-line-brass)", margin: "0 0 14px" }}>Compose · add a guest</p>
                   <form onSubmit={handleAddGuest} className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
                     <Input
                       type="email"
@@ -571,21 +578,21 @@ export default function HostAdminDashboard() {
                       value={guestEmail}
                       onChange={(e) => setGuestEmail(e.target.value)}
                       required
-                      className="rounded-xl"
+                      style={{ background: "rgba(7,20,38,0.7)", border: "1px solid var(--app-card-border)", color: "var(--app-text)", borderRadius: 0 }}
                     />
                     <Input
                       placeholder="Full name (optional)"
                       value={guestName}
                       onChange={(e) => setGuestName(e.target.value)}
-                      className="rounded-xl"
+                      style={{ background: "rgba(7,20,38,0.7)", border: "1px solid var(--app-card-border)", color: "var(--app-text)", borderRadius: 0 }}
                     />
                     <Input
                       placeholder="Phone (optional)"
                       value={guestPhone}
                       onChange={(e) => setGuestPhone(e.target.value)}
-                      className="rounded-xl"
+                      style={{ background: "rgba(7,20,38,0.7)", border: "1px solid var(--app-card-border)", color: "var(--app-text)", borderRadius: 0 }}
                     />
-                    <label className="flex items-center gap-2 rounded-xl border border-sera-line bg-sera-ivory px-3 text-sm text-sera-ink">
+                    <label style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", border: "1px solid var(--app-card-border)", fontFamily: "var(--font-sans)", fontSize: "0.86rem", color: "var(--app-text)" }}>
                       <input
                         type="checkbox"
                         checked={guestPlusOne}
@@ -593,123 +600,55 @@ export default function HostAdminDashboard() {
                       />
                       Allow plus-ones
                     </label>
-                    <Button type="submit" variant="sera" size="sm" disabled={addingGuest} className="rounded-full md:col-span-2">
-                      {addingGuest ? "Adding…" : "Add guest"}
-                    </Button>
+                    <button type="submit" disabled={addingGuest} className="md:col-span-2" style={{ background: "#5A1218", color: "#F4EBDD", border: 0, borderRadius: 999, padding: "10px 20px", fontFamily: "var(--font-sans)", fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.18em", textTransform: "uppercase", cursor: addingGuest ? "not-allowed" : "pointer", opacity: addingGuest ? 0.7 : 1 }}>
+                      {addingGuest ? "Adding…" : "Place on the list"}
+                    </button>
                   </form>
                 </div>
 
-                <div className="mt-5 max-h-[32rem] space-y-2 overflow-auto pr-1">
+                <div className="mt-2 max-h-[32rem] overflow-auto pr-1" style={{ display: "flex", flexDirection: "column" }}>
                   {(guestsQuery.data ?? []).map((g) => {
                     const isEditing = editingGuestId === g.id;
                     return (
-                      <div key={g.id} className="rounded-2xl border border-sera-line bg-sera-cloud px-4 py-3 text-sm transition-colors hover:border-sera-ink/20">
+                      <div key={g.id} style={{ borderTop: "1px solid var(--app-card-border)", padding: "14px 0", fontSize: "0.875rem", transition: "background 160ms" }}>
                         {isEditing ? (
-                          <div className="space-y-2">
+                          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                              <Input
-                                placeholder="Full name"
-                                value={editForm.full_name ?? ""}
-                                onChange={(e) => setEditForm((f) => ({ ...f, full_name: e.target.value }))}
-                              />
-                              <Input
-                                type="email"
-                                placeholder="Email"
-                                value={editForm.invited_email ?? ""}
-                                onChange={(e) => setEditForm((f) => ({ ...f, invited_email: e.target.value }))}
-                              />
-                              <Input
-                                placeholder="Phone"
-                                value={editForm.phone_number ?? ""}
-                                onChange={(e) => setEditForm((f) => ({ ...f, phone_number: e.target.value }))}
-                              />
-                              <label className="flex items-center gap-2 text-xs">
-                                <input
-                                  type="checkbox"
-                                  checked={editForm.plus_one_allowed ?? false}
-                                  onChange={(e) => setEditForm((f) => ({ ...f, plus_one_allowed: e.target.checked }))}
-                                />
+                              <Input placeholder="Full name" value={editForm.full_name ?? ""} onChange={(e) => setEditForm((f) => ({ ...f, full_name: e.target.value }))} style={{ background: "rgba(7,20,38,0.7)", border: "1px solid var(--app-card-border)", color: "var(--app-text)", borderRadius: 0 }} />
+                              <Input type="email" placeholder="Email" value={editForm.invited_email ?? ""} onChange={(e) => setEditForm((f) => ({ ...f, invited_email: e.target.value }))} style={{ background: "rgba(7,20,38,0.7)", border: "1px solid var(--app-card-border)", color: "var(--app-text)", borderRadius: 0 }} />
+                              <Input placeholder="Phone" value={editForm.phone_number ?? ""} onChange={(e) => setEditForm((f) => ({ ...f, phone_number: e.target.value }))} style={{ background: "rgba(7,20,38,0.7)", border: "1px solid var(--app-card-border)", color: "var(--app-text)", borderRadius: 0 }} />
+                              <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.8rem", color: "var(--app-text)" }}>
+                                <input type="checkbox" checked={editForm.plus_one_allowed ?? false} onChange={(e) => setEditForm((f) => ({ ...f, plus_one_allowed: e.target.checked }))} />
                                 Plus-one allowed
                               </label>
                             </div>
-                            <div className="flex gap-2 justify-end">
-                              <Button size="sm" variant="ghost" onClick={() => { setEditingGuestId(null); setEditForm({}); }}>
-                                Cancel
-                              </Button>
-                              <Button size="sm" variant="sera" onClick={handleSaveEdit}>
-                                Save
-                              </Button>
+                            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                              <button onClick={() => { setEditingGuestId(null); setEditForm({}); }} style={{ background: "transparent", border: "1px solid var(--app-card-border)", color: "var(--app-text-muted)", borderRadius: 999, padding: "6px 14px", fontSize: "0.75rem", cursor: "pointer" }}>Cancel</button>
+                              <button onClick={handleSaveEdit} style={{ background: "#5A1218", color: "#F4EBDD", border: 0, borderRadius: 999, padding: "6px 14px", fontSize: "0.75rem", cursor: "pointer" }}>Save</button>
                             </div>
                           </div>
                         ) : (
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <p className="font-medium truncate">{g.full_name ?? g.invited_email}</p>
-                              {g.full_name && <p className="text-xs text-sera-warm-grey truncate">{g.invited_email}</p>}
-                              <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-sera-warm-grey">
+                          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+                            <div style={{ minWidth: 0 }}>
+                              <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.92rem", color: "var(--app-text)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.full_name ?? g.invited_email}</p>
+                              {g.full_name && <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.66rem", color: "var(--app-text-muted)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.invited_email}</p>}
+                              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginTop: 4, fontFamily: "var(--font-mono)", fontSize: "0.66rem", color: "var(--app-text-muted)" }}>
                                 {g.phone_number && <span>{g.phone_number}</span>}
-                                {g.plus_one_allowed && (
-                                  <span>+1 allowed{g.plus_one_count ? ` · ${g.plus_one_count} confirmed` : ""}</span>
-                                )}
-                                {g.rsvp_responded_at && (
-                                  <span>· responded {new Date(g.rsvp_responded_at).toLocaleDateString()}</span>
-                                )}
+                                {g.plus_one_allowed && <span>+1 allowed{g.plus_one_count ? ` · ${g.plus_one_count} confirmed` : ""}</span>}
+                                {g.rsvp_responded_at && <span>· responded {new Date(g.rsvp_responded_at).toLocaleDateString()}</span>}
                               </div>
-                              {g.rsvp_message && (
-                                <p className="text-xs text-sera-stone mt-1 italic">"{g.rsvp_message}"</p>
-                              )}
+                              {g.rsvp_message && <p style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.78rem", color: "var(--app-text-muted)", marginTop: 6 }}>"{g.rsvp_message}"</p>}
                             </div>
-                            <div className="flex items-center gap-1 shrink-0">
-                              <select
-                                value={g.rsvp_status}
-                                onChange={(e) => handleOverrideStatus(g, e.target.value as any)}
-                                className="text-[11px] border border-sera-sand/60 px-2 py-1 bg-white uppercase tracking-wider"
-                                aria-label="Override RSVP status"
-                              >
+                            <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+                              <select value={g.rsvp_status} onChange={(e) => handleOverrideStatus(g, e.target.value as any)} aria-label="Override RSVP status" style={{ fontFamily: "var(--font-sans)", fontSize: "0.62rem", letterSpacing: "0.18em", textTransform: "uppercase", border: "1px solid var(--app-card-border)", background: "rgba(7,20,38,0.7)", color: "var(--app-text)", padding: "4px 8px" }}>
                                 <option value="pending">pending</option>
                                 <option value="accepted">accepted</option>
                                 <option value="declined">declined</option>
                               </select>
-                              <button
-                                onClick={() => copyRsvpLink(g.rsvp_token)}
-                                className="p-1.5 text-sera-warm-grey hover:text-sera-navy"
-                                aria-label="Copy RSVP link"
-                                title="Copy RSVP link"
-                              >
-                                <Link2 className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => void resendInvitation(g)}
-                                className="p-1.5 text-sera-warm-grey hover:text-sera-navy"
-                                aria-label="Resend invitation email"
-                                title="Resend invitation email"
-                              >
-                                <Send className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setEditingGuestId(g.id);
-                                  setEditForm({
-                                    full_name: g.full_name,
-                                    invited_email: g.invited_email,
-                                    phone_number: g.phone_number,
-                                    plus_one_allowed: g.plus_one_allowed,
-                                  });
-                                }}
-                                className="p-1.5 text-sera-warm-grey hover:text-sera-navy"
-                                aria-label="Edit guest"
-                                title="Edit"
-                              >
-                                <Pencil className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleRemoveGuest(g.id)}
-                                className="p-1.5 text-sera-warm-grey hover:text-sera-oxblood"
-                                aria-label="Remove guest"
-                                title="Remove"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                              <button onClick={() => copyRsvpLink(g.rsvp_token)} style={{ background: "transparent", border: "1px solid var(--app-card-border)", width: 28, height: 28, display: "inline-flex", alignItems: "center", justifyContent: "center", color: "var(--app-text-muted)", cursor: "pointer" }} aria-label="Copy RSVP link" title="Copy RSVP link"><Link2 className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => void resendInvitation(g)} style={{ background: "transparent", border: "1px solid var(--app-card-border)", width: 28, height: 28, display: "inline-flex", alignItems: "center", justifyContent: "center", color: "var(--app-text-muted)", cursor: "pointer" }} aria-label="Resend invitation" title="Resend invitation"><Send className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => { setEditingGuestId(g.id); setEditForm({ full_name: g.full_name, invited_email: g.invited_email, phone_number: g.phone_number, plus_one_allowed: g.plus_one_allowed }); }} style={{ background: "transparent", border: "1px solid var(--app-card-border)", width: 28, height: 28, display: "inline-flex", alignItems: "center", justifyContent: "center", color: "var(--app-text-muted)", cursor: "pointer" }} aria-label="Edit guest" title="Edit"><Pencil className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => handleRemoveGuest(g.id)} style={{ background: "transparent", border: "1px solid var(--app-card-border)", width: 28, height: 28, display: "inline-flex", alignItems: "center", justifyContent: "center", color: "var(--app-text-muted)", cursor: "pointer" }} aria-label="Remove guest" title="Remove"><Trash2 className="w-3.5 h-3.5" /></button>
                             </div>
                           </div>
                         )}
@@ -719,68 +658,34 @@ export default function HostAdminDashboard() {
                           const redeemedCount = guestTickets.filter((t) => t.status === "redeemed").length;
                           const accepted = g.rsvp_status === "accepted";
                           return (
-                            <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-sera-sand/30 pt-2 text-xs">
-                              <span className="sera-label text-sera-stone">Drink ticket</span>
+                            <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, borderTop: "1px solid var(--app-card-border)", paddingTop: 8 }}>
+                              <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--app-line-brass)" }}>Drink ticket</span>
                               {guestTickets.length === 0 ? (
-                                <Button
-                                  size="sm"
-                                  variant="sera-outline"
-                                  onClick={() => issueTicketForGuest(g)}
-                                  disabled={!accepted}
-                                  title={accepted ? "Issue a drink ticket" : "Guest must accept first"}
-                                >
-                                  <Ticket className="w-3 h-3 mr-1" /> Issue
-                                </Button>
+                                <button onClick={() => issueTicketForGuest(g)} disabled={!accepted} title={accepted ? "Issue a drink ticket" : "Guest must accept first"} style={{ background: "transparent", border: "1px solid var(--app-card-border)", color: "var(--app-text-muted)", borderRadius: 999, padding: "3px 10px", fontSize: "0.66rem", letterSpacing: "0.18em", textTransform: "uppercase", cursor: accepted ? "pointer" : "not-allowed", opacity: accepted ? 1 : 0.4, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                                  <Ticket className="w-3 h-3" /> Issue
+                                </button>
                               ) : (
                                 <>
                                   {activeTickets.length > 0 ? (
                                     <>
-                                      <Badge variant="outline" className="text-[10px]">
-                                        {activeTickets.length} active
-                                      </Badge>
+                                      <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.62rem", color: "#3D4A35", border: "1px solid rgba(61,74,53,0.5)", padding: "2px 7px", borderRadius: 999 }}>{activeTickets.length} active</span>
                                       {activeTickets[0] && (
                                         <>
-                                          <button
-                                            onClick={() => copyTicketToken(activeTickets[0].token)}
-                                            className="text-sera-navy underline-offset-2 hover:underline"
-                                            aria-label="Copy ticket token"
-                                            title="Copy token to test in bartender manual entry"
-                                          >
-                                            copy token
-                                          </button>
-                                          <button
-                                            onClick={() => voidTicket(activeTickets[0].id)}
-                                            className="p-1 text-sera-warm-grey hover:text-sera-oxblood"
-                                            aria-label="Void ticket"
-                                            title="Void"
-                                          >
-                                            <Ban className="w-3.5 h-3.5" />
-                                          </button>
+                                          <button onClick={() => copyTicketToken(activeTickets[0].token)} style={{ background: "none", border: "none", color: "var(--app-text-muted)", fontSize: "0.72rem", textDecoration: "underline", cursor: "pointer" }} title="Copy token">copy token</button>
+                                          <button onClick={() => voidTicket(activeTickets[0].id)} style={{ background: "transparent", border: "1px solid var(--app-card-border)", width: 24, height: 24, display: "inline-flex", alignItems: "center", justifyContent: "center", color: "var(--app-text-muted)", cursor: "pointer" }} title="Void"><Ban className="w-3 h-3" /></button>
                                         </>
                                       )}
                                     </>
                                   ) : null}
-                                  <Button
-                                    size="sm"
-                                    variant="sera-outline"
-                                    onClick={() => issueTicketForGuest(g)}
-                                    disabled={!accepted}
-                                  >
-                                    <Ticket className="w-3 h-3 mr-1" /> Issue another
-                                  </Button>
-                                  {redeemedCount > 0 && (
-                                    <span className="text-sera-warm-grey">· {redeemedCount} redeemed</span>
-                                  )}
+                                  <button onClick={() => issueTicketForGuest(g)} disabled={!accepted} style={{ background: "transparent", border: "1px solid var(--app-card-border)", color: "var(--app-text-muted)", borderRadius: 999, padding: "3px 10px", fontSize: "0.66rem", letterSpacing: "0.18em", textTransform: "uppercase", cursor: accepted ? "pointer" : "not-allowed", opacity: accepted ? 1 : 0.4, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                                    <Ticket className="w-3 h-3" /> Issue another
+                                  </button>
+                                  {redeemedCount > 0 && <span style={{ color: "var(--app-text-muted)", fontSize: "0.72rem" }}>· {redeemedCount} redeemed</span>}
                                 </>
                               )}
                               {accepted && (
-                                <button
-                                  onClick={() => copyPassLink(g)}
-                                  className="ml-auto inline-flex items-center gap-1 text-sera-navy underline-offset-2 hover:underline"
-                                  aria-label="Copy guest pass link"
-                                  title="Copy guest pass link"
-                                >
-                                  <Wallet className="w-3.5 h-3.5" /> Copy pass link
+                                <button onClick={() => copyPassLink(g)} style={{ marginLeft: "auto", background: "none", border: "none", color: "var(--app-text-muted)", fontSize: "0.72rem", display: "inline-flex", alignItems: "center", gap: 4, cursor: "pointer", textDecoration: "underline" }} title="Copy guest pass link">
+                                  <Wallet className="w-3.5 h-3.5" /> Hold in wallet
                                 </button>
                               )}
                             </div>
@@ -790,7 +695,7 @@ export default function HostAdminDashboard() {
                     );
                   })}
                   {(guestsQuery.data ?? []).length === 0 && (
-                    <p className="text-sm text-sera-warm-grey">No guests yet.</p>
+                    <p style={{ fontSize: "0.875rem", color: "var(--app-text-muted)", padding: "20px 0" }}>No guests yet.</p>
                   )}
                 </div>
               </div>
@@ -799,20 +704,20 @@ export default function HostAdminDashboard() {
               <div className="grid md:grid-cols-3 gap-4">
                 <EntryCard
                   icon={<Ticket className="w-5 h-5" />}
-                  title="Issue drink tickets"
-                  description={`${stats.ticketsRedeemed}/${stats.ticketsTotal} redeemed · click to bulk-issue to all accepted guests`}
+                  title="Hand out passes"
+                  description={`${stats.ticketsRedeemed}/${stats.ticketsTotal} redeemed · bulk-issue to all accepted guests`}
                   onClick={() => void issueTicketsToAllAccepted()}
                 />
                 <EntryCard
                   icon={<ScanLine className="w-5 h-5" />}
-                  title="Check-in"
-                  description="Open the door scanner"
+                  title="Open the door"
+                  description="Start check-in for arrivals"
                   onClick={() => navigate(`/check-in?event=${currentEvent.id}`)}
                 />
                 <EntryCard
                   icon={<Users className="w-5 h-5" />}
-                  title="Bar Mode"
-                  description="Open the staff-friendly drink ticket scanner"
+                  title="The bar"
+                  description="Live drink ticket redemption"
                   onClick={() => navigate("/ops/bartender")}
                 />
               </div>
@@ -832,12 +737,14 @@ export default function HostAdminDashboard() {
 
 function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-sera-line bg-sera-cloud px-4 py-3">
-      <div className="flex items-center gap-1.5 text-sera-warm-grey">
+    <div style={{ border: "1px solid var(--app-card-border)", background: "rgba(13,27,46,0.5)", padding: "18px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--font-sans)", fontSize: "0.62rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--app-text-muted)" }}>
         {icon}
-        <p className="text-[10px] uppercase tracking-[0.18em]">{label}</p>
+        <span>{label}</span>
       </div>
-      <p className="mt-1 font-serif text-2xl text-sera-ink tabular-nums">{value}</p>
+      <div style={{ fontFamily: "var(--font-mono)", fontWeight: 600, fontSize: "1.8rem", letterSpacing: "-0.02em", color: "var(--app-text)", fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
+        {value}
+      </div>
     </div>
   );
 }
@@ -848,13 +755,15 @@ function EntryCard({ icon, title, description, onClick }: {
   return (
     <button
       onClick={onClick}
-      className="group rounded-[24px] border border-sera-line bg-sera-ivory p-5 text-left transition-all hover:-translate-y-px hover:border-sera-ink/30 hover:shadow-soft"
+      style={{ border: "1px solid var(--app-line-brass)", background: "rgba(169,132,92,0.04)", padding: "22px 22px", textAlign: "left", display: "flex", alignItems: "center", gap: 14, cursor: "pointer", color: "var(--app-text)", width: "100%", transition: "border-color 160ms, background 160ms" }}
     >
-      <div className="flex items-center gap-2 text-sera-ink">
+      <span style={{ width: 36, height: 36, border: "1px solid var(--app-line-brass)", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#A9845C", flexShrink: 0 }}>
         {icon}
-        <span className="font-serif text-lg">{title}</span>
+      </span>
+      <div>
+        <p style={{ fontFamily: "var(--font-display)", fontSize: "1.05rem", color: "var(--app-text)", margin: 0, letterSpacing: "-0.01em" }}>{title}</p>
+        <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.72rem", color: "var(--app-text-muted)", margin: "2px 0 0" }}>{description}</p>
       </div>
-      <p className="mt-2 text-sm text-sera-warm-grey">{description}</p>
     </button>
   );
 }
@@ -862,7 +771,7 @@ function EntryCard({ icon, title, description, onClick }: {
 function FieldGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-[10px] uppercase tracking-[0.18em] text-sera-warm-grey">{label}</Label>
+      <Label style={{ fontFamily: "var(--font-sans)", fontSize: "0.62rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--app-text-muted)" }}>{label}</Label>
       {children}
     </div>
   );
