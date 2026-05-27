@@ -135,7 +135,7 @@ export default function QrScanner({ onDetected, paused = false }: Props) {
 
   return (
     <div className="space-y-3">
-      <div className="aspect-[3/4] w-full overflow-hidden rounded-md border border-sera-line/40 bg-black relative">
+      <div className="aspect-[3/4] w-full overflow-hidden bg-black relative" style={{ border: "1px solid var(--app-card-border)" }}>
         <video
           ref={videoRef}
           className="h-full w-full object-cover"
@@ -145,7 +145,7 @@ export default function QrScanner({ onDetected, paused = false }: Props) {
         />
         {!showVideo && (
           <div className="absolute inset-0 flex items-center justify-center p-6 text-center">
-            <p className="text-xs text-sera-ivory/80">
+            <p className="text-xs" style={{ color: "var(--app-text-muted)" }}>
               {state === "idle" && "Tap Start camera to scan a guest QR pass."}
               {state === "permission-denied" && "Camera blocked. Enable access in browser settings."}
               {state === "no-camera" && "No camera available on this device."}
@@ -157,7 +157,7 @@ export default function QrScanner({ onDetected, paused = false }: Props) {
         )}
         {state === "initializing" && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-            <p className="text-xs text-sera-ivory/90">Starting camera…</p>
+            <p className="text-xs" style={{ color: "var(--app-text)" }}>Starting camera…</p>
           </div>
         )}
       </div>

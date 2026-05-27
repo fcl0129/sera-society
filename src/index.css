@@ -87,31 +87,54 @@ html, body, #root {
     --ease-emphasized: cubic-bezier(0.22, 1, 0.36, 1);
     --ease-exit: cubic-bezier(0.4, 0, 1, 1);
 
-    /* Sera palette */
-    --sera-navy: 218 40% 18%;
-    --sera-deep-navy: 222 44% 12%;
-    --sera-ink: 221 24% 24%;
-    --sera-charcoal: 222 16% 13%;
-    --sera-ivory: 36 24% 97%;
-    --sera-beige: 30 28% 89%;
+    /* ── Sera brand palette (corrected to design-system spec) ── */
+    --sera-navy: 215 69% 9%;        /* #071426 midnight navy */
+    --sera-deep-navy: 215 56% 12%;  /* #0D1B2E deep ink blue */
+    --sera-ink: 215 56% 12%;        /* alias for deep-navy */
+    --sera-charcoal: 215 56% 12%;   /* dark elevated surface */
+    --sera-ivory: 37 51% 91%;       /* #F4EBDD warm cream */
+    --sera-beige: 34 45% 84%;       /* #E8D8C3 champagne paper */
     --sera-sand: 28 24% 80%;
     --sera-stone: 28 9% 62%;
     --sera-warm-grey: 24 8% 46%;
-    --sera-oxblood: 12 48% 33%;
-    --sera-oxblood-soft: 14 42% 42%;
-    --sera-rosewood: 10 32% 34%;
-    --sera-moss: 152 23% 32%;
-    --sera-moss-muted: 152 18% 46%;
+    --sera-oxblood: 355 67% 21%;    /* #5A1218 the only saturated color */
+    --sera-oxblood-soft: 354 68% 15%; /* #3E0C11 hover/pressed */
+    --sera-rosewood: 355 67% 21%;   /* alias oxblood */
+    --sera-moss: 97 17% 25%;        /* #3D4A35 accepted/success status only */
+    --sera-moss-muted: 97 14% 38%;  /* softer moss */
+    --sera-brass: 33 34% 51%;       /* #A9845C fine borders, premium details */
+    --sera-smoke: 214 14% 72%;      /* #A8B4C3 body text on dark */
+    --sera-rouge: 0 26% 50%;        /* #A35D5D soft hover for tags */
     --sera-surface-light: 40 23% 99%;
-    --sera-surface-warm: 33 30% 96%;
+    --sera-surface-warm: 37 51% 91%; /* now = cream */
     --sera-surface-cool: 220 19% 95%;
-    --sera-ivory-paper: 33 30% 94%;
+    --sera-ivory-paper: 37 51% 91%; /* cream */
     --sera-soft-blush: 15 27% 88%;
     --sera-matcha-mist: 144 24% 79%;
-    --sera-deep-moss: 139 9% 40%;
-    --sera-ink-brown: 27 14% 15%;
+    --sera-deep-moss: 97 17% 25%;   /* = moss */
+    --sera-ink-brown: 30 14% 7%;    /* #12100E soft black, text on light */
     --sera-porcelain-rose: 15 35% 92%;
     --sera-warm-stone: 32 18% 80%;
+
+    /* ── Alpha tokens for app surfaces ── */
+    --sera-cream-08: rgba(244, 235, 221, 0.08);
+    --sera-cream-14: rgba(244, 235, 221, 0.14);
+    --sera-cream-32: rgba(244, 235, 221, 0.32);
+    --sera-cream-72: rgba(244, 235, 221, 0.72);
+    --sera-navy-12:  rgba(7, 20, 38, 0.12);
+    --sera-navy-72:  rgba(7, 20, 38, 0.72);
+    --sera-brass-30: rgba(169, 132, 92, 0.30);
+    --sera-brass-50: rgba(169, 132, 92, 0.50);
+
+    /* ── App surface shortcuts ── */
+    --app-bg:           #071426;
+    --app-elevated:     #0D1B2E;
+    --app-card-bg:      rgba(13, 27, 46, 0.50);
+    --app-card-border:  rgba(244, 235, 221, 0.14);
+    --app-text:         #F4EBDD;
+    --app-text-muted:   #A8B4C3;
+    --app-line:         rgba(244, 235, 221, 0.14);
+    --app-line-brass:   rgba(169, 132, 92, 0.30);
 
     /* shadcn sidebar */
     --sidebar-background: 40 23% 99%;

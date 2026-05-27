@@ -8,7 +8,6 @@ import { redeemTicket, normalizeScannedTicketValue, type RedemptionResponse } fr
 import { LogOut, RefreshCcw, Ticket, ScanLine } from "lucide-react";
 import QrScanner from "@/components/ops/QrScanner";
 import { RedemptionReceipt, type ReceiptData, receiptStatusFromCode } from "@/components/ops/RedemptionReceipt";
-import { cn } from "@/lib/utils";
 
 type ScanMethod = "qr" | "manual";
 type ScanHistoryEntry = {
@@ -22,13 +21,15 @@ type ScanHistoryEntry = {
 const SCAN_HISTORY_LIMIT = 10;
 
 const METHOD_LABEL: Record<ScanMethod, string> = { qr: "Scan Pass", manual: "Guest Lookup" };
-const STATUS_TONE: Record<ReceiptData["status"], string> = {
-  success: "bg-status-success-soft text-status-success",
-  already_used: "bg-status-warning-soft text-status-warning",
-  void: "bg-sera-line/60 text-sera-warm-grey",
-  invalid: "bg-status-error-soft text-status-error",
-  unauthorized: "bg-status-error-soft text-status-error",
+
+const STATUS_STYLE: Record<ReceiptData["status"], { bg: string; color: string }> = {
+  success:      { bg: "rgba(61,74,53,0.25)",   color: "#3D4A35" },
+  already_used: { bg: "rgba(169,132,92,0.18)", color: "#A9845C" },
+  void:         { bg: "rgba(244,235,221,0.08)", color: "#A8B4C3" },
+  invalid:      { bg: "rgba(90,18,24,0.25)",   color: "#A35D5D" },
+  unauthorized: { bg: "rgba(90,18,24,0.25)",   color: "#A35D5D" },
 };
+
 const STATUS_LABEL: Record<ReceiptData["status"], string> = {
   success: "Redeemed",
   already_used: "Already used",
@@ -36,6 +37,7 @@ const STATUS_LABEL: Record<ReceiptData["status"], string> = {
   invalid: "Invalid",
   unauthorized: "Unauthorized",
 };
+
 const formatScanTime = (iso: string) => {
   try {
     return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
@@ -54,7 +56,6 @@ export default function BartenderPanel() {
   const [result, setResult] = useState<RedemptionResponse | null>(null);
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
   const [history, setHistory] = useState<ScanHistoryEntry[]>([]);
-
 
   const recordHistory = (entry: Omit<ScanHistoryEntry, "id">) => {
     setHistory((prev) =>
@@ -126,119 +127,254 @@ export default function BartenderPanel() {
     setScanLocked(false);
   };
 
+  const isListening = !scanLocked && !busy;
+
   return (
-    <div className="min-h-screen bg-sera-paper text-sera-ink">
-      <header className="border-b border-sera-line/70 bg-sera-cloud/80 backdrop-blur supports-[backdrop-filter]:bg-sera-cloud/60">
-        <div className="mx-auto flex max-w-lg items-center justify-between px-5 py-4">
+    <div style={{ minHeight: "100vh", background: "var(--app-bg)", color: "var(--app-text)" }}>
+      {/* Header */}
+      <header style={{
+        borderBottom: "1px solid var(--app-line)",
+        background: "rgba(7,20,38,0.82)",
+        backdropFilter: "blur(24px)",
+        WebkitBackdropFilter: "blur(24px)",
+        position: "sticky",
+        top: 0,
+        zIndex: 40,
+      }}>
+        <div style={{ maxWidth: 520, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px" }}>
           <div>
-            <p className="sera-label text-sera-warm-grey">Bar Mode · Sera</p>
-            <p className="font-serif text-base text-sera-ink">{fullName ?? email}</p>
+            <p style={{ margin: 0, fontFamily: "var(--font-sans)", fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--sera-brass)" }}>
+              Bar Mode · Sera
+            </p>
+            <p style={{ margin: "4px 0 0", fontFamily: "var(--font-display)", fontWeight: 500, fontSize: "1rem", color: "var(--app-text)" }}>
+              {fullName ?? email}
+            </p>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-sera-warm-grey hover:text-sera-ink">
-            <LogOut className="w-4 h-4" />
-          </Button>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            style={{
+              background: "transparent",
+              border: "1px solid var(--app-line)",
+              width: 36,
+              height: 36,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "var(--app-text-muted)",
+              cursor: "pointer",
+            }}
+          >
+            <LogOut style={{ width: 16, height: 16 }} />
+          </button>
         </div>
       </header>
 
-      <main className="mx-auto max-w-lg px-5 pt-6 pb-24 space-y-6">
-        {/* Hero / instruction */}
-        <section className="space-y-2">
-          <p className="sera-label text-sera-warm-grey">Bar Mode</p>
-          <h1 className="font-serif text-4xl leading-[1.05] text-sera-ink">
-            Hold a guest's pass<br />to the camera.
+      <main style={{ maxWidth: 520, margin: "0 auto", padding: "24px 20px 96px", display: "flex", flexDirection: "column", gap: 24 }}>
+
+        {/* Hero */}
+        <section style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <p style={{ margin: 0, fontFamily: "var(--font-sans)", fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--sera-brass)" }}>
+            Bar Mode
+          </p>
+          <h1 style={{ margin: 0, fontFamily: "var(--font-display)", fontWeight: 500, fontSize: "2.4rem", letterSpacing: "-0.035em", color: "var(--app-text)", lineHeight: 1.02 }}>
+            Pour the next.
           </h1>
-          <p className="text-sm text-sera-warm-grey">
-            Scan Pass is ready for live service. Guest Lookup is available below for controlled staff support.
+          <p style={{ margin: "8px 0 0", fontFamily: "var(--font-sans)", fontSize: "0.92rem", lineHeight: 1.55, color: "var(--app-text-muted)" }}>
+            Scan a guest pass or enter a token manually. The system handles duplicate redemptions quietly.
           </p>
         </section>
 
         {/* Scanner card */}
-        <section className="overflow-hidden rounded-[28px] border border-sera-line bg-sera-cloud shadow-soft">
-          <div className="flex items-center justify-between border-b border-sera-line/70 px-5 py-3">
-            <div className="flex items-center gap-2 text-sera-ink">
-              <ScanLine className="h-4 w-4" />
-              <p className="sera-label">Scan Pass</p>
+        <section style={{ border: "1px solid var(--app-card-border)", overflow: "hidden" }}>
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            borderBottom: "1px solid var(--app-line)",
+            padding: "12px 20px",
+            background: "rgba(13,27,46,0.5)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--app-text)" }}>
+              <ScanLine style={{ width: 16, height: 16 }} />
+              <p style={{ margin: 0, fontFamily: "var(--font-sans)", fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase" }}>
+                Scan Pass
+              </p>
             </div>
-            <span
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] uppercase tracking-[0.18em]",
-                scanLocked || busy
-                  ? "bg-sera-line/60 text-sera-warm-grey"
-                  : "bg-status-success-soft text-status-success",
-              )}
-            >
-              <span className={cn("h-1.5 w-1.5 rounded-full", scanLocked || busy ? "bg-sera-warm-grey" : "bg-status-success animate-pulse")} />
-              {scanLocked || busy ? "Paused" : "Listening"}
+            <span style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              fontFamily: "var(--font-mono)",
+              fontSize: "0.6rem",
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              border: isListening ? "1px solid rgba(61,74,53,0.5)" : "1px solid var(--app-line)",
+              color: isListening ? "#3D4A35" : "var(--app-text-muted)",
+              padding: "3px 10px",
+              borderRadius: 999,
+            }}>
+              <span style={{
+                width: 6,
+                height: 6,
+                borderRadius: 999,
+                background: isListening ? "#3D4A35" : "var(--app-text-muted)",
+              }} />
+              {isListening ? "Listening" : "Paused"}
             </span>
           </div>
-          <div className="bg-sera-ink/95 p-4">
-            <div className="overflow-hidden rounded-2xl">
+          <div style={{ background: "rgba(7,20,38,0.95)", padding: 16 }}>
+            <div style={{ overflow: "hidden" }}>
               <QrScanner onDetected={(value) => void handleRedeem(value, "qr")} paused={scanLocked || busy} />
             </div>
           </div>
         </section>
 
-        {/* Guest Lookup */}
-        <section className="rounded-[24px] border border-sera-line bg-sera-cloud p-5">
-          <p className="sera-label text-sera-warm-grey">Guest Lookup</p>
-          <form onSubmit={onSubmit} className="mt-3 space-y-3">
+        {/* Manual entry */}
+        <section style={{
+          border: "1px solid var(--app-line-brass)",
+          background: "rgba(169,132,92,0.04)",
+          padding: 22,
+        }}>
+          <p style={{ margin: 0, fontFamily: "var(--font-sans)", fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--sera-brass)" }}>
+            Manual entry
+          </p>
+          <form onSubmit={onSubmit} style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 12 }}>
             <Input
               value={manualCode}
               onChange={(e) => setManualCode(e.target.value)}
-              placeholder="Paste guest pass code"
-              className="h-12 rounded-xl bg-sera-ivory font-mono text-sm tracking-tight"
+              placeholder="Paste guest pass code · SERA-XXXX-XXXX"
+              style={{
+                height: 48,
+                background: "rgba(7,20,38,0.7)",
+                border: "1px solid var(--app-card-border)",
+                borderRadius: 0,
+                fontFamily: "var(--font-mono)",
+                fontSize: "0.88rem",
+                color: "var(--app-text)",
+                letterSpacing: "0.04em",
+              }}
             />
-            <Button type="submit" disabled={busy || !manualCode.trim()} className="w-full rounded-full" variant="sera">
-              <Ticket className="h-4 w-4 mr-2" />
-              Redeem with Guest Lookup
-            </Button>
+            <button
+              type="submit"
+              disabled={busy || !manualCode.trim()}
+              style={{
+                width: "100%",
+                padding: "14px 0",
+                background: busy || !manualCode.trim() ? "rgba(244,235,221,0.08)" : "var(--sera-oxblood)",
+                border: "none",
+                color: busy || !manualCode.trim() ? "var(--app-text-muted)" : "var(--sera-cream)",
+                fontFamily: "var(--font-sans)",
+                fontSize: "0.78rem",
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                cursor: busy || !manualCode.trim() ? "not-allowed" : "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+              }}
+            >
+              <Ticket style={{ width: 14, height: 14 }} />
+              Pour
+            </button>
           </form>
         </section>
 
-
         {/* Idle hint when no receipt */}
         {!receipt && (
-          <section className="rounded-[24px] border border-dashed border-sera-line bg-transparent p-6 text-center">
-            <p className="font-serif text-xl text-sera-ink">Awaiting next guest</p>
-            <p className="mt-1 text-sm text-sera-warm-grey">A receipt will appear here after each redemption.</p>
+          <section style={{
+            border: "1px dashed var(--app-card-border)",
+            background: "transparent",
+            padding: 24,
+            textAlign: "center",
+          }}>
+            <p style={{ margin: 0, fontFamily: "var(--font-display)", fontWeight: 500, fontSize: "1.25rem", color: "var(--app-text)" }}>
+              Awaiting next guest
+            </p>
+            <p style={{ margin: "6px 0 0", fontFamily: "var(--font-sans)", fontSize: "0.88rem", color: "var(--app-text-muted)" }}>
+              A receipt will appear here after each redemption.
+            </p>
           </section>
         )}
 
-        <section className="rounded-[24px] border border-sera-line bg-sera-cloud p-5">
-          <div className="flex items-center justify-between">
-            <p className="sera-label text-sera-warm-grey">Bar Ledger</p>
+        {/* Bar Ledger */}
+        <section style={{
+          border: "1px solid var(--app-card-border)",
+          background: "rgba(13,27,46,0.5)",
+          padding: 22,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <p style={{ margin: 0, fontFamily: "var(--font-sans)", fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--sera-brass)" }}>
+              Bar Ledger
+            </p>
             {history.length > 0 && (
               <button
                 type="button"
                 onClick={() => setHistory([])}
-                className="text-[11px] uppercase tracking-[0.18em] text-sera-warm-grey hover:text-sera-ink"
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "0.62rem",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: "var(--app-text-muted)",
+                  cursor: "pointer",
+                }}
               >
                 Clear
               </button>
             )}
           </div>
           {history.length === 0 ? (
-            <p className="mt-3 text-sm text-sera-warm-grey">No redemptions yet this session.</p>
+            <p style={{ margin: "12px 0 0", fontFamily: "var(--font-sans)", fontSize: "0.88rem", color: "var(--app-text-muted)" }}>
+              No redemptions yet this session.
+            </p>
           ) : (
-            <ul className="mt-3 divide-y divide-sera-line/70">
-              {history.map((entry) => (
-                <li key={entry.id} className="flex items-center justify-between gap-3 py-2.5">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className={cn("rounded-full px-2 py-0.5 text-[10px] uppercase tracking-[0.16em]", STATUS_TONE[entry.status])}>
-                        {STATUS_LABEL[entry.status]}
-                      </span>
-                      <span className="text-[11px] uppercase tracking-[0.16em] text-sera-warm-grey">
-                        {METHOD_LABEL[entry.method]}
-                      </span>
+            <ul style={{ margin: "12px 0 0", padding: 0, listStyle: "none", display: "flex", flexDirection: "column" }}>
+              {history.map((entry, i) => {
+                const s = STATUS_STYLE[entry.status];
+                return (
+                  <li
+                    key={entry.id}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 12,
+                      padding: "10px 0",
+                      borderTop: i === 0 ? "none" : "1px solid var(--app-line)",
+                    }}
+                  >
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{
+                          borderRadius: 999,
+                          padding: "2px 8px",
+                          fontFamily: "var(--font-mono)",
+                          fontSize: "0.62rem",
+                          letterSpacing: "0.16em",
+                          textTransform: "uppercase",
+                          background: s.bg,
+                          color: s.color,
+                        }}>
+                          {STATUS_LABEL[entry.status]}
+                        </span>
+                        <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.62rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--app-text-muted)" }}>
+                          {METHOD_LABEL[entry.method]}
+                        </span>
+                      </div>
+                      <p style={{ margin: "4px 0 0", fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--app-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {truncateToken(entry.token)}
+                      </p>
                     </div>
-                    <p className="mt-1 truncate font-mono text-xs text-sera-ink">{truncateToken(entry.token)}</p>
-                  </div>
-                  <span className="shrink-0 text-[11px] tabular-nums text-sera-warm-grey">
-                    {formatScanTime(entry.timestamp)}
-                  </span>
-                </li>
-              ))}
+                    <span style={{ flexShrink: 0, fontFamily: "var(--font-mono)", fontSize: "0.66rem", fontVariantNumeric: "tabular-nums", color: "var(--app-text-muted)" }}>
+                      {formatScanTime(entry.timestamp)}
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </section>
@@ -246,15 +382,40 @@ export default function BartenderPanel() {
 
       {/* Receipt overlay */}
       {receipt && (
-        <div className="fixed inset-0 z-40 flex items-end justify-center bg-sera-ink/40 px-4 pb-6 sm:items-center sm:pb-0">
-          <div className="w-full max-w-md">
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 40,
+          display: "flex",
+          alignItems: "flex-end",
+          justifyContent: "center",
+          background: "rgba(7,20,38,0.72)",
+          padding: "0 16px 24px",
+        }}>
+          <div style={{ width: "100%", maxWidth: 480 }}>
             <RedemptionReceipt data={receipt} onDismiss={dismissReceipt} />
             <button
               type="button"
               onClick={dismissReceipt}
-              className="mx-auto mt-3 flex items-center gap-2 rounded-full bg-sera-ivory/90 px-4 py-2 text-xs text-sera-ink shadow-soft hover:bg-sera-ivory"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                margin: "12px auto 0",
+                padding: "8px 16px",
+                background: "rgba(244,235,221,0.12)",
+                border: "1px solid var(--app-card-border)",
+                borderRadius: 999,
+                fontFamily: "var(--font-sans)",
+                fontSize: "0.72rem",
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: "var(--app-text)",
+                cursor: "pointer",
+              }}
             >
-              <RefreshCcw className="h-3 w-3" /> Ready for next guest
+              <RefreshCcw style={{ width: 12, height: 12 }} />
+              Ready for next guest
             </button>
           </div>
         </div>
