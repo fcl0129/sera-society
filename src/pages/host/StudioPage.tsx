@@ -78,7 +78,7 @@ export default function StudioPage() {
             event_page_config: {
               ...DEFAULT_PAGE_CONFIG,
               widgets: defaultWidgets(),
-            },
+            } as unknown as Record<string, unknown>,
           })
           .select("*")
           .single();
@@ -91,9 +91,10 @@ export default function StudioPage() {
       }
       const { data, error } = await supabase.from("events").select("*").eq("id", id).single();
       if (error || !data) return;
+      const raw = data.event_page_config as unknown;
       const cfg: EventPageConfig =
-        data.event_page_config && typeof data.event_page_config === "object" && Object.keys(data.event_page_config).length > 0
-          ? (data.event_page_config as EventPageConfig)
+        raw && typeof raw === "object" && Object.keys(raw as object).length > 0
+          ? (raw as EventPageConfig)
           : { ...DEFAULT_PAGE_CONFIG, widgets: defaultWidgets() };
       setEvent({
         id: data.id,
@@ -120,7 +121,7 @@ export default function StudioPage() {
       const merged = { ...event, ...patch };
       setEvent(merged);
       setSaving(true);
-      const payload: Record<string, unknown> = {
+      const payload = {
         title: merged.title,
         description: merged.description,
         venue: merged.venue,
@@ -129,7 +130,7 @@ export default function StudioPage() {
         rsvp_cutoff_at: merged.rsvp_cutoff_at || null,
         capacity: merged.capacity ? parseInt(merged.capacity, 10) || null : null,
         visibility: merged.visibility,
-        event_page_config: merged.event_page_config,
+        event_page_config: merged.event_page_config as unknown as Record<string, unknown>,
       };
       await supabase.from("events").update(payload).eq("id", merged.id);
       setSaving(false);
