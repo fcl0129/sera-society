@@ -20,6 +20,9 @@ import NotFound from "./pages/NotFound";
 import { Navigate } from "react-router-dom";
 import AdminAccessRequests from "./pages/AdminAccessRequests";
 import CheckIn from "./pages/CheckIn";
+import StudioPage from "./pages/host/StudioPage";
+import StudioListPage from "./pages/host/StudioListPage";
+import PublicEventPage from "./pages/PublicEventPage";
 
 import RoleRoute from "./components/RoleRoute";
 import OpsHome from "./pages/ops/OpsHome";
@@ -55,6 +58,12 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<Faq />} />
+
+            {/* Event Studio */}
+            <Route path="/host" element={<StudioListPage />} />
+            <Route path="/host/studio/new" element={<StudioPage />} />
+            <Route path="/host/studio/:id" element={<StudioPage />} />
+            <Route path="/e/:slug" element={<PublicEventPage />} />
 
             {/* Isolated ticket-test harness — not linked from nav */}
             <Route path="/ticket-test" element={<TicketTestDashboard />} />

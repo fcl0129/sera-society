@@ -262,6 +262,33 @@ export type Database = {
         }
         Relationships: []
       }
+      event_guestbook_entries: {
+        Row: {
+          approved: boolean
+          created_at: string
+          event_id: string
+          guest_name: string
+          id: string
+          message: string
+        }
+        Insert: {
+          approved?: boolean
+          created_at?: string
+          event_id: string
+          guest_name: string
+          id?: string
+          message: string
+        }
+        Update: {
+          approved?: boolean
+          created_at?: string
+          event_id?: string
+          guest_name?: string
+          id?: string
+          message?: string
+        }
+        Relationships: []
+      }
       event_guests: {
         Row: {
           created_at: string
@@ -373,6 +400,63 @@ export type Database = {
           },
         ]
       }
+      event_photos: {
+        Row: {
+          approved: boolean
+          created_at: string
+          event_id: string
+          guest_name: string | null
+          id: string
+          image_url: string
+        }
+        Insert: {
+          approved?: boolean
+          created_at?: string
+          event_id: string
+          guest_name?: string | null
+          id?: string
+          image_url: string
+        }
+        Update: {
+          approved?: boolean
+          created_at?: string
+          event_id?: string
+          guest_name?: string | null
+          id?: string
+          image_url?: string
+        }
+        Relationships: []
+      }
+      event_prompt_responses: {
+        Row: {
+          created_at: string
+          event_id: string
+          guest_name: string
+          id: string
+          prompt_id: string
+          prompt_label: string
+          response: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          guest_name: string
+          id?: string
+          prompt_id: string
+          prompt_label: string
+          response: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          guest_name?: string
+          id?: string
+          prompt_id?: string
+          prompt_label?: string
+          response?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           builder_config: Json
@@ -384,6 +468,7 @@ export type Database = {
           enable_nfc: boolean
           enable_qr: boolean
           ends_at: string | null
+          event_page_config: Json
           id: string
           organizer_id: string
           reminder_days: number[] | null
@@ -396,6 +481,7 @@ export type Database = {
           title: string
           updated_at: string
           venue: string | null
+          visibility: string
         }
         Insert: {
           builder_config?: Json
@@ -407,6 +493,7 @@ export type Database = {
           enable_nfc?: boolean
           enable_qr?: boolean
           ends_at?: string | null
+          event_page_config?: Json
           id?: string
           organizer_id: string
           reminder_days?: number[] | null
@@ -419,6 +506,7 @@ export type Database = {
           title: string
           updated_at?: string
           venue?: string | null
+          visibility?: string
         }
         Update: {
           builder_config?: Json
@@ -430,6 +518,7 @@ export type Database = {
           enable_nfc?: boolean
           enable_qr?: boolean
           ends_at?: string | null
+          event_page_config?: Json
           id?: string
           organizer_id?: string
           reminder_days?: number[] | null
@@ -442,6 +531,7 @@ export type Database = {
           title?: string
           updated_at?: string
           venue?: string | null
+          visibility?: string
         }
         Relationships: [
           {
