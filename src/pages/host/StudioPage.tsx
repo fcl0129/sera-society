@@ -67,8 +67,8 @@ export default function StudioPage() {
         const now = new Date();
         now.setDate(now.getDate() + 30);
         now.setHours(19, 30, 0, 0);
-        const { data, error } = await supabase
-          .from("events")
+        const { data, error } = await (supabase
+          .from("events") as any)
           .insert({
             organizer_id: uid,
             title: "Untitled evening",
@@ -78,7 +78,7 @@ export default function StudioPage() {
             event_page_config: {
               ...DEFAULT_PAGE_CONFIG,
               widgets: defaultWidgets(),
-            } as unknown as Record<string, unknown>,
+            },
           })
           .select("*")
           .single();
@@ -121,7 +121,7 @@ export default function StudioPage() {
       const merged = { ...event, ...patch };
       setEvent(merged);
       setSaving(true);
-      const payload = {
+      const payload: Record<string, unknown> = {
         title: merged.title,
         description: merged.description,
         venue: merged.venue,
@@ -130,9 +130,9 @@ export default function StudioPage() {
         rsvp_cutoff_at: merged.rsvp_cutoff_at || null,
         capacity: merged.capacity ? parseInt(merged.capacity, 10) || null : null,
         visibility: merged.visibility,
-        event_page_config: merged.event_page_config as unknown as Record<string, unknown>,
+        event_page_config: merged.event_page_config,
       };
-      await supabase.from("events").update(payload).eq("id", merged.id);
+      await (supabase.from("events") as any).update(payload).eq("id", merged.id);
       setSaving(false);
     },
     [event],
@@ -613,7 +613,7 @@ function PublishStep({ event, onPersist }: { event: DraftEvent; onPersist: (p: P
   async function publish() {
     setBusy(true);
     const slug = event.slug || slugify(event.title || "evening");
-    const { error } = await supabase.from("events").update({ status: "published", slug }).eq("id", event.id);
+    const { error } = await (supabase.from("events") as any).update({ status: "published", slug }).eq("id", event.id);
     if (error) {
       alert("Publish failed: " + error.message);
     } else {
@@ -624,7 +624,7 @@ function PublishStep({ event, onPersist }: { event: DraftEvent; onPersist: (p: P
 
   async function unpublish() {
     setBusy(true);
-    await supabase.from("events").update({ status: "draft" }).eq("id", event.id);
+    await (supabase.from("events") as any).update({ status: "draft" }).eq("id", event.id);
     await onPersist({ status: "draft" });
     setBusy(false);
   }
