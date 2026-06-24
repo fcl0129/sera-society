@@ -690,3 +690,133 @@ function pill(theme: ReturnType<typeof getTheme>, active: boolean): React.CSSPro
 }
 
 export { STUDIO_THEMES };
+
+/* ============ Personalized widgets (check-in & drink tickets) ============ */
+
+function usePassToken() {
+  const [params] = useSearchParams();
+  return params.get("t") || params.get("token") || "";
+}
+
+type PassData = {
+  ok: boolean;
+  event?: { id: string; title: string };
+  guest?: { id: string; full_name: string | null; rsvp_status: string };
+  tickets?: { id: string; token: string; status: string; redeemed_at: string | null }[];
+};
+
+function usePassData(eventId: string, isPreview: boolean): { token: string; data: PassData | null; loading: boolean } {
+  const token = usePassToken();
+  const [data, setData] = useState<PassData | null>(null);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (isPreview || !token) return;
+    setLoading(true);
+    (supabase as any)
+      .rpc("get_guest_pass_by_token", { _token: token })
+      .then(({ data }: { data: PassData | null }) => {
+        setData(data ?? { ok: false });
+        setLoading(false);
+      });
+  }, [token, isPreview, eventId]);
+  return { token, data, loading };
+}
+
+function PersonalizedHint({ theme, message }: { theme: ReturnType<typeof getTheme>; message: string }) {
+  return (
+    <p style={{ margin: "12px 0 0", fontStyle: "italic", color: theme.textSecondary, fontSize: "0.92rem" }}>
+      {message}
+    </p>
+  );
+}
+
+function CheckInWidget({ widget, event, theme, isPreview }: { widget: WidgetInstance; event: RenderEvent; theme: ReturnType<typeof getTheme>; isPreview: boolean }) {
+  const { token, data, loading } = usePassData(event.id, isPreview);
+  const instructions = (widget.config.instructions as string) || "Show this at the door.";
+
+  const guestName = data?.guest?.full_name || "Guest";
+  const accepted = data?.guest?.rsvp_status === "accepted";
+  const passUrl = token ? `${typeof window !== "undefined" ? window.location.origin : ""}/pass/${token}` : "";
+
+  return (
+    <Surface theme={theme}>
+      <Label theme={theme}>Check-in</Label>
+      {isPreview ? (
+        <>
+          <p style={{ margin: "14px 0 0", fontFamily: `'${theme.headingFont}', serif`, fontSize: "1.3rem" }}>Your personal door pass</p>
+          <PersonalizedHint theme={theme} message="In the live page, each guest sees their own QR here (powered by the existing /pass/:token flow)." />
+        </>
+      ) : !token ? (
+        <PersonalizedHint theme={theme} message="Open this page from your personal invitation link to see your check-in pass." />
+      ) : loading ? (
+        <PersonalizedHint theme={theme} message="Loading your pass…" />
+      ) : !data?.ok ? (
+        <PersonalizedHint theme={theme} message="We couldn't find your pass." />
+      ) : !accepted ? (
+        <PersonalizedHint theme={theme} message="RSVP to receive your check-in pass." />
+      ) : (
+        <div style={{ marginTop: 18, display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+          <div style={{ background: "#fff", padding: 14, borderRadius: theme.cornerRadius }}>
+            <QRCodeSVG value={passUrl} size={160} bgColor="#ffffff" fgColor="#0a0a0a" level="M" />
+          </div>
+          <p style={{ margin: 0, fontFamily: `'${theme.headingFont}', serif`, fontSize: "1.1rem" }}>{guestName}</p>
+          <p style={{ margin: 0, fontSize: "0.78rem", letterSpacing: "0.18em", textTransform: "uppercase", color: theme.accent }}>
+            {instructions}
+          </p>
+          <a href={passUrl} style={{ color: theme.accent, fontSize: "0.74rem", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none", borderBottom: `1px solid ${theme.accent}` }}>
+            Open full pass →
+          </a>
+        </div>
+      )}
+    </Surface>
+  );
+}
+
+function DrinkTicketsWidget({ widget, event, theme, isPreview }: { widget: WidgetInstance; event: RenderEvent; theme: ReturnType<typeof getTheme>; isPreview: boolean }) {
+  const { token, data, loading } = usePassData(event.id, isPreview);
+  const instructions = (widget.config.instructions as string) || "Tap or show to your bartender.";
+  const tickets = data?.tickets ?? [];
+  const active = tickets.filter((t) => t.status === "active");
+  const redeemed = tickets.filter((t) => t.status === "redeemed");
+
+  return (
+    <Surface theme={theme}>
+      <Label theme={theme}>Drink tickets</Label>
+      {isPreview ? (
+        <div style={{ marginTop: 14 }}>
+          <p style={{ margin: 0, fontFamily: `'${theme.headingFont}', serif`, fontSize: "1.4rem" }}>2 of 3 remaining</p>
+          <PersonalizedHint theme={theme} message="In the live page, each guest sees their real ticket count and a redeemable QR for each one (same source as /pass/:token)." />
+        </div>
+      ) : !token ? (
+        <PersonalizedHint theme={theme} message="Open this page from your personal invitation link to see your drink tickets." />
+      ) : loading ? (
+        <PersonalizedHint theme={theme} message="Loading your tickets…" />
+      ) : !data?.ok || tickets.length === 0 ? (
+        <PersonalizedHint theme={theme} message="No drink tickets issued to you yet." />
+      ) : (
+        <div style={{ marginTop: 16 }}>
+          <p style={{ margin: 0, fontFamily: `'${theme.headingFont}', serif`, fontSize: "1.5rem" }}>
+            {active.length} of {tickets.length} remaining
+          </p>
+          <p style={{ margin: "6px 0 14px", fontSize: "0.86rem", color: theme.textSecondary }}>{instructions}</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(140px,1fr))", gap: 10 }}>
+            {active.slice(0, 4).map((t) => (
+              <div key={t.id} style={{ padding: 12, border: `1px solid ${theme.surfaceBorder}`, borderRadius: theme.cornerRadius, background: "#fff", textAlign: "center" }}>
+                <QRCodeSVG value={`${typeof window !== "undefined" ? window.location.origin : ""}/pass/${token}`} size={110} bgColor="#ffffff" fgColor="#0a0a0a" level="M" />
+                <p style={{ margin: "8px 0 0", fontSize: "0.62rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#666" }}>Active</p>
+              </div>
+            ))}
+          </div>
+          {redeemed.length > 0 && (
+            <p style={{ margin: "14px 0 0", fontSize: "0.78rem", color: theme.textSecondary }}>
+              {redeemed.length} redeemed earlier.
+            </p>
+          )}
+          <a href={`/pass/${token}`} style={{ display: "inline-block", marginTop: 14, color: theme.accent, fontSize: "0.74rem", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none", borderBottom: `1px solid ${theme.accent}` }}>
+            Open full pass →
+          </a>
+        </div>
+      )}
+    </Surface>
+  );
+}
