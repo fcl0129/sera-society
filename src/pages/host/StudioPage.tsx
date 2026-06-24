@@ -712,6 +712,18 @@ function WidgetEditor({ widget, onChange }: { widget: WidgetInstance; onChange: 
       return (
         <Field label="Caption"><input value={(widget.config.caption as string) || ""} onChange={(e) => onChange({ caption: e.target.value })} style={input} /></Field>
       );
+    case "check_in":
+    case "drink_tickets":
+      return (
+        <>
+          <Field label="Instructions shown to the guest">
+            <input value={(widget.config.instructions as string) || ""} onChange={(e) => onChange({ instructions: e.target.value })} style={input} />
+          </Field>
+          <p style={{ margin: "8px 0 0", fontSize: "0.78rem", color: "#888", lineHeight: 1.5 }}>
+            This widget reads from the same source as the /pass/:token flow. Guests must open the event page from their personal invitation link (e.g. <code>?t=&lt;token&gt;</code>) to see their {widget.type === "check_in" ? "check-in QR" : "drink tickets"}.
+          </p>
+        </>
+      );
     default:
       return null;
   }
