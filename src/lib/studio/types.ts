@@ -8,7 +8,9 @@ export type WidgetType =
   | "seating"
   | "prompts"
   | "schedule"
-  | "dress_code";
+  | "dress_code"
+  | "check_in"
+  | "drink_tickets";
 
 export interface WidgetInstance {
   id: string;
@@ -24,7 +26,12 @@ export interface ThemeCustomization {
   themeId: string;
   headingFont?: string;
   bodyFont?: string;
+  /** Solid color, CSS gradient, or a URL (we detect http(s):// to treat as image). */
   background?: string;
+  /** Optional background image URL applied as cover. Overrides `background` when set. */
+  backgroundImageUrl?: string;
+  /** Optional cover/hero image displayed in the hero widget. */
+  coverImageUrl?: string;
   accent?: string;
   texture?: boolean;
   corner?: "sharp" | "soft" | "editorial";
