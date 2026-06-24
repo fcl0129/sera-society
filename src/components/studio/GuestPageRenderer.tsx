@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "@/integrations/supabase/client";
 import { getTheme, ensureFont, STUDIO_THEMES } from "@/lib/studio/themes";
 import type { EventPageConfig, WidgetInstance } from "@/lib/studio/types";
@@ -52,11 +54,15 @@ export function GuestPageRenderer({
 }) {
   const cfg = event.event_page_config ?? { theme: { themeId: "midnight_supper" }, widgets: [] };
   const baseTheme = getTheme(cfg.theme?.themeId ?? "midnight_supper");
+  const bgImage = cfg.theme?.backgroundImageUrl;
+  const computedBackground = bgImage
+    ? `linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.55)), url("${bgImage}") center/cover no-repeat`
+    : cfg.theme?.background || baseTheme.background;
   const theme = {
     ...baseTheme,
     headingFont: cfg.theme?.headingFont || baseTheme.headingFont,
     bodyFont: cfg.theme?.bodyFont || baseTheme.bodyFont,
-    background: cfg.theme?.background || baseTheme.background,
+    background: computedBackground,
     accent: cfg.theme?.accent || baseTheme.accent,
     cornerRadius:
       cfg.theme?.corner === "sharp" ? 0 : cfg.theme?.corner === "soft" ? 14 : baseTheme.cornerRadius,
@@ -123,6 +129,7 @@ export function GuestPageRenderer({
             event={event}
             theme={theme}
             isPreview={isPreview}
+            coverImageUrl={cfg.theme?.coverImageUrl}
           />
         ))}
       </div>
@@ -251,15 +258,17 @@ function WidgetRenderer({
   event,
   theme,
   isPreview,
+  coverImageUrl,
 }: {
   widget: WidgetInstance;
   event: RenderEvent;
   theme: ReturnType<typeof getTheme>;
   isPreview: boolean;
+  coverImageUrl?: string;
 }) {
   switch (widget.type) {
     case "hero":
-      return <HeroWidget widget={widget} event={event} theme={theme} />;
+      return <HeroWidget widget={widget} event={event} theme={theme} coverImageUrl={coverImageUrl} />;
     case "rsvp":
       return <RsvpWidget widget={widget} event={event} theme={theme} isPreview={isPreview} />;
     case "schedule":
@@ -278,15 +287,32 @@ function WidgetRenderer({
       return <PhotoWallWidget widget={widget} event={event} theme={theme} isPreview={isPreview} />;
     case "seating":
       return <SeatingWidget widget={widget} theme={theme} />;
+    case "check_in":
+      return <CheckInWidget widget={widget} event={event} theme={theme} isPreview={isPreview} />;
+    case "drink_tickets":
+      return <DrinkTicketsWidget widget={widget} event={event} theme={theme} isPreview={isPreview} />;
     default:
       return null;
   }
 }
 
-function HeroWidget({ widget, event, theme }: { widget: WidgetInstance; event: RenderEvent; theme: ReturnType<typeof getTheme> }) {
+function HeroWidget({ widget, event, theme, coverImageUrl }: { widget: WidgetInstance; event: RenderEvent; theme: ReturnType<typeof getTheme>; coverImageUrl?: string }) {
   const hostMessage = (widget.config.hostMessage as string) || "";
   return (
     <header style={{ display: "flex", flexDirection: "column", gap: 18, paddingTop: 24 }}>
+      {coverImageUrl && (
+        <img
+          src={coverImageUrl}
+          alt=""
+          style={{
+            width: "100%",
+            maxHeight: 360,
+            objectFit: "cover",
+            borderRadius: theme.cornerRadius,
+            border: `1px solid ${theme.surfaceBorder}`,
+          }}
+        />
+      )}
       <Label theme={theme}>{event.venue ? `For our guests · ${event.venue}` : "An evening with friends"}</Label>
       <Heading theme={theme} size="xl">
         <span style={{ fontStyle: "italic" }}>{event.title || "Untitled evening"}</span>
