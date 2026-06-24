@@ -857,3 +857,102 @@ function fromLocal(v: string) {
   if (!v) return "";
   return new Date(v).toISOString();
 }
+
+/* ============ Template gallery ============ */
+
+function TemplateGallery({
+  onPick,
+  creating,
+  onCancel,
+}: {
+  onPick: (tpl: StudioTemplate) => void;
+  creating: string | null;
+  onCancel: () => void;
+}) {
+  const [tab, setTab] = useState<"event_page" | "invitation">("event_page");
+  const list = STUDIO_TEMPLATES.filter((t) => t.id === "blank" || t.category === tab);
+  return (
+    <div style={{ minHeight: "100vh", background: "#F6F4EE", color: "#12100E", fontFamily: "Inter, system-ui, sans-serif" }}>
+      <header style={{ borderBottom: "1px solid rgba(18,16,14,0.12)", background: "#fff" }}>
+        <div style={{ maxWidth: 1480, margin: "0 auto", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <button onClick={onCancel} style={topBtn}>← Cancel</button>
+          <span style={{ fontSize: "0.66rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#888" }}>New event page</span>
+          <span style={{ width: 60 }} />
+        </div>
+      </header>
+
+      <div style={{ maxWidth: 1180, margin: "0 auto", padding: "56px 24px" }}>
+        <p style={{ margin: 0, fontSize: "0.66rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#A9845C" }}>Templates</p>
+        <h1 style={{ margin: "10px 0 24px", fontFamily: "'Cormorant Garamond', serif", fontWeight: 500, fontStyle: "italic", fontSize: "clamp(2rem,4vw,3.4rem)", letterSpacing: "-0.03em", lineHeight: 1.05 }}>
+          Start from a starting point
+        </h1>
+        <p style={{ margin: "0 0 32px", color: "#555", maxWidth: 560, lineHeight: 1.6 }}>
+          Each template is a theme, a layout, and sample copy — fully editable once you're in. Pick one to begin, or start from blank.
+        </p>
+
+        <div style={{ display: "inline-flex", border: "1px solid rgba(18,16,14,0.12)", borderRadius: 999, padding: 4, background: "#fff", marginBottom: 28 }}>
+          {(["event_page", "invitation"] as const).map((k) => (
+            <button
+              key={k}
+              onClick={() => setTab(k)}
+              style={{
+                padding: "8px 18px",
+                background: tab === k ? "#12100E" : "transparent",
+                color: tab === k ? "#fff" : "#666",
+                border: "none",
+                borderRadius: 999,
+                fontSize: "0.72rem",
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                cursor: "pointer",
+              }}
+            >
+              {k === "event_page" ? "Event pages" : "Invitations"}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 18 }}>
+          {list.map((tpl) => {
+            const theme = STUDIO_THEMES.find((t) => t.id === tpl.themeId) || STUDIO_THEMES[0];
+            const busy = creating === tpl.id;
+            return (
+              <button
+                key={tpl.id}
+                disabled={!!creating}
+                onClick={() => onPick(tpl)}
+                style={{
+                  textAlign: "left",
+                  padding: 0,
+                  border: "1px solid rgba(18,16,14,0.12)",
+                  borderRadius: 8,
+                  background: "#fff",
+                  cursor: creating ? "wait" : "pointer",
+                  opacity: creating && !busy ? 0.5 : 1,
+                  overflow: "hidden",
+                  transition: "transform .2s, box-shadow .2s",
+                }}
+                onMouseEnter={(e) => { if (!creating) { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.08)"; } }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
+              >
+                <div style={{ height: 160, background: theme.background, padding: 20, color: theme.textPrimary, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                  <span style={{ fontSize: "0.6rem", letterSpacing: "0.28em", textTransform: "uppercase", color: theme.accent }}>{tpl.category === "invitation" ? "Invitation" : "Event page"}</span>
+                  <div>
+                    <p style={{ margin: 0, fontFamily: `'${theme.headingFont}', serif`, fontSize: "1.6rem", fontStyle: "italic", lineHeight: 1.1 }}>{tpl.name}</p>
+                    <p style={{ margin: "4px 0 0", fontSize: "0.78rem", opacity: 0.7 }}>{tpl.widgets.length} widgets</p>
+                  </div>
+                </div>
+                <div style={{ padding: "14px 16px" }}>
+                  <p style={{ margin: 0, fontSize: "0.86rem", color: "#444", lineHeight: 1.5 }}>{tpl.tagline}</p>
+                  <p style={{ margin: "10px 0 0", fontSize: "0.7rem", letterSpacing: "0.22em", textTransform: "uppercase", color: busy ? "#A9845C" : "#999" }}>
+                    {busy ? "Creating…" : "Use template →"}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
