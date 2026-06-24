@@ -722,6 +722,15 @@ export default function HostAdminDashboard() {
                   onClick={() => navigate("/ops/bartender")}
                 />
               </div>
+
+              <SeatingPanel eventId={currentEvent.id} />
+              <BroadcastPanel eventId={currentEvent.id} eventTitle={currentEvent.title} />
+              <WrappedPanel
+                eventId={currentEvent.id}
+                eventEndsAt={currentEvent.ends_at}
+                rsvpTokenSample={(guestsQuery.data ?? [])[0]?.rsvp_token ?? null}
+              />
+              <StaffRolesPanel eventId={currentEvent.id} />
             </>
           )}
         </section>
