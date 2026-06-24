@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/card";
 import { LogOut, Plus, Calendar, Users, Ticket, ScanLine, Trash2, Mail, Link2, Pencil, Check, X, Clock, Ban, Send, Wallet } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { CreateEventFlow } from "@/components/organizer/CreateEventFlow";
+import { SeatingPanel, BroadcastPanel, WrappedPanel, StaffRolesPanel } from "@/components/organizer/OrganizerPanels";
 
 const fmt = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 const fmtFull = new Intl.DateTimeFormat(undefined, {
