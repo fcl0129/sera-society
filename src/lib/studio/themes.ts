@@ -134,6 +134,39 @@ export const FONT_PAIRS: { heading: string; body: string; label: string }[] = [
   { heading: "Playfair Display", body: "Work Sans", label: "Playfair + Work Sans" },
 ];
 
+/** Expanded Google Fonts catalogue available in the custom designer. */
+export const HEADING_FONT_OPTIONS = [
+  "Cormorant Garamond",
+  "Playfair Display",
+  "Instrument Serif",
+  "EB Garamond",
+  "DM Serif Display",
+  "Fraunces",
+  "Libre Bodoni",
+  "Bodoni Moda",
+  "Italiana",
+  "Cardo",
+  "Marcellus",
+  "Tenor Sans",
+  "Bricolage Grotesque",
+  "Syne",
+  "Archivo",
+];
+
+export const BODY_FONT_OPTIONS = [
+  "Inter",
+  "Work Sans",
+  "Jost",
+  "Manrope",
+  "DM Sans",
+  "Outfit",
+  "Nunito",
+  "Lato",
+  "Public Sans",
+  "IBM Plex Sans",
+  "Karla",
+];
+
 const LOADED = new Set<string>();
 export function ensureFont(family: string) {
   if (typeof document === "undefined") return;
