@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { GuestPageRenderer, type RenderEvent } from "@/components/studio/GuestPageRenderer";
-import { STUDIO_THEMES, FONT_PAIRS, ensureFont, getTheme } from "@/lib/studio/themes";
+import { STUDIO_THEMES, FONT_PAIRS, HEADING_FONT_OPTIONS, BODY_FONT_OPTIONS, ensureFont, getTheme } from "@/lib/studio/themes";
 import {
   WIDGET_REGISTRY,
   WIDGET_ORDER,
@@ -11,6 +11,7 @@ import {
 } from "@/lib/studio/widgetRegistry";
 import type { EventPageConfig, WidgetInstance, WidgetType, Visibility } from "@/lib/studio/types";
 import { DEFAULT_PAGE_CONFIG } from "@/lib/studio/types";
+import { STUDIO_TEMPLATES, buildConfigFromTemplate, type StudioTemplate } from "@/lib/studio/templates";
 
 type Step = "basics" | "theme" | "widgets" | "publish";
 const STEPS: { key: Step; label: string }[] = [
@@ -49,6 +50,7 @@ export default function StudioPage() {
   const [device, setDevice] = useState<"mobile" | "desktop">("mobile");
   const [saving, setSaving] = useState(false);
   const [authed, setAuthed] = useState<string | null>(null);
+  const [creatingFromTemplate, setCreatingFromTemplate] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setAuthed(data.user?.id ?? null));
@@ -58,35 +60,7 @@ export default function StudioPage() {
     async function load() {
       if (!id) return;
       if (id === "new") {
-        const { data: userData } = await supabase.auth.getUser();
-        const uid = userData.user?.id;
-        if (!uid) {
-          navigate("/login?redirect=/host/studio/new");
-          return;
-        }
-        const now = new Date();
-        now.setDate(now.getDate() + 30);
-        now.setHours(19, 30, 0, 0);
-        const { data, error } = await (supabase
-          .from("events") as any)
-          .insert({
-            organizer_id: uid,
-            title: "Untitled evening",
-            starts_at: now.toISOString(),
-            status: "draft",
-            visibility: "private_link",
-            event_page_config: {
-              ...DEFAULT_PAGE_CONFIG,
-              widgets: defaultWidgets(),
-            },
-          })
-          .select("*")
-          .single();
-        if (error || !data) {
-          alert("Could not create event: " + error?.message);
-          return;
-        }
-        navigate(`/host/studio/${data.id}`, { replace: true });
+        // Show template gallery; creation deferred until template chosen.
         return;
       }
       const { data, error } = await supabase.from("events").select("*").eq("id", id).single();
@@ -114,6 +88,47 @@ export default function StudioPage() {
     }
     load();
   }, [id, navigate]);
+
+  const createFromTemplate = useCallback(
+    async (tpl: StudioTemplate) => {
+      setCreatingFromTemplate(tpl.id);
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      if (!uid) {
+        navigate("/login?redirect=/host/studio/new");
+        return;
+      }
+      const now = new Date();
+      now.setDate(now.getDate() + 30);
+      now.setHours(19, 30, 0, 0);
+      const config =
+        tpl.id === "blank"
+          ? { ...DEFAULT_PAGE_CONFIG, widgets: defaultWidgets() }
+          : buildConfigFromTemplate(tpl);
+      const { data, error } = await (supabase.from("events") as any)
+        .insert({
+          organizer_id: uid,
+          title: tpl.sampleCopy.title || "Untitled evening",
+          starts_at: now.toISOString(),
+          status: "draft",
+          visibility: "private_link",
+          event_page_config: config,
+        })
+        .select("*")
+        .single();
+      setCreatingFromTemplate(null);
+      if (error || !data) {
+        alert("Could not create event: " + error?.message);
+        return;
+      }
+      navigate(`/host/studio/${data.id}`, { replace: true });
+    },
+    [navigate],
+  );
+
+  if (id === "new") {
+    return <TemplateGallery onPick={createFromTemplate} creating={creatingFromTemplate} onCancel={() => navigate("/host")} />;
+  }
 
   const persist = useCallback(
     async (patch: Partial<DraftEvent>) => {
