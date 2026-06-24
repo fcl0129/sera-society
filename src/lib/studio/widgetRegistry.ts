@@ -78,6 +78,18 @@ export const WIDGET_REGISTRY: Record<WidgetType, WidgetMeta> = {
     description: "Dress code text and inspiration notes.",
     defaultConfig: { text: "Cocktail", notes: "" },
   },
+  check_in: {
+    type: "check_in",
+    label: "Check-in Pass",
+    description: "Guest sees their personal check-in QR / status (post-RSVP only).",
+    defaultConfig: { instructions: "Show this at the door." },
+  },
+  drink_tickets: {
+    type: "drink_tickets",
+    label: "Drink Tickets",
+    description: "Guest's active drink tickets, redeemable at the bar.",
+    defaultConfig: { instructions: "Tap or show to your bartender." },
+  },
 };
 
 export const WIDGET_ORDER: WidgetType[] = [
@@ -91,6 +103,8 @@ export const WIDGET_ORDER: WidgetType[] = [
   "guestbook",
   "photo_wall",
   "seating",
+  "check_in",
+  "drink_tickets",
 ];
 
 let counter = 0;

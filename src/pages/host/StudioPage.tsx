@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { GuestPageRenderer, type RenderEvent } from "@/components/studio/GuestPageRenderer";
-import { STUDIO_THEMES, FONT_PAIRS, ensureFont, getTheme } from "@/lib/studio/themes";
+import { STUDIO_THEMES, FONT_PAIRS, HEADING_FONT_OPTIONS, BODY_FONT_OPTIONS, ensureFont, getTheme } from "@/lib/studio/themes";
 import {
   WIDGET_REGISTRY,
   WIDGET_ORDER,
@@ -11,6 +11,7 @@ import {
 } from "@/lib/studio/widgetRegistry";
 import type { EventPageConfig, WidgetInstance, WidgetType, Visibility } from "@/lib/studio/types";
 import { DEFAULT_PAGE_CONFIG } from "@/lib/studio/types";
+import { STUDIO_TEMPLATES, buildConfigFromTemplate, type StudioTemplate } from "@/lib/studio/templates";
 
 type Step = "basics" | "theme" | "widgets" | "publish";
 const STEPS: { key: Step; label: string }[] = [
@@ -49,6 +50,7 @@ export default function StudioPage() {
   const [device, setDevice] = useState<"mobile" | "desktop">("mobile");
   const [saving, setSaving] = useState(false);
   const [authed, setAuthed] = useState<string | null>(null);
+  const [creatingFromTemplate, setCreatingFromTemplate] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setAuthed(data.user?.id ?? null));
@@ -58,35 +60,7 @@ export default function StudioPage() {
     async function load() {
       if (!id) return;
       if (id === "new") {
-        const { data: userData } = await supabase.auth.getUser();
-        const uid = userData.user?.id;
-        if (!uid) {
-          navigate("/login?redirect=/host/studio/new");
-          return;
-        }
-        const now = new Date();
-        now.setDate(now.getDate() + 30);
-        now.setHours(19, 30, 0, 0);
-        const { data, error } = await (supabase
-          .from("events") as any)
-          .insert({
-            organizer_id: uid,
-            title: "Untitled evening",
-            starts_at: now.toISOString(),
-            status: "draft",
-            visibility: "private_link",
-            event_page_config: {
-              ...DEFAULT_PAGE_CONFIG,
-              widgets: defaultWidgets(),
-            },
-          })
-          .select("*")
-          .single();
-        if (error || !data) {
-          alert("Could not create event: " + error?.message);
-          return;
-        }
-        navigate(`/host/studio/${data.id}`, { replace: true });
+        // Show template gallery; creation deferred until template chosen.
         return;
       }
       const { data, error } = await supabase.from("events").select("*").eq("id", id).single();
@@ -114,6 +88,47 @@ export default function StudioPage() {
     }
     load();
   }, [id, navigate]);
+
+  const createFromTemplate = useCallback(
+    async (tpl: StudioTemplate) => {
+      setCreatingFromTemplate(tpl.id);
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      if (!uid) {
+        navigate("/login?redirect=/host/studio/new");
+        return;
+      }
+      const now = new Date();
+      now.setDate(now.getDate() + 30);
+      now.setHours(19, 30, 0, 0);
+      const config =
+        tpl.id === "blank"
+          ? { ...DEFAULT_PAGE_CONFIG, widgets: defaultWidgets() }
+          : buildConfigFromTemplate(tpl);
+      const { data, error } = await (supabase.from("events") as any)
+        .insert({
+          organizer_id: uid,
+          title: tpl.sampleCopy.title || "Untitled evening",
+          starts_at: now.toISOString(),
+          status: "draft",
+          visibility: "private_link",
+          event_page_config: config,
+        })
+        .select("*")
+        .single();
+      setCreatingFromTemplate(null);
+      if (error || !data) {
+        alert("Could not create event: " + error?.message);
+        return;
+      }
+      navigate(`/host/studio/${data.id}`, { replace: true });
+    },
+    [navigate],
+  );
+
+  if (id === "new") {
+    return <TemplateGallery onPick={createFromTemplate} creating={creatingFromTemplate} onCancel={() => navigate("/host")} />;
+  }
 
   const persist = useCallback(
     async (patch: Partial<DraftEvent>) => {
@@ -318,6 +333,25 @@ function BasicsStep({ event, onChange }: { event: DraftEvent; onChange: (p: Part
 
 function ThemeStep({ config, onChange }: { config: EventPageConfig; onChange: (m: (c: EventPageConfig) => EventPageConfig) => void }) {
   const current = config.theme.themeId;
+  const [bgMode, setBgMode] = useState<"theme" | "color" | "gradient" | "image">(
+    config.theme?.backgroundImageUrl ? "image" : config.theme?.background?.includes("gradient") ? "gradient" : config.theme?.background ? "color" : "theme",
+  );
+  const [uploadingBg, setUploadingBg] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
+
+  async function uploadAsset(file: File, kind: "background" | "cover"): Promise<string | null> {
+    const { data: userData } = await supabase.auth.getUser();
+    const uid = userData.user?.id;
+    if (!uid) return null;
+    const path = `studio/${uid}/${kind}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
+    const { error } = await supabase.storage.from("event-photos").upload(path, file, { upsert: false });
+    if (error) {
+      alert("Upload failed: " + error.message);
+      return null;
+    }
+    return supabase.storage.from("event-photos").getPublicUrl(path).data.publicUrl;
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
       <Title eyebrow="02 · Theme" title="Choose the mood" />
@@ -359,7 +393,7 @@ function ThemeStep({ config, onChange }: { config: EventPageConfig; onChange: (m
           }}
           style={input}
         >
-          {FONT_PAIRS.map((p) => <option key={p.heading} value={p.heading}>{p.heading}</option>)}
+          {HEADING_FONT_OPTIONS.map((f) => <option key={f} value={f}>{f}</option>)}
         </select>
       </Field>
       <Field label="Body font">
@@ -371,17 +405,95 @@ function ThemeStep({ config, onChange }: { config: EventPageConfig; onChange: (m
           }}
           style={input}
         >
-          {Array.from(new Set(FONT_PAIRS.map((p) => p.body))).map((b) => <option key={b} value={b}>{b}</option>)}
+          {BODY_FONT_OPTIONS.map((f) => <option key={f} value={f}>{f}</option>)}
         </select>
       </Field>
       <div style={twoCol}>
         <Field label="Accent color">
           <input type="color" value={config.theme.accent || getTheme(current).accent} onChange={(e) => onChange((c) => ({ ...c, theme: { ...c.theme, accent: e.target.value } }))} style={{ ...input, height: 44, padding: 4 }} />
         </Field>
-        <Field label="Background (color or CSS gradient)">
-          <input value={config.theme.background || ""} onChange={(e) => onChange((c) => ({ ...c, theme: { ...c.theme, background: e.target.value } }))} placeholder="leave empty for theme default" style={input} />
+        <Field label="Background type">
+          <select value={bgMode} onChange={(e) => setBgMode(e.target.value as typeof bgMode)} style={input}>
+            <option value="theme">Use theme default</option>
+            <option value="color">Solid color</option>
+            <option value="gradient">CSS gradient</option>
+            <option value="image">Uploaded image</option>
+          </select>
         </Field>
       </div>
+      {bgMode === "color" && (
+        <Field label="Background color">
+          <input type="color" value={config.theme.background?.startsWith("#") ? config.theme.background : "#0d1b2e"} onChange={(e) => onChange((c) => ({ ...c, theme: { ...c.theme, background: e.target.value, backgroundImageUrl: undefined } }))} style={{ ...input, height: 44, padding: 4 }} />
+        </Field>
+      )}
+      {bgMode === "gradient" && (
+        <Field label="CSS gradient">
+          <input value={config.theme.background || ""} onChange={(e) => onChange((c) => ({ ...c, theme: { ...c.theme, background: e.target.value, backgroundImageUrl: undefined } }))} placeholder="linear-gradient(170deg,#0d1b2e 0%,#071426 100%)" style={input} />
+        </Field>
+      )}
+      {bgMode === "image" && (
+        <Field label="Background image">
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <label style={{ ...chip, display: "inline-block" }}>
+              {uploadingBg ? "Uploading…" : config.theme.backgroundImageUrl ? "Replace image" : "Upload image"}
+              <input
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                disabled={uploadingBg}
+                onChange={async (e) => {
+                  const f = e.target.files?.[0];
+                  if (!f) return;
+                  setUploadingBg(true);
+                  const url = await uploadAsset(f, "background");
+                  setUploadingBg(false);
+                  if (url) onChange((c) => ({ ...c, theme: { ...c.theme, backgroundImageUrl: url, background: undefined } }));
+                }}
+              />
+            </label>
+            {config.theme.backgroundImageUrl && (
+              <>
+                <img src={config.theme.backgroundImageUrl} alt="" style={{ width: 56, height: 40, objectFit: "cover", borderRadius: 4, border: "1px solid rgba(0,0,0,0.1)" }} />
+                <button onClick={() => onChange((c) => ({ ...c, theme: { ...c.theme, backgroundImageUrl: undefined } }))} style={{ ...chip, background: "transparent" }}>Remove</button>
+              </>
+            )}
+          </div>
+        </Field>
+      )}
+      {bgMode === "theme" && config.theme.background && (
+        <button onClick={() => onChange((c) => ({ ...c, theme: { ...c.theme, background: undefined, backgroundImageUrl: undefined } }))} style={{ ...chip, alignSelf: "flex-start" }}>
+          Clear custom background
+        </button>
+      )}
+
+      <Field label="Cover / hero image (shown in the hero widget)">
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          <label style={{ ...chip, display: "inline-block" }}>
+            {uploadingCover ? "Uploading…" : config.theme.coverImageUrl ? "Replace cover" : "Upload cover"}
+            <input
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              disabled={uploadingCover}
+              onChange={async (e) => {
+                const f = e.target.files?.[0];
+                if (!f) return;
+                setUploadingCover(true);
+                const url = await uploadAsset(f, "cover");
+                setUploadingCover(false);
+                if (url) onChange((c) => ({ ...c, theme: { ...c.theme, coverImageUrl: url } }));
+              }}
+            />
+          </label>
+          {config.theme.coverImageUrl && (
+            <>
+              <img src={config.theme.coverImageUrl} alt="" style={{ width: 56, height: 40, objectFit: "cover", borderRadius: 4, border: "1px solid rgba(0,0,0,0.1)" }} />
+              <button onClick={() => onChange((c) => ({ ...c, theme: { ...c.theme, coverImageUrl: undefined } }))} style={{ ...chip, background: "transparent" }}>Remove</button>
+            </>
+          )}
+        </div>
+      </Field>
+
       <div style={twoCol}>
         <Field label="Corner style">
           <select value={config.theme.corner || "editorial"} onChange={(e) => onChange((c) => ({ ...c, theme: { ...c.theme, corner: e.target.value as "sharp" | "soft" | "editorial" } }))} style={input}>
@@ -600,6 +712,18 @@ function WidgetEditor({ widget, onChange }: { widget: WidgetInstance; onChange: 
       return (
         <Field label="Caption"><input value={(widget.config.caption as string) || ""} onChange={(e) => onChange({ caption: e.target.value })} style={input} /></Field>
       );
+    case "check_in":
+    case "drink_tickets":
+      return (
+        <>
+          <Field label="Instructions shown to the guest">
+            <input value={(widget.config.instructions as string) || ""} onChange={(e) => onChange({ instructions: e.target.value })} style={input} />
+          </Field>
+          <p style={{ margin: "8px 0 0", fontSize: "0.78rem", color: "#888", lineHeight: 1.5 }}>
+            This widget reads from the same source as the /pass/:token flow. Guests must open the event page from their personal invitation link (e.g. <code>?t=&lt;token&gt;</code>) to see their {widget.type === "check_in" ? "check-in QR" : "drink tickets"}.
+          </p>
+        </>
+      );
     default:
       return null;
   }
@@ -732,4 +856,103 @@ function toLocal(iso?: string) {
 function fromLocal(v: string) {
   if (!v) return "";
   return new Date(v).toISOString();
+}
+
+/* ============ Template gallery ============ */
+
+function TemplateGallery({
+  onPick,
+  creating,
+  onCancel,
+}: {
+  onPick: (tpl: StudioTemplate) => void;
+  creating: string | null;
+  onCancel: () => void;
+}) {
+  const [tab, setTab] = useState<"event_page" | "invitation">("event_page");
+  const list = STUDIO_TEMPLATES.filter((t) => t.id === "blank" || t.category === tab);
+  return (
+    <div style={{ minHeight: "100vh", background: "#F6F4EE", color: "#12100E", fontFamily: "Inter, system-ui, sans-serif" }}>
+      <header style={{ borderBottom: "1px solid rgba(18,16,14,0.12)", background: "#fff" }}>
+        <div style={{ maxWidth: 1480, margin: "0 auto", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <button onClick={onCancel} style={topBtn}>← Cancel</button>
+          <span style={{ fontSize: "0.66rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#888" }}>New event page</span>
+          <span style={{ width: 60 }} />
+        </div>
+      </header>
+
+      <div style={{ maxWidth: 1180, margin: "0 auto", padding: "56px 24px" }}>
+        <p style={{ margin: 0, fontSize: "0.66rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#A9845C" }}>Templates</p>
+        <h1 style={{ margin: "10px 0 24px", fontFamily: "'Cormorant Garamond', serif", fontWeight: 500, fontStyle: "italic", fontSize: "clamp(2rem,4vw,3.4rem)", letterSpacing: "-0.03em", lineHeight: 1.05 }}>
+          Start from a starting point
+        </h1>
+        <p style={{ margin: "0 0 32px", color: "#555", maxWidth: 560, lineHeight: 1.6 }}>
+          Each template is a theme, a layout, and sample copy — fully editable once you're in. Pick one to begin, or start from blank.
+        </p>
+
+        <div style={{ display: "inline-flex", border: "1px solid rgba(18,16,14,0.12)", borderRadius: 999, padding: 4, background: "#fff", marginBottom: 28 }}>
+          {(["event_page", "invitation"] as const).map((k) => (
+            <button
+              key={k}
+              onClick={() => setTab(k)}
+              style={{
+                padding: "8px 18px",
+                background: tab === k ? "#12100E" : "transparent",
+                color: tab === k ? "#fff" : "#666",
+                border: "none",
+                borderRadius: 999,
+                fontSize: "0.72rem",
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                cursor: "pointer",
+              }}
+            >
+              {k === "event_page" ? "Event pages" : "Invitations"}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 18 }}>
+          {list.map((tpl) => {
+            const theme = STUDIO_THEMES.find((t) => t.id === tpl.themeId) || STUDIO_THEMES[0];
+            const busy = creating === tpl.id;
+            return (
+              <button
+                key={tpl.id}
+                disabled={!!creating}
+                onClick={() => onPick(tpl)}
+                style={{
+                  textAlign: "left",
+                  padding: 0,
+                  border: "1px solid rgba(18,16,14,0.12)",
+                  borderRadius: 8,
+                  background: "#fff",
+                  cursor: creating ? "wait" : "pointer",
+                  opacity: creating && !busy ? 0.5 : 1,
+                  overflow: "hidden",
+                  transition: "transform .2s, box-shadow .2s",
+                }}
+                onMouseEnter={(e) => { if (!creating) { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.08)"; } }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
+              >
+                <div style={{ height: 160, background: theme.background, padding: 20, color: theme.textPrimary, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                  <span style={{ fontSize: "0.6rem", letterSpacing: "0.28em", textTransform: "uppercase", color: theme.accent }}>{tpl.category === "invitation" ? "Invitation" : "Event page"}</span>
+                  <div>
+                    <p style={{ margin: 0, fontFamily: `'${theme.headingFont}', serif`, fontSize: "1.6rem", fontStyle: "italic", lineHeight: 1.1 }}>{tpl.name}</p>
+                    <p style={{ margin: "4px 0 0", fontSize: "0.78rem", opacity: 0.7 }}>{tpl.widgets.length} widgets</p>
+                  </div>
+                </div>
+                <div style={{ padding: "14px 16px" }}>
+                  <p style={{ margin: 0, fontSize: "0.86rem", color: "#444", lineHeight: 1.5 }}>{tpl.tagline}</p>
+                  <p style={{ margin: "10px 0 0", fontSize: "0.7rem", letterSpacing: "0.22em", textTransform: "uppercase", color: busy ? "#A9845C" : "#999" }}>
+                    {busy ? "Creating…" : "Use template →"}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
 }
