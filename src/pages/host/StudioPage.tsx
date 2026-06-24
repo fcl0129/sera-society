@@ -333,6 +333,25 @@ function BasicsStep({ event, onChange }: { event: DraftEvent; onChange: (p: Part
 
 function ThemeStep({ config, onChange }: { config: EventPageConfig; onChange: (m: (c: EventPageConfig) => EventPageConfig) => void }) {
   const current = config.theme.themeId;
+  const [bgMode, setBgMode] = useState<"theme" | "color" | "gradient" | "image">(
+    config.theme?.backgroundImageUrl ? "image" : config.theme?.background?.includes("gradient") ? "gradient" : config.theme?.background ? "color" : "theme",
+  );
+  const [uploadingBg, setUploadingBg] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
+
+  async function uploadAsset(file: File, kind: "background" | "cover"): Promise<string | null> {
+    const { data: userData } = await supabase.auth.getUser();
+    const uid = userData.user?.id;
+    if (!uid) return null;
+    const path = `studio/${uid}/${kind}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
+    const { error } = await supabase.storage.from("event-photos").upload(path, file, { upsert: false });
+    if (error) {
+      alert("Upload failed: " + error.message);
+      return null;
+    }
+    return supabase.storage.from("event-photos").getPublicUrl(path).data.publicUrl;
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
       <Title eyebrow="02 · Theme" title="Choose the mood" />
@@ -374,7 +393,7 @@ function ThemeStep({ config, onChange }: { config: EventPageConfig; onChange: (m
           }}
           style={input}
         >
-          {FONT_PAIRS.map((p) => <option key={p.heading} value={p.heading}>{p.heading}</option>)}
+          {HEADING_FONT_OPTIONS.map((f) => <option key={f} value={f}>{f}</option>)}
         </select>
       </Field>
       <Field label="Body font">
@@ -386,17 +405,95 @@ function ThemeStep({ config, onChange }: { config: EventPageConfig; onChange: (m
           }}
           style={input}
         >
-          {Array.from(new Set(FONT_PAIRS.map((p) => p.body))).map((b) => <option key={b} value={b}>{b}</option>)}
+          {BODY_FONT_OPTIONS.map((f) => <option key={f} value={f}>{f}</option>)}
         </select>
       </Field>
       <div style={twoCol}>
         <Field label="Accent color">
           <input type="color" value={config.theme.accent || getTheme(current).accent} onChange={(e) => onChange((c) => ({ ...c, theme: { ...c.theme, accent: e.target.value } }))} style={{ ...input, height: 44, padding: 4 }} />
         </Field>
-        <Field label="Background (color or CSS gradient)">
-          <input value={config.theme.background || ""} onChange={(e) => onChange((c) => ({ ...c, theme: { ...c.theme, background: e.target.value } }))} placeholder="leave empty for theme default" style={input} />
+        <Field label="Background type">
+          <select value={bgMode} onChange={(e) => setBgMode(e.target.value as typeof bgMode)} style={input}>
+            <option value="theme">Use theme default</option>
+            <option value="color">Solid color</option>
+            <option value="gradient">CSS gradient</option>
+            <option value="image">Uploaded image</option>
+          </select>
         </Field>
       </div>
+      {bgMode === "color" && (
+        <Field label="Background color">
+          <input type="color" value={config.theme.background?.startsWith("#") ? config.theme.background : "#0d1b2e"} onChange={(e) => onChange((c) => ({ ...c, theme: { ...c.theme, background: e.target.value, backgroundImageUrl: undefined } }))} style={{ ...input, height: 44, padding: 4 }} />
+        </Field>
+      )}
+      {bgMode === "gradient" && (
+        <Field label="CSS gradient">
+          <input value={config.theme.background || ""} onChange={(e) => onChange((c) => ({ ...c, theme: { ...c.theme, background: e.target.value, backgroundImageUrl: undefined } }))} placeholder="linear-gradient(170deg,#0d1b2e 0%,#071426 100%)" style={input} />
+        </Field>
+      )}
+      {bgMode === "image" && (
+        <Field label="Background image">
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <label style={{ ...chip, display: "inline-block" }}>
+              {uploadingBg ? "Uploading…" : config.theme.backgroundImageUrl ? "Replace image" : "Upload image"}
+              <input
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                disabled={uploadingBg}
+                onChange={async (e) => {
+                  const f = e.target.files?.[0];
+                  if (!f) return;
+                  setUploadingBg(true);
+                  const url = await uploadAsset(f, "background");
+                  setUploadingBg(false);
+                  if (url) onChange((c) => ({ ...c, theme: { ...c.theme, backgroundImageUrl: url, background: undefined } }));
+                }}
+              />
+            </label>
+            {config.theme.backgroundImageUrl && (
+              <>
+                <img src={config.theme.backgroundImageUrl} alt="" style={{ width: 56, height: 40, objectFit: "cover", borderRadius: 4, border: "1px solid rgba(0,0,0,0.1)" }} />
+                <button onClick={() => onChange((c) => ({ ...c, theme: { ...c.theme, backgroundImageUrl: undefined } }))} style={{ ...chip, background: "transparent" }}>Remove</button>
+              </>
+            )}
+          </div>
+        </Field>
+      )}
+      {bgMode === "theme" && config.theme.background && (
+        <button onClick={() => onChange((c) => ({ ...c, theme: { ...c.theme, background: undefined, backgroundImageUrl: undefined } }))} style={{ ...chip, alignSelf: "flex-start" }}>
+          Clear custom background
+        </button>
+      )}
+
+      <Field label="Cover / hero image (shown in the hero widget)">
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          <label style={{ ...chip, display: "inline-block" }}>
+            {uploadingCover ? "Uploading…" : config.theme.coverImageUrl ? "Replace cover" : "Upload cover"}
+            <input
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              disabled={uploadingCover}
+              onChange={async (e) => {
+                const f = e.target.files?.[0];
+                if (!f) return;
+                setUploadingCover(true);
+                const url = await uploadAsset(f, "cover");
+                setUploadingCover(false);
+                if (url) onChange((c) => ({ ...c, theme: { ...c.theme, coverImageUrl: url } }));
+              }}
+            />
+          </label>
+          {config.theme.coverImageUrl && (
+            <>
+              <img src={config.theme.coverImageUrl} alt="" style={{ width: 56, height: 40, objectFit: "cover", borderRadius: 4, border: "1px solid rgba(0,0,0,0.1)" }} />
+              <button onClick={() => onChange((c) => ({ ...c, theme: { ...c.theme, coverImageUrl: undefined } }))} style={{ ...chip, background: "transparent" }}>Remove</button>
+            </>
+          )}
+        </div>
+      </Field>
+
       <div style={twoCol}>
         <Field label="Corner style">
           <select value={config.theme.corner || "editorial"} onChange={(e) => onChange((c) => ({ ...c, theme: { ...c.theme, corner: e.target.value as "sharp" | "soft" | "editorial" } }))} style={input}>
