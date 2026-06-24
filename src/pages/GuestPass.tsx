@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "@/integrations/supabase/client";
-import { CalendarClock, MapPin, Loader2, CheckCircle2, Ban, Ticket as TicketIcon } from "lucide-react";
+import { CalendarClock, MapPin, Loader2, CheckCircle2, Ban, Ticket as TicketIcon, MessageSquare, Sparkles } from "lucide-react";
 
 // TODO(future): Apple Wallet / Passmeister integration. For now this is a
 // web-based wallet-like pass rendered from a secure RSVP token URL.
@@ -57,6 +57,7 @@ export default function GuestPassPage() {
   const { token } = useParams();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<PassResponse | null>(null);
+  const [broadcasts, setBroadcasts] = useState<{ id: string; body: string; created_at: string }[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -78,9 +79,20 @@ export default function GuestPassPage() {
     };
     void load();
 
+    const loadBroadcasts = async () => {
+      if (!token) return;
+      const { data: res } = await (supabase as any).rpc("get_broadcasts_by_token", { _token: token });
+      if (res?.ok) setBroadcasts(res.messages ?? []);
+    };
+    void loadBroadcasts();
+    const broadcastsInterval = window.setInterval(loadBroadcasts, 15000);
+
     // Poll every 8s while page is open so redemptions reflect quickly.
     const interval = window.setInterval(load, 8000);
-    return () => window.clearInterval(interval);
+    return () => {
+      window.clearInterval(interval);
+      window.clearInterval(broadcastsInterval);
+    };
   }, [token]);
 
   if (loading) {
@@ -111,6 +123,9 @@ export default function GuestPassPage() {
   const activeTickets = tickets.filter((t) => t.status === "active");
   const redeemedTickets = tickets.filter((t) => t.status === "redeemed");
   const voidTickets = tickets.filter((t) => t.status === "void");
+  const eventEnded = event.ends_at
+    ? new Date(event.ends_at) < new Date()
+    : new Date(event.starts_at).getTime() + 6 * 60 * 60 * 1000 < Date.now();
 
   return (
     <main className="min-h-screen bg-sera-paper">
@@ -139,6 +154,40 @@ export default function GuestPassPage() {
           </div>
         </div>
       </section>
+
+      {broadcasts.length > 0 && (
+        <section className="px-5 pb-6">
+          <div className="mx-auto w-full max-w-xl space-y-3">
+            <p className="sera-label text-sera-warm-grey flex items-center gap-2">
+              <MessageSquare className="w-3.5 h-3.5" /> A word from your host
+            </p>
+            {broadcasts.map((m) => (
+              <article key={m.id} className="rounded-[20px] border border-sera-line bg-sera-ivory p-5 shadow-soft">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-sera-warm-grey">
+                  {new Date(m.created_at).toLocaleString()}
+                </p>
+                <p className="mt-2 text-[15px] leading-relaxed text-sera-ink whitespace-pre-wrap">{m.body}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {eventEnded && token && (
+        <section className="px-5 pb-6">
+          <div className="mx-auto w-full max-w-xl rounded-[24px] border border-sera-line bg-sera-ivory p-6 text-center shadow-soft">
+            <Sparkles className="mx-auto h-5 w-5 text-sera-warm-grey" strokeWidth={1.5} />
+            <p className="mt-2 font-serif text-2xl text-sera-ink">The evening is wrapped.</p>
+            <p className="mt-1 text-sm text-sera-warm-grey">See the recap, the numbers, and a note from your host.</p>
+            <Link
+              to={`/wrapped/${encodeURIComponent(token)}`}
+              className="mt-5 inline-flex h-11 items-center justify-center rounded-full bg-sera-ink px-7 text-xs uppercase tracking-[0.2em] text-sera-ivory hover:opacity-90"
+            >
+              View the recap
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* RSVP gate */}
       {!accepted && (
