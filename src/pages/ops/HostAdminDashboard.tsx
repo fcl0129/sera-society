@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/card";
 import { LogOut, Plus, Calendar, Users, Ticket, ScanLine, Trash2, Mail, Link2, Pencil, Check, X, Clock, Ban, Send, Wallet } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { CreateEventFlow } from "@/components/organizer/CreateEventFlow";
+import { SeatingPanel, BroadcastPanel, WrappedPanel, StaffRolesPanel } from "@/components/organizer/OrganizerPanels";
 
 const fmt = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 const fmtFull = new Intl.DateTimeFormat(undefined, {
@@ -721,6 +722,15 @@ export default function HostAdminDashboard() {
                   onClick={() => navigate("/ops/bartender")}
                 />
               </div>
+
+              <SeatingPanel eventId={currentEvent.id} />
+              <BroadcastPanel eventId={currentEvent.id} eventTitle={currentEvent.title} />
+              <WrappedPanel
+                eventId={currentEvent.id}
+                eventEndsAt={currentEvent.ends_at}
+                rsvpTokenSample={(guestsQuery.data ?? [])[0]?.rsvp_token ?? null}
+              />
+              <StaffRolesPanel eventId={currentEvent.id} />
             </>
           )}
         </section>

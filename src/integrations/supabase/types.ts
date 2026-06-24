@@ -1198,21 +1198,30 @@ export type Database = {
       wrapped_summaries: {
         Row: {
           created_at: string
+          custom_note: string | null
           event_id: string
           id: string
+          is_published: boolean
           summary: Json
+          updated_at: string
         }
         Insert: {
           created_at?: string
+          custom_note?: string | null
           event_id: string
           id?: string
+          is_published?: boolean
           summary?: Json
+          updated_at?: string
         }
         Update: {
           created_at?: string
+          custom_note?: string | null
           event_id?: string
           id?: string
+          is_published?: boolean
           summary?: Json
+          updated_at?: string
         }
         Relationships: [
           {
@@ -1243,8 +1252,10 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_broadcasts_by_token: { Args: { _token: string }; Returns: Json }
       get_guest_pass_by_token: { Args: { _token: string }; Returns: Json }
       get_rsvp_by_token: { Args: { _token: string }; Returns: Json }
+      get_wrapped_by_token: { Args: { _token: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

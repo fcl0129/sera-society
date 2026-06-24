@@ -12,6 +12,7 @@ import Invitations from "./pages/Invitations";
 import EventPages from "./pages/EventPages";
 import Rsvp from "./pages/Rsvp";
 import GuestPass from "./pages/GuestPass";
+import Wrapped from "./pages/Wrapped";
 import RequestAccess from "./pages/RequestAccess";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -54,6 +55,7 @@ const App = () => (
             <Route path="/event-pages" element={<EventPages />} />
             <Route path="/rsvp/:token" element={<Rsvp />} />
             <Route path="/pass/:token" element={<GuestPass />} />
+            <Route path="/wrapped/:token" element={<Wrapped />} />
             <Route path="/request-access" element={<RequestAccess />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
